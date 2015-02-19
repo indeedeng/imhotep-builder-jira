@@ -8,7 +8,8 @@ DEFINE ParseGitCommitUid com.indeed.squall.pigutil.logs.ParseLogFieldJustValue('
 -- load logentries from logrepo
 git_commit_raw = LOAD '$logroot/gitcommit' USING LogLoader AS (uid:chararray, log:chararray);
 git_commit_formatted = FOREACH git_commit_raw
-                       GENERATE ParseGitCommitSha1(log) as sha1:chararray,
-                       ParseGitCommitProjectId(log) as projectId:int,
-                       ParseGitCommitUid(log) as uid:chararray;
+                       GENERATE
+                       (chararray) ParseGitCommitSha1(log) as sha1,
+                       (int) ParseGitCommitProjectId(log) as projectId,
+                       (chararray) ParseGitCommitUid(log) as uid;
 logs = GROUP git_commit_formatted by sha1;
