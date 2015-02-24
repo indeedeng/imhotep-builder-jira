@@ -23,7 +23,7 @@ public class GitLabEntry {
     public static GitLabEntry parseFrom(final Tuple pigTuple) {
         try {
             final String sha1 = (String) pigTuple.get(0);
-            final int projectId = Integer.parseInt((String) pigTuple.get(1));
+            final int projectId = (int) pigTuple.get(1);
             final String uid = (String) pigTuple.get(2);
             return new GitLabEntry(sha1, projectId, uid);
         } catch (final ExecException e) {
