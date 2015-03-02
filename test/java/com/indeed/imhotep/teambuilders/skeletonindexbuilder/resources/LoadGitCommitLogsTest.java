@@ -3,6 +3,7 @@ package com.indeed.imhotep.teambuilders.skeletonindexbuilder.resources;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.indeed.imhotep.builders.pigunit.ImhotepPigTestHelper;
 import com.indeed.imhotep.teambuilders.skeletonindexbuilder.gitlab.GitLabEntry;
@@ -60,7 +61,7 @@ public class LoadGitCommitLogsTest {
 
     private void assertBagContains(UID uid, String sha1, int projectId, DataBag data) throws Exception {
         for (final Tuple groupedLog : data) {
-            if (groupedLog.get(0).equals(uid.toString())) {
+            if (groupedLog.get(0).equals(sha1)) {
                 final DataBag bag = (DataBag)groupedLog.get(1);
                 assertEquals(1, bag.size());
                 for (final Tuple tuple : bag) {
@@ -70,7 +71,9 @@ public class LoadGitCommitLogsTest {
                     assertEquals(projectId, entry.getProjectId());
                     assertEquals(uid.getTimeStamp(), entry.getTimestampMillis());
                 }
+                return;
             }
         }
+        fail("Bag does not contain entry with SHA1 " + sha1);
     }
 }
