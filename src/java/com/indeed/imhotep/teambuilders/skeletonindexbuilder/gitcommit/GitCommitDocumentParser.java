@@ -17,6 +17,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * @author jhamacher
  */
@@ -62,11 +65,16 @@ public class GitCommitDocumentParser implements FlamdexDocumentParser<Text, Tupl
 
     private ParserResult buildDocument(final GitLabEntry gitLabEntry) {
 
+        final long timestampMillis = gitLabEntry.getTimestampMillis();
+
         final FlamdexDocument doc = new FlamdexDocument();
         doc.setStringField("sha1", gitLabEntry.getSha1());
         doc.setIntField("projectId", gitLabEntry.getProjectId());
 
-        final String shardId = BuilderUtils.getDailyShardId(gitLabEntry.getTimestampMillis());
+        // This is necessary to support time functions in IQL.
+        doc.setIntField("unixtime", SECONDS.convert(timestampMillis, MILLISECONDS));
+
+        final String shardId = BuilderUtils.getDailyShardId(timestampMillis);
         return new ParserResult(shardId, Collections.singletonList(doc));
     }
 }
