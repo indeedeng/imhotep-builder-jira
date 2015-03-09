@@ -1,0 +1,8 @@
+build/
+*.iml
+.idea
+target/
+build-transient-src/
+web-build/
+dist/
+build.properties
