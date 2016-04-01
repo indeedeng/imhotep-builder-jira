@@ -1,4 +1,4 @@
-package com.indeed.imhotep.teambuilders.skeletonindexbuilder.gitlab;
+package com.indeed.skeleton.index.builder.gitlab;
 
 import com.indeed.logging.client.uid.UID;
 import org.apache.log4j.Logger;
