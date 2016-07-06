@@ -1,9 +1,9 @@
-package com.indeed.imhotep.teambuilders.skeletonindexbuilder.gitcommit;
+package com.indeed.skeleton.index.builder.gitcommit;
 
 import com.google.common.collect.Lists;
 import com.indeed.flamdex.writer.FlamdexDocument;
 import com.indeed.imhotep.builders.BuilderUtils;
-import com.indeed.imhotep.teambuilders.skeletonindexbuilder.gitlab.GitLabEntry;
+import com.indeed.skeleton.index.builder.gitlab.GitLabEntry;
 import com.indeed.squall.hadoopflamdex.FlamdexDocumentParser;
 import com.indeed.squall.hadoopflamdex.ParserResult;
 import org.apache.hadoop.conf.Configuration;
