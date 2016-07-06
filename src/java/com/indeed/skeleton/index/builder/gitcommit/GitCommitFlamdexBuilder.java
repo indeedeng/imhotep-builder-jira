@@ -1,4 +1,4 @@
-package com.indeed.imhotep.teambuilders.skeletonindexbuilder.gitcommit;
+package com.indeed.skeleton.index.builder.gitcommit;
 
 import com.indeed.imhotep.builders.AbstractFlamdexBuilder;
 import com.indeed.squall.hadoopflamdex.FlamdexUpdateMapper;
