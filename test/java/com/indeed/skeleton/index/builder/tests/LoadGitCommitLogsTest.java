@@ -1,16 +1,16 @@
-package com.indeed.imhotep.teambuilders.skeletonindexbuilder.resources;
+package com.indeed.skeleton.index.builder.tests;
+
+import com.indeed.imhotep.builders.pigunit.ImhotepPigTestHelper;
+import com.indeed.logging.client.uid.UID;
+import com.indeed.skeleton.index.builder.gitlab.GitLabEntry;
+import org.apache.pig.data.DataBag;
+import org.apache.pig.data.Tuple;
+import org.junit.Test;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
-import com.indeed.imhotep.builders.pigunit.ImhotepPigTestHelper;
-import com.indeed.imhotep.teambuilders.skeletonindexbuilder.gitlab.GitLabEntry;
-import com.indeed.logging.client.uid.UID;
-import org.apache.pig.data.DataBag;
-import org.apache.pig.data.Tuple;
-import org.junit.Test;
 
 /**
  * @author jhamacher

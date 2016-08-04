@@ -1,5 +1,6 @@
-package com.indeed.imhotep.teambuilders.skeletonindexbuilder.gitlab;
+package com.indeed.skeleton.index.builder.tests;
 
+import com.indeed.skeleton.index.builder.gitlab.GitLabEntry;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
