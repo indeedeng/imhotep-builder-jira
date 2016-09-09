@@ -3,8 +3,6 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
-
-
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,23 +17,8 @@ import java.util.Calendar;
  * Created by soono on 8/30/16.
  */
 public class IssuesAPICaller {
-    //
-    // For Authentication
-    //
 
-    private final static String username = "jira-indexer";
-    private final static String password = "jiraindexer";
-    private final static String userPass = username + ":" + password;
-    private final static String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
-
-    //
-    // For URL
-    //
-
-    private final static String baseURL = "https://bugs.qa.indeed.net/rest/api/2/search";
-    // TODO: Fix hardcoding of customfield_10003 for verifier.
-    private final static String fields = "assignee,comment,creator,issuetype,status,resolution,summary,reporter,created,customfield_10003";
-    private final static String expand = "changelog";
+    private ConfigReader configReader = new PropertiesConfigReader();
 
     //
     // For Pagination
@@ -99,12 +82,19 @@ public class IssuesAPICaller {
     private HttpsURLConnection getURLConnection(String urlString) throws IOException {
         URL url = new URL(urlString);
         HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Authorization", basicAuth);
+        urlConnection.setRequestProperty("Authorization", getBasicAuth());
         return urlConnection;
     }
 
+    private String getBasicAuth() {
+        String userPass = configReader.username() + ":" + configReader.password();
+        String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
+        return basicAuth;
+    }
+
     private String getIssuesURL() {
-        final StringBuilder url = new StringBuilder(baseURL + "?");
+        final StringBuilder url = new StringBuilder(configReader.baseURL() + "?");
+        url.append("projectKey=JASX&"); // fixme
         url.append(getJQLParam());
         url.append("&");
         url.append(getFieldsParam());
@@ -118,8 +108,8 @@ public class IssuesAPICaller {
     }
 
     private String getBasicInfoURL() {
-        final StringBuilder url = new StringBuilder(baseURL + "?");
-        url.append("&");
+        final StringBuilder url = new StringBuilder(configReader.baseURL() + "?");
+        url.append("projectKey=JASX&"); // fixme
         url.append(getJQLParam());
         url.append("&maxResults=0");
         return url.toString();
@@ -136,11 +126,11 @@ public class IssuesAPICaller {
     }
 
     private String getFieldsParam() {
-        return String.format("fields=%s", fields);
+        return String.format("fields=%s", configReader.apiFields());
     }
 
     private String getExpandParam() {
-        return String.format("expand=%s", expand);
+        return String.format("expand=%s", configReader.apiExpand());
     }
 
     private String getStartAtParam() {

@@ -16,6 +16,9 @@ public class IndexBuilder {
     public static void main (String[] args) throws Exception {
 
         IssuesAPICaller issuesAPICaller = new IssuesAPICaller();
+
+        List<Action> actions = null;
+
         while(issuesAPICaller.currentPageExist()){
             // Get issues from API.
             JsonNode issuesNode = issuesAPICaller.getIssuesNode();
@@ -23,18 +26,19 @@ public class IndexBuilder {
                 // Parse Each Issue API response to Object.
                 Issue issue = IssueAPIParser.getObject(issueNode);
 
-                // Build Action object from parsed API response Object.
+                // Build Action objects from parsed API response Object.
                 ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
-                List<Action> actions = actionsBuilder.buildActions();
 
-                // Parse and Save Document.
-                for ( Action action : actions) {
-                    FlamdexDocument doc = DocumentParser.parse(action);
-                    // TODO: save document.
+                // Set built actions to actions list.
+                if (actions == null) {
+                    actions = actionsBuilder.buildActions();
+                } else {
+                    actions.addAll(actionsBuilder.buildActions());
                 }
             }
         }
 
+        // Create a TSV file.
+        TsvFileWriter.createTSVFile(actions);
     }
-
 }
