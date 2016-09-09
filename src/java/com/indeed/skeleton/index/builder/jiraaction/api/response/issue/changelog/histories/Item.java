@@ -11,10 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Item {
     public String field;
-    public String fieldtype;
-    public String from;
     public String fromString;
-    public String to;
     public String toString;
 
     @JsonProperty("field")

@@ -19,6 +19,7 @@ public class Action {
     public long issueage;
     public String issuekey;
     public String issuetype;
+    public String project;
     public String prevstatus;
     public String reporter;
     public String resolution;
@@ -37,6 +38,7 @@ public class Action {
         issueage = 0;
         issuekey = issue.key;
         issuetype = issue.initialValue("issuetype");
+        project = issue.initialValue("project");
         prevstatus = "";
         reporter = issue.initialValue("reporter");
         resolution = issue.initialValue("resolution");
@@ -56,6 +58,7 @@ public class Action {
         issueage = prevAction.issueage + getTimeDiff(prevAction.timestamp, history.created);
         issuekey = prevAction.issuekey;
         issuetype = history.itemExist("issuetype") ? history.getItemLastValue("issuetype") : prevAction.issuetype;
+        project = history.itemExist("project") ? history.getItemLastValue("project") : prevAction.project;
         prevstatus = prevAction.status;
         reporter = history.itemExist("reporter") ? history.getItemLastValue("reporter") : prevAction.reporter;
         resolution = history.itemExist("resolution") ? history.getItemLastValue("resolution") : prevAction.resolution;
@@ -75,6 +78,7 @@ public class Action {
         issueage = prevAction.issueage + getTimeDiff(prevAction.timestamp, comment.created);
         issuekey = prevAction.issuekey;
         issuetype = prevAction.issuetype;
+        project = prevAction.project;
         prevstatus = prevAction.status;
         reporter = prevAction.reporter;
         resolution = prevAction.resolution;

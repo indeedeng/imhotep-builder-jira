@@ -33,6 +33,7 @@ public class PropertiesConfigReader implements ConfigReader {
         Config.baseURL = PropertiesConfigReader.prop.getProperty("jiraBaseURL");
         Config.apiFields = PropertiesConfigReader.prop.getProperty("jiraFields");
         Config.apiExpand = PropertiesConfigReader.prop.getProperty("jiraExpand");
+        Config.apiProject = PropertiesConfigReader.prop.getProperty("jiraProject");
     }
 
     @Override
@@ -58,5 +59,10 @@ public class PropertiesConfigReader implements ConfigReader {
     @Override
     public String apiExpand() {
         return Config.apiExpand;
+    }
+
+    @Override
+    public String apiProject() {
+        return Config.apiProject;
     }
 }

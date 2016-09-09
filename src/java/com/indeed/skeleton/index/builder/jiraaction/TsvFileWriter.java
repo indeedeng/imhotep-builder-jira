@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class TsvFileWriter {
     public static final String [] FILE_HEADER = {
-        "action", "actor", "assignee", "fieldschanged*", "issueage", "issuekey", "issuetype", "prevstatus", "reporter",
+        "action", "actor", "assignee", "fieldschanged*", "issueage", "issuekey", "issuetype", "project", "prevstatus", "reporter",
             "resolution", "status", "summary", "timeinstate", "time", "verifier"
     };
     public static void createTSVFile(List<Action> actions) throws IOException, ParseException {
@@ -47,6 +47,8 @@ public class TsvFileWriter {
             bw.write(action.issuekey);
             bw.write("\t");
             bw.write(action.issuetype);
+            bw.write("\t");
+            bw.write(action.project);
             bw.write("\t");
             bw.write(action.prevstatus);
             bw.write("\t");

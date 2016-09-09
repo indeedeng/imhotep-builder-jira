@@ -94,7 +94,6 @@ public class IssuesAPICaller {
 
     private String getIssuesURL() {
         final StringBuilder url = new StringBuilder(configReader.baseURL() + "?");
-        url.append("projectKey=JASX&"); // fixme
         url.append(getJQLParam());
         url.append("&");
         url.append(getFieldsParam());
@@ -109,7 +108,6 @@ public class IssuesAPICaller {
 
     private String getBasicInfoURL() {
         final StringBuilder url = new StringBuilder(configReader.baseURL() + "?");
-        url.append("projectKey=JASX&"); // fixme
         url.append(getJQLParam());
         url.append("&maxResults=0");
         return url.toString();
@@ -122,7 +120,7 @@ public class IssuesAPICaller {
         cal.add(Calendar.DATE, -1);
         final String yesterday = dateFormat.format(cal.getTime());
 
-        return String.format("jql=updatedDate<%s+AND+updatedDate>=%s", today, yesterday);
+        return String.format("jql=updatedDate<%s+AND+updatedDate>=%s+AND+project=%s", today, yesterday, configReader.apiProject());
     }
 
     private String getFieldsParam() {
