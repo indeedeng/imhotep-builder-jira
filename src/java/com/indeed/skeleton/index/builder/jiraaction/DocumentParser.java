@@ -21,7 +21,7 @@ public class DocumentParser {
         doc.setStringField("status", action.status);
         doc.setStringField("summary", action.summary);
         doc.setIntField("timeinstate", action.timeinstate);
-        doc.setStringField("timestamp", action.timestamp); //TODO: check specification
+        doc.setStringField("timestamp", action.timestamp);
         doc.setStringField("verifier", action.verifier);
         return doc;
     }

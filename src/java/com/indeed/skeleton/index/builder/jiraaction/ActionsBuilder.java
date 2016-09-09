@@ -26,7 +26,6 @@ public class ActionsBuilder {
     }
 
     public List<Action> buildActions() throws Exception {
-        // TODO: Sort Issue Changelog
 
         if (isNewIssue) setCreateAction();
 
@@ -55,6 +54,8 @@ public class ActionsBuilder {
     //
 
     private void setUpdateActions() throws Exception {
+        issue.changelog.sortHistories();
+
         Action prevAction = getLatestAction();
         for (History history : issue.changelog.histories) {
             if (!isOnYesterday(history.created)) continue;
@@ -67,8 +68,12 @@ public class ActionsBuilder {
     private Action getLatestAction() throws Exception {
         if (isNewIssue) return actions.get(0); // returns create action.
         else {
-            // TODO: Get Last Action from DB and parse it to Action class.
-            Action action = new Action(issue);// TODO delete this line
+            // Get the last action by day before yesterday.
+            Action action = new Action(issue);
+            for (History history : issue.changelog.histories) {
+                if (isOnYesterday(history.created)) break;
+                action = new Action(action, history);
+            }
             return action;
         }
     }
@@ -78,7 +83,7 @@ public class ActionsBuilder {
     //
 
     private void setCommentActions() throws Exception {
-        // TODO: Sort Comments
+        issue.fields.comment.sortComments();
 
         int currentActionIndex = 0;
         for (Comment comment : issue.fields.comment.comments) {

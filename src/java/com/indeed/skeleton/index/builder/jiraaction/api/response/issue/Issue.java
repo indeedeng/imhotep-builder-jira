@@ -17,7 +17,8 @@ public class Issue {
 
     public String initialValue(String field) throws Exception {
         if (this.changelog.historyItemExist(field)) {
-            return this.changelog.getFirstHistoryItem(field).fromString;
+            String fromString = this.changelog.getFirstHistoryItem(field).fromString;
+            return fromString == null ? "" : fromString;
         } else {
             return this.fields.getStringValue(field);
         }

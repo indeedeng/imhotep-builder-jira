@@ -38,8 +38,11 @@ public class History {
 
     public String getItemLastValue(String field) {
         for (Item item : items) {
-            if (item.field.equals(field)) return item.toString;
+            if (item.field.equals(field)) {
+                String toString = item.toString;
+                return toString == null ? "" : toString;
+            }
         }
-        return null;
+        return "";
     }
 }
