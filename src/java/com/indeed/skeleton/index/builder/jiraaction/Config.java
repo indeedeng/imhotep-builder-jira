@@ -9,4 +9,5 @@ public class Config {
     public static String baseURL;
     public static String apiFields;
     public static String apiExpand;
+    public static String apiProject;
 }

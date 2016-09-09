@@ -9,4 +9,5 @@ interface ConfigReader {
     public String baseURL();
     public String apiFields();
     public String apiExpand();
+    public String apiProject();
 }
