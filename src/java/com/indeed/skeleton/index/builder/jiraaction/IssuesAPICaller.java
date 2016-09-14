@@ -116,11 +116,10 @@ public class IssuesAPICaller {
     private String getJQLParam() {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         final Calendar cal = Calendar.getInstance();
-        final String today = dateFormat.format(cal.getTime());
         cal.add(Calendar.DATE, -1);
         final String yesterday = dateFormat.format(cal.getTime());
 
-        return String.format("jql=updatedDate<%s+AND+updatedDate>=%s+AND+project=%s", today, yesterday, configReader.apiProject());
+        return String.format("jql=updatedDate>=%s", yesterday);
     }
 
     private String getFieldsParam() {
