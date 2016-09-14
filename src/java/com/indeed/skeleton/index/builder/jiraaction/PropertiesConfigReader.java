@@ -1,5 +1,7 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -28,27 +30,31 @@ public class PropertiesConfigReader implements ConfigReader {
             e.printStackTrace();
         }
 
-        Config.username = PropertiesConfigReader.prop.getProperty("jiraUsername");
-        Config.password = PropertiesConfigReader.prop.getProperty("jiraPassword");
-        Config.baseURL = PropertiesConfigReader.prop.getProperty("jiraBaseURL");
+        Config.jiraUser = PropertiesConfigReader.prop.getProperty("jiraUsername");
+        Config.jiraPass = PropertiesConfigReader.prop.getProperty("jiraPassword");
+        Config.jiraBaseURL = PropertiesConfigReader.prop.getProperty("jiraBaseURL");
         Config.apiFields = PropertiesConfigReader.prop.getProperty("jiraFields");
         Config.apiExpand = PropertiesConfigReader.prop.getProperty("jiraExpand");
         Config.apiProject = PropertiesConfigReader.prop.getProperty("jiraProject");
+
+        Config.iuploadURL = PropertiesConfigReader.prop.getProperty("iuploadURL");
+        Config.iuploadUser = PropertiesConfigReader.prop.getProperty("iuploadUser");
+        Config.iuploadPass = PropertiesConfigReader.prop.getProperty("iuploadPass");
     }
 
     @Override
-    public String username() {
-        return Config.username;
+    public String jiraUser() {
+        return Config.jiraUser;
     }
 
     @Override
-    public String password() {
-        return Config.password;
+    public String jiraPass() {
+        return Config.jiraPass;
     }
 
     @Override
-    public String baseURL() {
-        return Config.baseURL;
+    public String jiraBaseURL() {
+        return Config.jiraBaseURL;
     }
 
     @Override
@@ -64,5 +70,20 @@ public class PropertiesConfigReader implements ConfigReader {
     @Override
     public String apiProject() {
         return Config.apiProject;
+    }
+
+    @Override
+    public String iuploadURL() {
+        return Config.iuploadURL;
+    }
+
+    @Override
+    public String iuploadUser() {
+        return Config.iuploadUser;
+    }
+
+    @Override
+    public String iuploadPass() {
+        return Config.iuploadPass;
     }
 }

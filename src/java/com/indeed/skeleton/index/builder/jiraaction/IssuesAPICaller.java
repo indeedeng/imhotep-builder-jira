@@ -87,13 +87,13 @@ public class IssuesAPICaller {
     }
 
     private String getBasicAuth() {
-        String userPass = configReader.username() + ":" + configReader.password();
+        String userPass = configReader.jiraUser() + ":" + configReader.jiraPass();
         String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
     }
 
     private String getIssuesURL() {
-        final StringBuilder url = new StringBuilder(configReader.baseURL() + "?");
+        final StringBuilder url = new StringBuilder(configReader.jiraBaseURL() + "?");
         url.append(getJQLParam());
         url.append("&");
         url.append(getFieldsParam());
@@ -107,7 +107,7 @@ public class IssuesAPICaller {
     }
 
     private String getBasicInfoURL() {
-        final StringBuilder url = new StringBuilder(configReader.baseURL() + "?");
+        final StringBuilder url = new StringBuilder(configReader.jiraBaseURL() + "?");
         url.append(getJQLParam());
         url.append("&maxResults=0");
         return url.toString();
