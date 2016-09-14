@@ -38,7 +38,7 @@ public class IndexBuilder {
             }
         }
 
-        // Create a TSV file.
+        // Create and Upload a TSV file.
         TsvFileWriter.createTSVFile(actions);
     }
 }
