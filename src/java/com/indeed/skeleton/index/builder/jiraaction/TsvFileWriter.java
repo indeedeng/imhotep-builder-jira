@@ -103,7 +103,7 @@ public class TsvFileWriter {
 
         final String iuploadUrl = configReader.iuploadURL();
 
-        final String userPass = configReader.iuploadUser() + ":" + configReader.iuploadPass();
+        final String userPass = configReader.username() + ":" + configReader.password();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
         HttpPost httpPost = new HttpPost(iuploadUrl);

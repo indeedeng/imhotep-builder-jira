@@ -24,7 +24,7 @@ public class IssuesAPICaller {
     // For Pagination
     //
 
-    private final int numPerPage = 1000; // Max number of issues per page
+    private final int numPerPage = 10; // Max number of issues per page
     private int page = 0; // Current Page
     private int numTotal = -1; // Max number of issues per page
 
@@ -80,6 +80,7 @@ public class IssuesAPICaller {
     //
 
     private HttpsURLConnection getURLConnection(String urlString) throws IOException {
+        System.out.println(urlString);
         URL url = new URL(urlString);
         HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", getBasicAuth());
@@ -87,7 +88,7 @@ public class IssuesAPICaller {
     }
 
     private String getBasicAuth() {
-        String userPass = configReader.jiraUser() + ":" + configReader.jiraPass();
+        String userPass = configReader.username() + ":" + configReader.password();
         String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
     }
@@ -123,11 +124,11 @@ public class IssuesAPICaller {
     }
 
     private String getFieldsParam() {
-        return String.format("fields=%s", configReader.apiFields());
+        return String.format("fields=%s", configReader.jiraFields());
     }
 
     private String getExpandParam() {
-        return String.format("expand=%s", configReader.apiExpand());
+        return String.format("expand=%s", configReader.jiraExpand());
     }
 
     private String getStartAtParam() {
