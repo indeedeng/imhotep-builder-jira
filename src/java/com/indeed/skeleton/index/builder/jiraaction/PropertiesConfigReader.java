@@ -30,26 +30,24 @@ public class PropertiesConfigReader implements ConfigReader {
             e.printStackTrace();
         }
 
-        Config.jiraUser = PropertiesConfigReader.prop.getProperty("jiraUsername");
-        Config.jiraPass = PropertiesConfigReader.prop.getProperty("jiraPassword");
-        Config.jiraBaseURL = PropertiesConfigReader.prop.getProperty("jiraBaseURL");
-        Config.apiFields = PropertiesConfigReader.prop.getProperty("jiraFields");
-        Config.apiExpand = PropertiesConfigReader.prop.getProperty("jiraExpand");
-        Config.apiProject = PropertiesConfigReader.prop.getProperty("jiraProject");
+//        Config.username = PropertiesConfigReader.prop.getProperty("username"); // fixme: remove
+//        Config.password = PropertiesConfigReader.prop.getProperty("password"); // fixme: remove
+        Config.jiraBaseURL = PropertiesConfigReader.prop.getProperty("jira.baseurl");
+        Config.jiraFields = PropertiesConfigReader.prop.getProperty("jira.fields");
+        Config.jiraExpand = PropertiesConfigReader.prop.getProperty("jira.expand");
+        Config.jiraProject = PropertiesConfigReader.prop.getProperty("jira.project");
 
-        Config.iuploadURL = PropertiesConfigReader.prop.getProperty("iuploadURL");
-        Config.iuploadUser = PropertiesConfigReader.prop.getProperty("iuploadUser");
-        Config.iuploadPass = PropertiesConfigReader.prop.getProperty("iuploadPass");
+        Config.iuploadURL = PropertiesConfigReader.prop.getProperty("iupload.url");
     }
 
     @Override
-    public String jiraUser() {
-        return Config.jiraUser;
+    public String username() {
+        return Config.username;
     }
 
     @Override
-    public String jiraPass() {
-        return Config.jiraPass;
+    public String password() {
+        return Config.password;
     }
 
     @Override
@@ -58,32 +56,22 @@ public class PropertiesConfigReader implements ConfigReader {
     }
 
     @Override
-    public String apiFields() {
-        return Config.apiFields;
+    public String jiraFields() {
+        return Config.jiraFields;
     }
 
     @Override
-    public String apiExpand() {
-        return Config.apiExpand;
+    public String jiraExpand() {
+        return Config.jiraExpand;
     }
 
     @Override
-    public String apiProject() {
-        return Config.apiProject;
+    public String jiraProject() {
+        return Config.jiraProject;
     }
 
     @Override
     public String iuploadURL() {
         return Config.iuploadURL;
-    }
-
-    @Override
-    public String iuploadUser() {
-        return Config.iuploadUser;
-    }
-
-    @Override
-    public String iuploadPass() {
-        return Config.iuploadPass;
     }
 }
