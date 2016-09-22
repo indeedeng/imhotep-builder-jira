@@ -24,7 +24,7 @@ public class IssuesAPICaller {
     // For Pagination
     //
 
-    private final int numPerPage = 10; // Max number of issues per page
+    private final int numPerPage = 5; // Max number of issues per page
     private int page = 0; // Current Page
     private int numTotal = -1; // Max number of issues per page
 
