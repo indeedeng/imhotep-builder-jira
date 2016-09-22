@@ -42,12 +42,12 @@ public class PropertiesConfigReader implements ConfigReader {
 
     @Override
     public String username() {
-        return Config.username;
+        return Config.jiraUsernameIndexer;
     }
 
     @Override
     public String password() {
-        return Config.password;
+        return Config.jiraPasswordIndexer;
     }
 
     @Override
