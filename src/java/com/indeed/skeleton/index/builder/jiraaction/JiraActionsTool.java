@@ -13,12 +13,15 @@ public class JiraActionsTool implements CommandLineTool {
     private static final Logger log = Logger.getLogger(JiraActionsTool.class);
 
     public static void main(String[] args) {
+        System.out.println("start jira actions tool main");
         final JiraActionsTool u = new JiraActionsTool();
         CommandLineUtil cmdLineUtil = new CommandLineUtil(log, args, u);
         final String toolFullName = u.getClass().getName();
         final String toolDisplayName = u.getClass().getSimpleName();
         cmdLineUtil.addStatusUpdateFunction(new CronToolStatusUpdater(cmdLineUtil.getProperties(), toolFullName, toolDisplayName, args, true));
+        System.out.println("start jira actions tool run");
         u.run(cmdLineUtil);
+        System.out.println("end jira actions tool main and run");
     }
 
     @Override
