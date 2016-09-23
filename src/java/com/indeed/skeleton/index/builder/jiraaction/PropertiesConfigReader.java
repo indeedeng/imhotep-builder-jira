@@ -30,14 +30,14 @@ public class PropertiesConfigReader implements ConfigReader {
             e.printStackTrace();
         }
 
-//        Config.username = PropertiesConfigReader.prop.getProperty("username"); // fixme: remove
-//        Config.password = PropertiesConfigReader.prop.getProperty("password"); // fixme: remove
-        Config.jiraBaseURL = PropertiesConfigReader.prop.getProperty("jira.baseurl");
-        Config.jiraFields = PropertiesConfigReader.prop.getProperty("jira.fields");
-        Config.jiraExpand = PropertiesConfigReader.prop.getProperty("jira.expand");
-        Config.jiraProject = PropertiesConfigReader.prop.getProperty("jira.project");
-
-        Config.iuploadURL = PropertiesConfigReader.prop.getProperty("iupload.url");
+//        Config.jiraUsernameIndexer = PropertiesConfigReader.prop.getProperty("jira.username.indexer"); // fixme: remove
+//        Config.jiraPasswordIndexer = PropertiesConfigReader.prop.getProperty("jira.password.indexer"); // fixme: remove
+//        Config.jiraBaseURL = PropertiesConfigReader.prop.getProperty("jira.baseurl");
+//        Config.jiraFields = PropertiesConfigReader.prop.getProperty("jira.fields");
+//        Config.jiraExpand = PropertiesConfigReader.prop.getProperty("jira.expand");
+//        Config.jiraProject = PropertiesConfigReader.prop.getProperty("jira.project");
+//
+//        Config.iuploadURL = PropertiesConfigReader.prop.getProperty("iupload.url");
     }
 
     @Override
@@ -57,7 +57,7 @@ public class PropertiesConfigReader implements ConfigReader {
 
     @Override
     public String jiraFields() {
-        return Config.jiraFields;
+        return Config.jiraFields.substring(1, Config.jiraFields.length()-1).replaceAll("\\s+","");
     }
 
     @Override

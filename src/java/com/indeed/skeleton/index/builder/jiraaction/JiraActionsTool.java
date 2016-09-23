@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
  */
 public class JiraActionsTool implements CommandLineTool {
     private static final Logger log = Logger.getLogger(JiraActionsTool.class);
-    private String jiraUsername;
 
     public static void main(String[] args) {
         final JiraActionsTool u = new JiraActionsTool();
