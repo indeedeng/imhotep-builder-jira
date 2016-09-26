@@ -26,9 +26,11 @@ public class IndexBuilder {
 
         long start, end;
 
+//        boolean debug_bool = true; //fixme
+
         while(issuesAPICaller.currentPageExist()){
+//        while(debug_bool){ //fixme
             // Get issues from API.
-            Thread.sleep(1000);
             start = System.currentTimeMillis();
             JsonNode issuesNode = issuesAPICaller.getIssuesNode();
             end = System.currentTimeMillis();
@@ -51,6 +53,10 @@ public class IndexBuilder {
             }
             end = System.currentTimeMillis();
             System.out.println((end - start) + "ms to get actions from a set of issues.");
+
+            Thread.sleep(10000);
+
+//            debug_bool = false; //fixme
         }
 
         start = System.currentTimeMillis();
