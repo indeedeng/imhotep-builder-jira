@@ -1,11 +1,8 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.indeed.flamdex.writer.FlamdexDocument;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
-import org.apache.avro.generic.GenericData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,10 +23,7 @@ public class IndexBuilder {
 
         long start, end;
 
-//        boolean debug_bool = true; //fixme
-
         while(issuesAPICaller.currentPageExist()){
-//        while(debug_bool){ //fixme
             // Get issues from API.
             start = System.currentTimeMillis();
             JsonNode issuesNode = issuesAPICaller.getIssuesNode();
@@ -55,8 +49,6 @@ public class IndexBuilder {
             System.out.println((end - start) + "ms to get actions from a set of issues.");
 
             Thread.sleep(10000);
-
-//            debug_bool = false; //fixme
         }
 
         start = System.currentTimeMillis();
