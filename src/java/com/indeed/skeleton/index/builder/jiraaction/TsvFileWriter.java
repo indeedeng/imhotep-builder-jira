@@ -28,21 +28,21 @@ public class TsvFileWriter {
         "action", "actor", "assignee", "fieldschanged*", "issueage", "issuekey", "issuetype", "project", "prevstatus", "reporter",
             "resolution", "status", "summary", "timeinstate", "time", "verifier"
     };
-    public static void createTSVFile(List<Action> actions) throws IOException, ParseException {
-        String filename = "jiraactions_" + getYesterday() + ".tsv";
-        File file = new File(filename);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+    public static void createTSVFile(final List<Action> actions) throws IOException, ParseException {
+        final String filename = "jiraactions_" + getYesterday() + ".tsv";
+        final File file = new File(filename);
+        final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
         // Write header
         for (int i=0; i< FILE_HEADER.length; i++) {
             if (i > 0) bw.write("\t");
-            String header = FILE_HEADER[i];
+            final String header = FILE_HEADER[i];
             bw.write(header);
         }
         bw.write("\n");
 
         // Write body
-        for (Action action : actions) {
+        for (final Action action : actions) {
             bw.write(action.action);
             bw.write("\t");
             bw.write(action.actor);
@@ -51,7 +51,7 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.fieldschanged);
             bw.write("\t");
-            String issueage = String.valueOf(action.issueage);
+            final String issueage = String.valueOf(action.issueage);
             bw.write(issueage);
             bw.write("\t");
             bw.write(action.issuekey);
@@ -70,7 +70,7 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.summary);
             bw.write("\t");
-            String timeinstate = String.valueOf(action.timeinstate);
+            final String timeinstate = String.valueOf(action.timeinstate);
             bw.write(timeinstate);
             bw.write("\t");
             bw.write(getUnixTimestamp(action.timestamp));
@@ -84,17 +84,17 @@ public class TsvFileWriter {
     }
 
     private static String getYesterday() {
-        Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, -1);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         return sdf.format(cal.getTime());
     }
 
-    private static String getUnixTimestamp(String jiraTimestamp) throws ParseException {
-        String timestamp = jiraTimestamp.replace('T', ' ');
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        Date date = dateFormat.parse(timestamp);
-        long unixTime = date.getTime()/1000;
+    private static String getUnixTimestamp(final String jiraTimestamp) throws ParseException {
+        final String timestamp = jiraTimestamp.replace('T', ' ');
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        final Date date = dateFormat.parse(timestamp);
+        final long unixTime = date.getTime()/1000;
         return String.valueOf(unixTime);
     }
 
@@ -106,7 +106,7 @@ public class TsvFileWriter {
         final String userPass = configReader.username() + ":" + configReader.password();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
-        HttpPost httpPost = new HttpPost(iuploadUrl);
+        final HttpPost httpPost = new HttpPost(iuploadUrl);
         httpPost.setHeader("Authorization", basicAuth);
         httpPost.setEntity(MultipartEntityBuilder.create()
                 .addBinaryBody("file", tsvFile, ContentType.MULTIPART_FORM_DATA, tsvFile.getName())

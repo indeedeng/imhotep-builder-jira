@@ -12,9 +12,9 @@ import org.apache.log4j.Logger;
 public class JiraActionsTool implements CommandLineTool {
     private static final Logger log = Logger.getLogger(JiraActionsTool.class);
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final JiraActionsTool u = new JiraActionsTool();
-        CommandLineUtil cmdLineUtil = new CommandLineUtil(log, args, u);
+        final CommandLineUtil cmdLineUtil = new CommandLineUtil(log, args, u);
         final String toolFullName = u.getClass().getName();
         final String toolDisplayName = u.getClass().getSimpleName();
         cmdLineUtil.addStatusUpdateFunction(new CronToolStatusUpdater(cmdLineUtil.getProperties(), toolFullName, toolDisplayName, args, true));
@@ -22,15 +22,15 @@ public class JiraActionsTool implements CommandLineTool {
     }
 
     @Override
-    public void initialize(CommandLineUtil cmdLineUtil) {
+    public void initialize(final CommandLineUtil cmdLineUtil) {
     }
 
     @Override
-    public void run(CommandLineUtil cmdLineUtil) {
+    public void run(final CommandLineUtil cmdLineUtil) {
         try {
             final Config config = new Config();
             ConfigurationParser.readFromPath(config, cmdLineUtil.getPropertiesFilename(), cmdLineUtil.getArgs());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }

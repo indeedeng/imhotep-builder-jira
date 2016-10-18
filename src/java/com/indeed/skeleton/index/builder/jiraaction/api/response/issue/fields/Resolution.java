@@ -9,5 +9,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Resolution {
-    public String name;
+    public final String name;
 }

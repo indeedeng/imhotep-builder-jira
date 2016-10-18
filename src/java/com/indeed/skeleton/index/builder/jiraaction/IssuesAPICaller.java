@@ -18,7 +18,7 @@ import java.util.Calendar;
  */
 public class IssuesAPICaller {
 
-    private ConfigReader configReader = new PropertiesConfigReader();
+    private final ConfigReader configReader = new PropertiesConfigReader();
 
     //
     // For Pagination
@@ -33,7 +33,7 @@ public class IssuesAPICaller {
     }
 
     public JsonNode getIssuesNode() throws IOException {
-        JsonNode apiRes = getJsonNode(getIssuesURL());
+        final JsonNode apiRes = getJsonNode(getIssuesURL());
         setNextPage();
         return apiRes.get("issues");
     }
@@ -42,12 +42,12 @@ public class IssuesAPICaller {
     // Call API with URL and parse response to JSON node.
     //
 
-    private JsonNode getJsonNode(String url) throws IOException {
+    private JsonNode getJsonNode(final String url) throws IOException {
         final HttpsURLConnection urlConnection = getURLConnection(url);
-        InputStream in = urlConnection.getInputStream();
+        final InputStream in = urlConnection.getInputStream();
         final BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String apiRes = br.readLine();
-        ObjectMapper mapper = new ObjectMapper();
+        final String apiRes = br.readLine();
+        final ObjectMapper mapper = new ObjectMapper();
         return mapper.readTree(apiRes);
     }
 
@@ -56,8 +56,8 @@ public class IssuesAPICaller {
     //
 
     private void setNumTotal() throws IOException {
-        JsonNode apiRes = getJsonNode(getBasicInfoURL());
-        JsonNode totalNode = apiRes.path("total");
+        final JsonNode apiRes = getJsonNode(getBasicInfoURL());
+        final JsonNode totalNode = apiRes.path("total");
         this.numTotal = totalNode.intValue();
     }
 
@@ -79,17 +79,17 @@ public class IssuesAPICaller {
     // For Getting URL Connection
     //
 
-    private HttpsURLConnection getURLConnection(String urlString) throws IOException {
+    private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
         System.out.println(urlString);
-        URL url = new URL(urlString);
-        HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+        final URL url = new URL(urlString);
+        final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", getBasicAuth());
         return urlConnection;
     }
 
     private String getBasicAuth() {
-        String userPass = configReader.username() + ":" + configReader.password();
-        String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
+        final String userPass = configReader.username() + ":" + configReader.password();
+        final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
     }
 

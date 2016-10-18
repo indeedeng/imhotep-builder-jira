@@ -10,14 +10,14 @@ import java.util.List;
  */
 public class IndexBuilder {
 
-    public static void main (String[] args) throws Exception {
+    public static void main (final String[] args) throws Exception {
 
         JiraActionsTool.main(args);
 
-        long start_total = System.currentTimeMillis();
-        long end_total;
+        final long start_total = System.currentTimeMillis();
+        final long end_total;
 
-        IssuesAPICaller issuesAPICaller = new IssuesAPICaller();
+        final IssuesAPICaller issuesAPICaller = new IssuesAPICaller();
 
         List<Action> actions = null;
 
@@ -26,17 +26,17 @@ public class IndexBuilder {
         while(issuesAPICaller.currentPageExist()){
             // Get issues from API.
             start = System.currentTimeMillis();
-            JsonNode issuesNode = issuesAPICaller.getIssuesNode();
+            final JsonNode issuesNode = issuesAPICaller.getIssuesNode();
             end = System.currentTimeMillis();
             System.out.println((end - start) + "ms for an API call.");
 
             start = System.currentTimeMillis();
             for (final JsonNode issueNode : issuesNode) {
                 // Parse Each Issue API response to Object.
-                Issue issue = IssueAPIParser.getObject(issueNode);
+                final Issue issue = IssueAPIParser.getObject(issueNode);
 
                 // Build Action objects from parsed API response Object.
-                ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+                final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
 
                 // Set built actions to actions list.
                 if (actions == null) {

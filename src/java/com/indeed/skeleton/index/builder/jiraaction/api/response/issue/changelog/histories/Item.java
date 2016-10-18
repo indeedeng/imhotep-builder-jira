@@ -11,11 +11,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Item {
     public String field;
-    public String fromString;
-    public String toString;
+    public final String fromString;
+    public final String toString;
 
     @JsonProperty("field")
-    public void setVerifier(String field) {
+    public void setVerifier(final String field) {
         this.field = field.toLowerCase().replaceAll("\\s", "-");
     }
 }
