@@ -42,6 +42,9 @@ public class JiraActionIndexBuilder {
                 for (final JsonNode issueNode : issuesNode) {
                     // Parse Each Issue API response to Object.
                     final Issue issue = IssueAPIParser.getObject(issueNode);
+                    if(issue == null) {
+                        continue;
+                    }
 
                     // Build Action objects from parsed API response Object.
                     final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
