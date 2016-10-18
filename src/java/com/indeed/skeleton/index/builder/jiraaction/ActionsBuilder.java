@@ -135,10 +135,10 @@ public class ActionsBuilder {
                 ( nextAction == null || !commentIsAfter(comment, nextAction) );
     }
 
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     private Date parseDate(final String dateString) throws ParseException {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         final String strippedCreatedString = dateString.replace('T', ' ');
-        final Date date = dateFormat.parse(strippedCreatedString);
+        final Date date = DATE_FORMAT.parse(strippedCreatedString);
         return date;
     }
 }
