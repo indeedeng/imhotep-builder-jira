@@ -9,5 +9,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Project {
-    public final String name;
+    public String name;
 }

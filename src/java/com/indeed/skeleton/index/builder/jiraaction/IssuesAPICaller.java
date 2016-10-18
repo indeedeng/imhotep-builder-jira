@@ -14,12 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
- * Created by soono on 8/30/16.
+ * @author soono
  */
 public class IssuesAPICaller {
-
-    private final ConfigReader configReader = new PropertiesConfigReader();
-
+    private final JiraActionIndexBuilderConfig config;
     //
     // For Pagination
     //
@@ -28,8 +26,8 @@ public class IssuesAPICaller {
     private int page = 0; // Current Page
     private int numTotal = -1; // Max number of issues per page
 
-    public IssuesAPICaller() throws IOException {
-        setNumTotal();
+    public IssuesAPICaller(final JiraActionIndexBuilderConfig config) {
+        this.config = config;
     }
 
     public JsonNode getIssuesNode() throws IOException {
@@ -55,7 +53,7 @@ public class IssuesAPICaller {
     // For Pagination
     //
 
-    private void setNumTotal() throws IOException {
+    public void setNumTotal() throws IOException {
         final JsonNode apiRes = getJsonNode(getBasicInfoURL());
         final JsonNode totalNode = apiRes.path("total");
         this.numTotal = totalNode.intValue();
@@ -88,13 +86,13 @@ public class IssuesAPICaller {
     }
 
     private String getBasicAuth() {
-        final String userPass = configReader.username() + ":" + configReader.password();
+        final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
     }
 
     private String getIssuesURL() {
-        final StringBuilder url = new StringBuilder(configReader.jiraBaseURL() + "?");
+        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?");
         url.append(getJQLParam());
         url.append("&");
         url.append(getFieldsParam());
@@ -108,7 +106,7 @@ public class IssuesAPICaller {
     }
 
     private String getBasicInfoURL() {
-        final StringBuilder url = new StringBuilder(configReader.jiraBaseURL() + "?");
+        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?");
         url.append(getJQLParam());
         url.append("&maxResults=0");
         return url.toString();
@@ -124,11 +122,11 @@ public class IssuesAPICaller {
     }
 
     private String getFieldsParam() {
-        return String.format("fields=%s", configReader.jiraFields());
+        return String.format("fields=%s", config.getJiraFields());
     }
 
     private String getExpandParam() {
-        return String.format("expand=%s", configReader.jiraExpand());
+        return String.format("expand=%s", config.getJiraExpand());
     }
 
     private String getStartAtParam() {

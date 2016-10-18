@@ -6,22 +6,22 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.co
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 
 /**
- * Created by soono on 8/25/16.
+ * @author soono
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Field {
-    public final User assignee;
+    public User assignee;
     public CommentCollection comment;
     public String created;
     public User creator;
-    public final Issuetype issuetype;
-    public final Project project;
-    public final User reporter;
-    public final Resolution resolution;
-    public final Status status;
-    public final String summary;
+    public Issuetype issuetype;
+    public Project project;
+    public User reporter;
+    public Resolution resolution;
+    public Status status;
+    public String summary;
     public User verifier;
 
     @JsonProperty("customfield_10003")

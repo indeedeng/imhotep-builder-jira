@@ -5,13 +5,13 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.Field;
 
 /**
- * Created by soono on 8/24/16.
+ * @author soono
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Issue {
-    public final String key;
+    public String key;
     public Field fields;
     public ChangeLog changelog;
 

@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Created by soono on 8/25/16.
+ * @author soono
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Item {
     public String field;
-    public final String fromString;
-    public final String toString;
+    public String fromString;
+    public String toString;
 
     @JsonProperty("field")
     public void setVerifier(final String field) {
