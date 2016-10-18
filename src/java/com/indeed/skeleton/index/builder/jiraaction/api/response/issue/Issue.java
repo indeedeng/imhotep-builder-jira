@@ -11,13 +11,13 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.Fi
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Issue {
-    public String key;
+    public final String key;
     public Field fields;
     public ChangeLog changelog;
 
-    public String initialValue(String field) throws Exception {
+    public String initialValue(final String field) throws Exception {
         if (this.changelog.historyItemExist(field)) {
-            String fromString = this.changelog.getFirstHistoryItem(field).fromString;
+            final String fromString = this.changelog.getFirstHistoryItem(field).fromString;
             return fromString == null ? "" : fromString;
         } else {
             return this.fields.getStringValue(field);

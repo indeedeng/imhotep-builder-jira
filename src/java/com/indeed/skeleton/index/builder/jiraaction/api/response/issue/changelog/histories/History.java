@@ -18,10 +18,10 @@ import java.util.List;
 public class History {
     public User author;
     public String created;
-    public Item[] items;
+    public final Item[] items;
 
     public String getChangedFields() {
-        StringBuilder fieldsChanged = new StringBuilder();
+        final StringBuilder fieldsChanged = new StringBuilder();
         for (int i = 0; i < items.length; i++) {
             if (i != 0) fieldsChanged.append(" ");
             fieldsChanged.append(items[i].field);
@@ -29,17 +29,17 @@ public class History {
         return fieldsChanged.toString();
     }
 
-    public boolean itemExist(String field) {
-        for (Item item : items) {
+    public boolean itemExist(final String field) {
+        for (final Item item : items) {
             if (item.field.equals(field)) return true;
         }
         return false;
     }
 
-    public String getItemLastValue(String field) {
-        for (Item item : items) {
+    public String getItemLastValue(final String field) {
+        for (final Item item : items) {
             if (item.field.equals(field)) {
-                String toString = item.toString;
+                final String toString = item.toString;
                 return toString == null ? "" : toString;
             }
         }

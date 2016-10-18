@@ -12,24 +12,24 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Field {
-    public User assignee;
+    public final User assignee;
     public CommentCollection comment;
     public String created;
     public User creator;
-    public Issuetype issuetype;
-    public Project project;
-    public User reporter;
-    public Resolution resolution;
-    public Status status;
-    public String summary;
+    public final Issuetype issuetype;
+    public final Project project;
+    public final User reporter;
+    public final Resolution resolution;
+    public final Status status;
+    public final String summary;
     public User verifier;
 
     @JsonProperty("customfield_10003")
-    public void setVerifier(User verifier) {
+    public void setVerifier(final User verifier) {
         this.verifier = verifier;
     }
 
-    public String getStringValue(String attribute) throws Exception {
+    public String getStringValue(final String attribute) throws Exception {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
             case "created": return created;

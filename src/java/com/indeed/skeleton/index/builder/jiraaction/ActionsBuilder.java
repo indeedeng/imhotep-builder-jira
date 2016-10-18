@@ -16,11 +16,11 @@ import java.util.List;
  * Created by soono on 8/30/16.
  */
 public class ActionsBuilder {
-    private Issue issue;
+    private final Issue issue;
     private boolean isNewIssue;
-    public List<Action> actions = new ArrayList<Action>();
+    public final List<Action> actions = new ArrayList<Action>();
 
-    public ActionsBuilder(Issue issue) throws ParseException {
+    public ActionsBuilder(final Issue issue) throws ParseException {
         this.issue = issue;
         setIsNewIssue();
     }
@@ -45,7 +45,7 @@ public class ActionsBuilder {
     //
 
     private void setCreateAction() throws Exception {
-        Action createAction = new Action(issue);
+        final Action createAction = new Action(issue);
         actions.add(createAction);
     }
 
@@ -57,9 +57,9 @@ public class ActionsBuilder {
         issue.changelog.sortHistories();
 
         Action prevAction = getLatestAction();
-        for (History history : issue.changelog.histories) {
+        for (final History history : issue.changelog.histories) {
             if (!isOnYesterday(history.created)) continue;
-            Action updateAction = new Action(prevAction, history);
+            final Action updateAction = new Action(prevAction, history);
             actions.add(updateAction);
             prevAction = updateAction;
         }
@@ -70,7 +70,7 @@ public class ActionsBuilder {
         else {
             // Get the last action by day before yesterday.
             Action action = new Action(issue);
-            for (History history : issue.changelog.histories) {
+            for (final History history : issue.changelog.histories) {
                 if (isOnYesterday(history.created)) break;
                 action = new Action(action, history);
             }
@@ -86,15 +86,15 @@ public class ActionsBuilder {
         issue.fields.comment.sortComments();
 
         int currentActionIndex = 0;
-        for (Comment comment : issue.fields.comment.comments) {
+        for (final Comment comment : issue.fields.comment.comments) {
             if (!isOnYesterday(comment.created)) continue;
             if (actions.isEmpty() || !commentIsAfter(comment, actions.get(0))) {
-                Action commentAction = new Action(getLatestAction(), comment);
+                final Action commentAction = new Action(getLatestAction(), comment);
                 actions.add(0, commentAction);
             } else {
                 while(true) {
                     if(commentIsRightAfter(comment, currentActionIndex)) {
-                        Action commentAction = new Action(actions.get(currentActionIndex), comment);
+                        final Action commentAction = new Action(actions.get(currentActionIndex), comment);
                         actions.add(currentActionIndex+1, commentAction);
                         break;
                     } else {
@@ -110,36 +110,36 @@ public class ActionsBuilder {
     // For interpreting if the date is new
     //
 
-    private boolean isOnYesterday(String dateString) throws ParseException {
-        Calendar date = Calendar.getInstance();
+    private boolean isOnYesterday(final String dateString) throws ParseException {
+        final Calendar date = Calendar.getInstance();
         date.setTime(parseDate(dateString));
 
-        Calendar yesterday = Calendar.getInstance();
+        final Calendar yesterday = Calendar.getInstance();
         yesterday.add(Calendar.DAY_OF_YEAR, -1);
 
         return date.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR)
                 && date.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR);
     }
 
-    private boolean commentIsAfter(Comment comment, Action action) throws ParseException {
+    private boolean commentIsAfter(final Comment comment, final Action action) throws ParseException {
         // return true if comment is made after the action
-        Date commentDate = parseDate(comment.created);
-        Date actionDate = parseDate(action.timestamp);
+        final Date commentDate = parseDate(comment.created);
+        final Date actionDate = parseDate(action.timestamp);
         return commentDate.after(actionDate);
     }
 
-    private boolean commentIsRightAfter(Comment comment, int actionIndex) throws ParseException {
-        Action action = actions.get(actionIndex);
-        int nextIndex = actionIndex + 1;
-        Action nextAction = actions.size() > nextIndex ? actions.get(nextIndex) : null;
+    private boolean commentIsRightAfter(final Comment comment, final int actionIndex) throws ParseException {
+        final Action action = actions.get(actionIndex);
+        final int nextIndex = actionIndex + 1;
+        final Action nextAction = actions.size() > nextIndex ? actions.get(nextIndex) : null;
         return commentIsAfter(comment, action) &&
                 ( nextAction == null || !commentIsAfter(comment, nextAction) );
     }
 
-    private Date parseDate(String dateString) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String strippedCreatedString = dateString.replace('T', ' ');
-        Date date = dateFormat.parse(strippedCreatedString);
+    private Date parseDate(final String dateString) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        final String strippedCreatedString = dateString.replace('T', ' ');
+        final Date date = dateFormat.parse(strippedCreatedString);
         return date;
     }
 }

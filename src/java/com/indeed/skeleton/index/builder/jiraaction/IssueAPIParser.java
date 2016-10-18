@@ -16,7 +16,7 @@ public class IssueAPIParser {
         Issue issue = new Issue();
         try {
             issue = mapper.treeToValue(issueNode, Issue.class);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         return issue;

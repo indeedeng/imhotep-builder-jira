@@ -67,14 +67,14 @@ public class ActionTest {
         EasyMock.replay(history);
 
         final Action action = new Action(prevAction, history);
-        Check.checkTrue(action.action.equals("update"));
+        Check.checkTrue("update".equals(action.action));
     }
 
     @Test
     public void testAction_update_actor() throws ParseException {
         EasyMock.replay(history);
 
-        String actor = "Test Actor";
+        final String actor = "Test Actor";
         author.displayName = actor;
 
         final Action action = new Action(prevAction, history);
@@ -83,7 +83,7 @@ public class ActionTest {
 
     @Test
     public void testAction_update_assignee_whenAssigneeChanged() throws ParseException {
-        String assignee = "Test Assignee";
+        final String assignee = "Test Assignee";
         EasyMock.expect(history.itemExist("assignee")).andReturn(true);
         EasyMock.expect(history.getItemLastValue("assignee")).andReturn(assignee);
         EasyMock.replay(history);
@@ -95,7 +95,7 @@ public class ActionTest {
 
     @Test
     public void testAction_update_assignee_whenAssigneeNotChanged() throws ParseException {
-        String assignee = "Test Assignee";
+        final String assignee = "Test Assignee";
         EasyMock.expect(history.itemExist("assignee")).andReturn(false);
         EasyMock.replay(history);
         prevAction.assignee = assignee;

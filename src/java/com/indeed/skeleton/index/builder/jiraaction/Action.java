@@ -13,7 +13,7 @@ import java.util.Date;
  */
 public class Action {
     public String action;
-    public String actor;
+    public final String actor;
     public String assignee;
     public String fieldschanged;
     public long issueage;
@@ -30,7 +30,7 @@ public class Action {
     public String verifier;
 
     // For Create Action
-    public Action(Issue issue) throws Exception {
+    public Action(final Issue issue) throws Exception {
         action = "create";
         actor = issue.fields.creator.displayName;
         assignee = issue.initialValue("assignee");
@@ -50,7 +50,7 @@ public class Action {
     }
 
     // For Update Action
-    public Action(Action prevAction, History history) throws ParseException {
+    public Action(final Action prevAction, final History history) throws ParseException {
         action = "update";
         actor = history.author.displayName;
         assignee = history.itemExist("assignee") ? history.getItemLastValue("assignee") : prevAction.assignee;
@@ -64,13 +64,13 @@ public class Action {
         resolution = history.itemExist("resolution") ? history.getItemLastValue("resolution") : prevAction.resolution;
         status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.status;
         summary = history.itemExist("summary") ? history.getItemLastValue("summary") : prevAction.summary;
-        timeinstate = getTimeDiff(prevAction.timestamp, history.created);;
+        timeinstate = getTimeDiff(prevAction.timestamp, history.created);
         timestamp = history.created;
         verifier = history.itemExist("verifier") ? history.getItemLastValue("verifier") : prevAction.verifier;
     }
 
     // For Comment Action
-    public Action(Action prevAction, Comment comment) throws ParseException {
+    public Action(final Action prevAction, final Comment comment) throws ParseException {
         action = "comment";
         actor =  comment.author.displayName;
         assignee = prevAction.assignee;
@@ -89,25 +89,25 @@ public class Action {
         verifier = prevAction.verifier;
     }
 
-    private long timeinstateForComment(Action prevAction, Comment comment) throws ParseException {
-        if (prevAction.action.equals("comment")) {
+    private long timeinstateForComment(final Action prevAction, final Comment comment) throws ParseException {
+        if ("comment".equals(prevAction.action)) {
             return prevAction.timeinstate + getTimeDiff(prevAction.timestamp, comment.created);
         } else {
             return getTimeDiff(prevAction.timestamp, comment.created);
         }
     }
 
-    private long getTimeDiff(String before, String after) throws ParseException {
-        Date beforeDate = parseDate(before);
-        Date afterDate = parseDate(after);
-        long seconds = (afterDate.getTime() - beforeDate.getTime()) / 1000;
+    private long getTimeDiff(final String before, final String after) throws ParseException {
+        final Date beforeDate = parseDate(before);
+        final Date afterDate = parseDate(after);
+        final long seconds = (afterDate.getTime() - beforeDate.getTime()) / 1000;
         return seconds;
     }
 
-    private Date parseDate(String dateString) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String strippedCreatedString = dateString.replace('T', ' ');
-        Date date = dateFormat.parse(strippedCreatedString);
+    private Date parseDate(final String dateString) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        final String strippedCreatedString = dateString.replace('T', ' ');
+        final Date date = dateFormat.parse(strippedCreatedString);
         return date;
     }
 

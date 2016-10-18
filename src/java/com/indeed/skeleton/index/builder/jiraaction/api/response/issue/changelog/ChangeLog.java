@@ -17,20 +17,20 @@ import java.util.Date;
 public class ChangeLog {
     public History[] histories;
 
-    public boolean historyItemExist(String field) {
-        for (History history : histories) {
+    public boolean historyItemExist(final String field) {
+        for (final History history : histories) {
             if (history.itemExist(field)) return true;
         }
         return false;
     }
 
-    public Item getFirstHistoryItem(String field) {
+    public Item getFirstHistoryItem(final String field) {
         // Return the first history item about the field.
         // If there is no history item about the field, return null.
 
         // Sort history items in time order.
-        for (History history : histories) {
-            for (Item item : history.items) {
+        for (final History history : histories) {
+            for (final Item item : history.items) {
                 if (item.field.equals(field)) return item;
             }
         }
@@ -43,11 +43,11 @@ public class ChangeLog {
         // Because it's usually already sorted, use insertion sort algorithm here.
 
         for (int i=1; i<histories.length; i++) {
-            History history = histories[i];
-            Date date = parseDate(history.created);
+            final History history = histories[i];
+            final Date date = parseDate(history.created);
             for (int k=i-1; k>=0; k--) {
-                History comparedHistory = histories[k];
-                Date comparedDate = parseDate(comparedHistory.created);
+                final History comparedHistory = histories[k];
+                final Date comparedDate = parseDate(comparedHistory.created);
                 if (date.after(comparedDate)) {
                     histories[k+1] = history;
                     break;
@@ -59,10 +59,10 @@ public class ChangeLog {
         }
     }
 
-    private Date parseDate(String dateString) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String strippedCreatedString = dateString.replace('T', ' ');
-        Date date = dateFormat.parse(strippedCreatedString);
+    private Date parseDate(final String dateString) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        final String strippedCreatedString = dateString.replace('T', ' ');
+        final Date date = dateFormat.parse(strippedCreatedString);
         return date;
     }
 }

@@ -97,7 +97,7 @@ public class ActionsBuilderTest {
         actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
-        for (Action action : actionsBuilder.actions) {
+        for (final Action action : actionsBuilder.actions) {
             if (action.action == "update") containsUpdate = true;
         }
         Check.checkTrue(containsUpdate);
@@ -114,7 +114,7 @@ public class ActionsBuilderTest {
         actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
-        for (Action action : actionsBuilder.actions) {
+        for (final Action action : actionsBuilder.actions) {
             if (action.action == "update") containsUpdate = true;
         }
         Check.checkFalse(containsUpdate);
@@ -131,7 +131,7 @@ public class ActionsBuilderTest {
         actionsBuilder.buildActions();
 
         boolean containsComment = false;
-        for (Action action : actionsBuilder.actions) {
+        for (final Action action : actionsBuilder.actions) {
             if (action.action == "update") containsComment = true;
         }
         Check.checkTrue(containsComment);
@@ -148,21 +148,21 @@ public class ActionsBuilderTest {
         actionsBuilder.buildActions();
 
         boolean containsComment = false;
-        for (Action action : actionsBuilder.actions) {
+        for (final Action action : actionsBuilder.actions) {
             if (action.action == "update") containsComment = true;
         }
         Check.checkFalse(containsComment);
     }
 
     private void setIssueNew() throws ParseException {
-        Calendar yesterday = Calendar.getInstance();
+        final Calendar yesterday = Calendar.getInstance();
         yesterday.add(Calendar.DAY_OF_YEAR, -1);
         issue.fields.created = parseDateToString(yesterday.getTime());
     }
 
 
     private void setIssueOld() throws ParseException {
-        Calendar dayBeforeYesterday = Calendar.getInstance();
+        final Calendar dayBeforeYesterday = Calendar.getInstance();
         dayBeforeYesterday.add(Calendar.DAY_OF_YEAR, -2);
         issue.fields.created = parseDateToString(dayBeforeYesterday.getTime());
     }
@@ -226,7 +226,7 @@ public class ActionsBuilderTest {
 
     }
 
-    private static String parseDateToString(Date date) {
+    private static String parseDateToString(final Date date) {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         final String dateString = dateFormat.format(date).replace(' ', 'T');
         return dateString;

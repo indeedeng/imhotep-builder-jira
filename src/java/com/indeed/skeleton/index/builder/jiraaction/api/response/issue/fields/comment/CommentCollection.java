@@ -21,11 +21,11 @@ public class CommentCollection {
         // Because it's usually already sorted, use insertion sort algorithm here.
 
         for (int i=1; i<comments.length; i++) {
-            Comment comment = comments[i];
-            Date date = parseDate(comment.created);
+            final Comment comment = comments[i];
+            final Date date = parseDate(comment.created);
             for (int k=i-1; k>=0; k--) {
-                Comment comparedComment = comments[k];
-                Date comparedDate = parseDate(comparedComment.created);
+                final Comment comparedComment = comments[k];
+                final Date comparedDate = parseDate(comparedComment.created);
                 if (date.after(comparedDate)) {
                     comments[k+1] = comment;
                     break;
@@ -37,10 +37,10 @@ public class CommentCollection {
         }
     }
 
-    private Date parseDate(String dateString) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String strippedCreatedString = dateString.replace('T', ' ');
-        Date date = dateFormat.parse(strippedCreatedString);
+    private Date parseDate(final String dateString) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        final String strippedCreatedString = dateString.replace('T', ' ');
+        final Date date = dateFormat.parse(strippedCreatedString);
         return date;
     }
 }
