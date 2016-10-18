@@ -3,7 +3,6 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
-import com.indeed.userservice.UserServiceProtos;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
