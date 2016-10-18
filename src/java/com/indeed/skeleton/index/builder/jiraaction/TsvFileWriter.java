@@ -1,14 +1,12 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.methods.HttpPost;
-
-import javax.annotation.Nonnull;
-
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.commons.codec.binary.Base64;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -21,14 +19,22 @@ import java.util.List;
 
 
 /**
- * Created by soono on 9/8/16.
+ * @author soono
  */
 public class TsvFileWriter {
+    private final JiraActionIndexBuilderConfig config;
+
     public static final String [] FILE_HEADER = {
         "action", "actor", "assignee", "fieldschanged*", "issueage", "issuekey", "issuetype", "project", "prevstatus", "reporter",
             "resolution", "status", "summary", "timeinstate", "time", "verifier"
     };
-    public static void createTSVFile(final List<Action> actions) throws IOException, ParseException {
+
+
+    public TsvFileWriter(final JiraActionIndexBuilderConfig config) {
+        this.config = config;
+    }
+
+    public void createTSVFile(final List<Action> actions) throws IOException, ParseException {
         final String filename = "jiraactions_" + getYesterday() + ".tsv";
         final File file = new File(filename);
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -98,12 +104,10 @@ public class TsvFileWriter {
         return String.valueOf(unixTime);
     }
 
-    private static void uploadTsvFile(@Nonnull final File tsvFile) throws IOException {
-        final ConfigReader configReader = new PropertiesConfigReader();
+    private void uploadTsvFile(@Nonnull final File tsvFile) throws IOException {
+        final String iuploadUrl = config.getIuploadURL();
 
-        final String iuploadUrl = configReader.iuploadURL();
-
-        final String userPass = configReader.username() + ":" + configReader.password();
+        final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
         final HttpPost httpPost = new HttpPost(iuploadUrl);
