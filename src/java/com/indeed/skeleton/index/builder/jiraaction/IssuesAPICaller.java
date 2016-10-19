@@ -8,7 +8,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -53,10 +55,11 @@ public class IssuesAPICaller {
     // For Pagination
     //
 
-    public void setNumTotal() throws IOException {
+    public int setNumTotal() throws IOException {
         final JsonNode apiRes = getJsonNode(getBasicInfoURL());
         final JsonNode totalNode = apiRes.path("total");
         this.numTotal = totalNode.intValue();
+        return numTotal;
     }
 
     public boolean currentPageExist() {
@@ -91,7 +94,7 @@ public class IssuesAPICaller {
         return basicAuth;
     }
 
-    private String getIssuesURL() {
+    private String getIssuesURL() throws UnsupportedEncodingException {
         final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?");
         url.append(getJQLParam());
         url.append("&");
@@ -105,20 +108,22 @@ public class IssuesAPICaller {
         return url.toString();
     }
 
-    private String getBasicInfoURL() {
+    private String getBasicInfoURL() throws UnsupportedEncodingException {
         final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?");
         url.append(getJQLParam());
         url.append("&maxResults=0");
         return url.toString();
     }
 
-    private String getJQLParam() {
+    private String getJQLParam() throws UnsupportedEncodingException {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, -1);
         final String yesterday = dateFormat.format(cal.getTime());
 
-        return String.format("jql=updatedDate>=%s", yesterday);
+        return "jql=" + URLEncoder.encode(
+                String.format("updatedDate>=%s AND project=%S", yesterday, config.getJiraProject()),
+                "UTF-8");
     }
 
     private String getFieldsParam() {
