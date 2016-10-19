@@ -18,11 +18,11 @@ public class IssueAPIParser {
 
     @Nullable
     public static Issue getObject(final JsonNode issueNode) {
-        Issue issue = new Issue();
+        Issue issue;
         try {
             issue = mapper.treeToValue(issueNode, Issue.class);
             if(issue.fields.created == null) {
-                Loggers.error(log, "Invalid issue %s with no date.", issue.key);
+                Loggers.warn(log, "Invalid issue %s with no date.", issue.key);
                 return null;
             }
         } catch (final IOException e) {

@@ -5,6 +5,7 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,9 +26,14 @@ public class JiraActionIndexBuilder {
             final long end_total;
 
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config);
-            issuesAPICaller.setNumTotal();
+            {
+                final long start = System.currentTimeMillis();
+                final int total = issuesAPICaller.setNumTotal();
+                final long end = System.currentTimeMillis();
+                Loggers.info(log, "%d ms, found %d total issues.", end - start, total);
+            }
 
-            List<Action> actions = null;
+            final List<Action> actions = new ArrayList<>();
 
             long start, end;
 
@@ -50,14 +56,10 @@ public class JiraActionIndexBuilder {
                     final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
 
                     // Set built actions to actions list.
-                    if (actions == null) {
-                        actions = actionsBuilder.buildActions();
-                    } else {
-                        actions.addAll(actionsBuilder.buildActions());
-                    }
+                    actions.addAll(actionsBuilder.buildActions());
                 }
                 end = System.currentTimeMillis();
-                Loggers.info(log, "%d to get actions from a set of issues.", end - start);
+                Loggers.info(log, "%d ms to get actions from a set of issues.", end - start);
 
                 Thread.sleep(10000);
             }

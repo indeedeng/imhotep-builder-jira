@@ -31,13 +31,21 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final String jiraPassword = config.getString("jira.password.indexer");
 
         final String jiraBaseUrl = config.getString("jira.baseurl");
-        final String jiraFields = config.getString("jira.fields");
+        final String[] jiraFieldArray = config.getStringArray("jira.fields");
         final String jiraExpand = config.getString("jira.expand");
         final String jiraProject = config.getString("jira.project");
         final String iuploadUrl = config.getString("iupload.url");
 
+        final StringBuilder jiraFields = new StringBuilder();
+        for(final String field : jiraFieldArray) {
+            if(jiraFields.length() > 0) {
+                jiraFields.append(",");
+            }
+            jiraFields.append(field);
+        }
+
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
-                jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, iuploadUrl);
+                jiraPassword, jiraBaseUrl, jiraFields.toString(), jiraExpand, jiraProject, iuploadUrl);
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 
