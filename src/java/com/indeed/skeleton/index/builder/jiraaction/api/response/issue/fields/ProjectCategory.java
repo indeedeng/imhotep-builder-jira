@@ -3,12 +3,11 @@ package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * @author soono
+ * @author kbinswanger
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 
-public class Project {
-    public ProjectCategory projectCategory;
+public class ProjectCategory {
     public String name;
 }
