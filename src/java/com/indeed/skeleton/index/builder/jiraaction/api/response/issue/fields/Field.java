@@ -41,6 +41,14 @@ public class Field {
             case "status": return status == null? "" : status.name;
             case "summary": return summary;
             case "verifier": return verifier == null? "" : verifier.displayName;
+            case "category": {
+                final ProjectCategory category = project == null
+                        ? null
+                        : project.projectCategory;
+                return (category == null || category.name == null)
+                        ? ""
+                        : category.name;
+            }
         }
         throw new Exception("Wrong Input name");
     }

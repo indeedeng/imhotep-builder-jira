@@ -28,6 +28,7 @@ public class Action {
     public long timeinstate;
     public String timestamp;
     public String verifier;
+    public String category;
 
     // For Create Action
     public Action(final Issue issue) throws Exception {
@@ -47,6 +48,7 @@ public class Action {
         timeinstate = 0;
         timestamp = issue.fields.created;
         verifier = issue.initialValue("verifier");
+        category = issue.initialValue("category");
     }
 
     // For Update Action
@@ -67,6 +69,7 @@ public class Action {
         timeinstate = getTimeDiff(prevAction.timestamp, history.created);
         timestamp = history.created;
         verifier = history.itemExist("verifier") ? history.getItemLastValue("verifier") : prevAction.verifier;
+        category = history.itemExist("category") ? history.getItemLastValue("category") : prevAction.category;
     }
 
     // For Comment Action
@@ -87,6 +90,7 @@ public class Action {
         timeinstate = timeinstateForComment(prevAction, comment);
         timestamp = comment.created;
         verifier = prevAction.verifier;
+        category = prevAction.category;
     }
 
     private long timeinstateForComment(final Action prevAction, final Comment comment) throws ParseException {
