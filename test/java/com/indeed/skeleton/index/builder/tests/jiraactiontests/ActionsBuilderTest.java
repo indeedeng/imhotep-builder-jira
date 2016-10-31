@@ -2,6 +2,7 @@ package com.indeed.skeleton.index.builder.tests.jiraactiontests;
 
 import com.indeed.skeleton.index.builder.jiraaction.Action;
 import com.indeed.skeleton.index.builder.jiraaction.ActionsBuilder;
+import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.ChangeLog;
@@ -11,33 +12,35 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.co
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.CommentCollection;
 import com.indeed.test.junit.Check;
 import org.easymock.EasyMock;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
- * Created by soono on 9/6/16.
+ * @author soono
+ * @author kbinswanger
  */
 public class ActionsBuilderTest {
-    Issue issue;
-    private static final String yesterday;
-    private static final String dayBeforeYesterday;
+    private Issue issue;
+    private DateTime withinRange;
+    private DateTime withinRange2;
+    private DateTime beforeRange;
 
-    static {
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        yesterday = parseDateToString(cal.getTime());
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        dayBeforeYesterday = parseDateToString(cal.getTime());
-    }
+    private DateTime startDate;
+    private DateTime endDate;
 
     @Before
-    public void initialize() {
+    public void initialize() throws ParseException {
+        startDate = JiraActionUtil.parseDateTime("2016-08-01 00:00:00");
+        endDate = JiraActionUtil.parseDateTime("2016-08-02 00:00:00");
+
+        withinRange = JiraActionUtil.parseDateTime("2016-08-01 01:00:00");
+        withinRange2 = JiraActionUtil.parseDateTime("2016-08-01 02:00:00");
+        beforeRange = JiraActionUtil.parseDateTime("2016-07-30 11:59:59");
+
         issue = EasyMock.createNiceMock(Issue.class);
 
         final Field field = EasyMock.createNiceMock(Field.class);
@@ -63,7 +66,7 @@ public class ActionsBuilderTest {
         setIssueNew();
         setExpectationsForCreateAction();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
         actionsBuilder.buildActions();
 
         final Action createAction = new Action(issue);
@@ -79,11 +82,10 @@ public class ActionsBuilderTest {
 
         setHistoryNew();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
         actionsBuilder.buildActions();
 
-        final Action createAction = new Action(issue);
-        Check.checkFalse(actionsBuilder.actions.get(0).equals(createAction));
+        Check.checkFalse(actionsBuilder.actions.get(0).action.equals("create"));
     }
 
     @Test
@@ -93,12 +95,14 @@ public class ActionsBuilderTest {
 
         setHistoryNew();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
         actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
         for (final Action action : actionsBuilder.actions) {
-            if (action.action == "update") containsUpdate = true;
+            if ("update".equals(action.action)) {
+                containsUpdate = true;
+            }
         }
         Check.checkTrue(containsUpdate);
     }
@@ -110,12 +114,14 @@ public class ActionsBuilderTest {
 
         setHistoryOld();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
         actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
         for (final Action action : actionsBuilder.actions) {
-            if (action.action == "update") containsUpdate = true;
+            if ("update".equals(action.action)) {
+                containsUpdate = true;
+            }
         }
         Check.checkFalse(containsUpdate);
     }
@@ -127,12 +133,14 @@ public class ActionsBuilderTest {
 
         setCommentNew();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
         actionsBuilder.buildActions();
 
         boolean containsComment = false;
         for (final Action action : actionsBuilder.actions) {
-            if (action.action == "update") containsComment = true;
+            if ("update".equals(action.action)) {
+                containsComment = true;
+            }
         }
         Check.checkTrue(containsComment);
     }
@@ -144,27 +152,25 @@ public class ActionsBuilderTest {
 
         setCommentOld();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
         actionsBuilder.buildActions();
 
         boolean containsComment = false;
         for (final Action action : actionsBuilder.actions) {
-            if (action.action == "update") containsComment = true;
+            if ("update".equals(action.action)) {
+                containsComment = true;
+            }
         }
         Check.checkFalse(containsComment);
     }
 
     private void setIssueNew() throws ParseException {
-        final Calendar yesterday = Calendar.getInstance();
-        yesterday.add(Calendar.DAY_OF_YEAR, -1);
-        issue.fields.created = parseDateToString(yesterday.getTime());
+        issue.fields.created = parseDateToString(withinRange);
     }
 
 
     private void setIssueOld() throws ParseException {
-        final Calendar dayBeforeYesterday = Calendar.getInstance();
-        dayBeforeYesterday.add(Calendar.DAY_OF_YEAR, -2);
-        issue.fields.created = parseDateToString(dayBeforeYesterday.getTime());
+        issue.fields.created = parseDateToString(beforeRange);
     }
 
     private void setExpectationsForCreateAction() {
@@ -175,9 +181,7 @@ public class ActionsBuilderTest {
 
     private void setHistoryNew() {
         final History history = EasyMock.createNiceMock(History.class);
-        final Calendar yesterday = Calendar.getInstance();
-        yesterday.add(Calendar.DAY_OF_YEAR, -1);
-        history.created = parseDateToString(yesterday.getTime());
+        history.created = parseDateToString(withinRange2);
 
         final User historyAuthor = EasyMock.createNiceMock(User.class);
         history.author = historyAuthor;
@@ -189,9 +193,7 @@ public class ActionsBuilderTest {
 
     private void setHistoryOld() {
         final History history = EasyMock.createNiceMock(History.class);
-        final Calendar dayBeforeYesterday = Calendar.getInstance();
-        dayBeforeYesterday.add(Calendar.DAY_OF_YEAR, -2);
-        history.created = parseDateToString(dayBeforeYesterday.getTime());
+        history.created = parseDateToString(beforeRange);
 
         final User historyAuthor = EasyMock.createNiceMock(User.class);
         history.author = historyAuthor;
@@ -203,7 +205,7 @@ public class ActionsBuilderTest {
 
     private void setCommentNew() {
         final Comment comment = EasyMock.createNiceMock(Comment.class);
-        comment.created = yesterday;
+        comment.created = parseDateToString(withinRange);
 
         final User commentAuthor = EasyMock.createNiceMock(User.class);
         comment.author = commentAuthor;
@@ -215,7 +217,7 @@ public class ActionsBuilderTest {
 
     private void setCommentOld() {
         final Comment comment = EasyMock.createNiceMock(Comment.class);
-        comment.created = dayBeforeYesterday;
+        comment.created = parseDateToString(beforeRange);
 
         final User commentAuthor = EasyMock.createNiceMock(User.class);
         comment.author = commentAuthor;
@@ -226,9 +228,7 @@ public class ActionsBuilderTest {
 
     }
 
-    private static String parseDateToString(final Date date) {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        final String dateString = dateFormat.format(date).replace(' ', 'T');
-        return dateString;
+    private static String parseDateToString(final DateTime date) {
+        return date.toString(JiraActionUtil.DATE_TIME_FORMATTER);
     }
 }

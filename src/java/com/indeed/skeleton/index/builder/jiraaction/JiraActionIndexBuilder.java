@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class JiraActionIndexBuilder {
         this.config = config;
     }
 
-    public void run() {
+    public void run() throws Exception {
         try {
             final long start_total = System.currentTimeMillis();
             final long end_total;
@@ -36,6 +37,10 @@ public class JiraActionIndexBuilder {
             final List<Action> actions = new ArrayList<>();
 
             long start, end;
+
+            final DateTime startDate = JiraActionUtil.parseDateTime(config.getStartDate());
+
+            final DateTime endDate = JiraActionUtil.parseDateTime(config.getEndDate());
 
             while (issuesAPICaller.currentPageExist()) {
                 // Get issues from API.
@@ -53,7 +58,7 @@ public class JiraActionIndexBuilder {
                     }
 
                     // Build Action objects from parsed API response Object.
-                    final ActionsBuilder actionsBuilder = new ActionsBuilder(issue);
+                    final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
 
                     // Set built actions to actions list.
                     actions.addAll(actionsBuilder.buildActions());
@@ -77,6 +82,7 @@ public class JiraActionIndexBuilder {
             Loggers.info(log, "%d ms for the whole process.", end_total - start_total);
         } catch (final Exception e) {
             log.error("Threw an exception trying to run the index builder", e);
+            throw e;
         }
     }
 }
