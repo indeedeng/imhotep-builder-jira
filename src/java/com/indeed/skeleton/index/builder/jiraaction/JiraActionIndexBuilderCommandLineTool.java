@@ -32,21 +32,27 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
 
         final String jiraBaseUrl = config.getString("jira.baseurl");
         final String[] jiraFieldArray = config.getStringArray("jira.fields");
+        final String jiraFields = arrayToCommaDelimetedString(jiraFieldArray);
         final String jiraExpand = config.getString("jira.expand");
-        final String jiraProject = config.getString("jira.project");
+        final String[] jiraProjectArray = config.getStringArray("jira.project");
+        final String jiraProject = arrayToCommaDelimetedString(jiraProjectArray);
         final String iuploadUrl = config.getString("iupload.url");
 
-        final StringBuilder jiraFields = new StringBuilder();
-        for(final String field : jiraFieldArray) {
-            if(jiraFields.length() > 0) {
-                jiraFields.append(",");
-            }
-            jiraFields.append(field);
-        }
 
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
-                jiraPassword, jiraBaseUrl, jiraFields.toString(), jiraExpand, jiraProject, iuploadUrl);
+                jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, iuploadUrl);
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
+    }
+
+    private final String arrayToCommaDelimetedString(final String[] array) {
+        final StringBuilder builder = new StringBuilder();
+        for (final String token : array) {
+            if (builder.length() > 0) {
+                builder.append(",");
+            }
+            builder.append(token);
+        }
+            return builder.toString();
     }
 
     @Override
