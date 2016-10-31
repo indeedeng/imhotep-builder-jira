@@ -3,6 +3,12 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.indeed.common.cli.CommandLineTool;
 import com.indeed.common.cli.CommandLineUtil;
 import com.indeed.common.dbutil.CronToolStatusUpdater;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
@@ -39,8 +45,37 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final String iuploadUrl = config.getString("iupload.url");
 
 
+        final Options options = new Options().addOption((OptionBuilder
+                    .withLongOpt("start")
+                    .isRequired()
+                    .hasArg()
+                    .withArgName("YYYY-MM-DD")
+                    .withDescription("ISO-8601 Formatted date string specifying the start date (inclusive"))
+                    .create("start"))
+        .addOption(OptionBuilder
+                    .withLongOpt("end")
+                    .isRequired()
+                    .hasArg()
+                    .withArgName("YYYY-MM-DD")
+                    .withDescription("ISO-8601 Formatted date string specifying end date (exclusive")
+                    .create("end"));
+
+        final String startDate;
+        final String endDate;
+        final CommandLineParser parser = new GnuParser();
+        final CommandLine commandLineArgs;
+        try {
+            commandLineArgs = parser.parse(options, cmdLineUtil.getArgs());
+            startDate = commandLineArgs.getOptionValue("start");
+            endDate = commandLineArgs.getOptionValue("end");
+        } catch (final ParseException e) {
+            log.error("Threw an exception trying to run the index builder", e);
+            System.exit(-1);
+            return; // For some reason this makes some errors go away, even though it never gets hit
+        }
+
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
-                jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, iuploadUrl);
+                jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, iuploadUrl, startDate, endDate);
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 
@@ -57,6 +92,10 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
 
     @Override
     public void run(final CommandLineUtil cmdLineUtil) {
-        indexBuilder.run();
+        try {
+            indexBuilder.run();
+        } catch (final Exception e) {
+            System.exit(-1);
+        }
     }
 }

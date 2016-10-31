@@ -3,30 +3,34 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
+import org.joda.time.DateTime;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
- * Created by soono on 8/30/16.
+ * @author soono
  */
 public class ActionsBuilder {
     private final Issue issue;
+    private final DateTime startDate;
+    private final DateTime endDate;
     private boolean isNewIssue;
     public final List<Action> actions = new ArrayList<Action>();
 
-    public ActionsBuilder(final Issue issue) throws ParseException {
+    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate) throws ParseException {
         this.issue = issue;
-        setIsNewIssue();
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public List<Action> buildActions() throws Exception {
+        setIsNewIssue();
 
-        if (isNewIssue) setCreateAction();
+        if (isNewIssue) {
+            setCreateAction();
+        }
 
         setUpdateActions();
 
@@ -36,7 +40,7 @@ public class ActionsBuilder {
     }
 
     private void setIsNewIssue() throws ParseException {
-        this.isNewIssue = isOnYesterday(issue.fields.created);
+        this.isNewIssue = isCreatedDuringRange(issue.fields.created);
     }
 
     //
@@ -57,7 +61,9 @@ public class ActionsBuilder {
 
         Action prevAction = getLatestAction();
         for (final History history : issue.changelog.histories) {
-            if (!isOnYesterday(history.created)) continue;
+            if (!isCreatedDuringRange(history.created)) {
+                continue;
+            }
             final Action updateAction = new Action(prevAction, history);
             actions.add(updateAction);
             prevAction = updateAction;
@@ -65,12 +71,14 @@ public class ActionsBuilder {
     }
 
     private Action getLatestAction() throws Exception {
-        if (isNewIssue) return actions.get(0); // returns create action.
+        if (isNewIssue) {
+            return actions.get(0); // returns create action.
+        }
         else {
             // Get the last action by day before yesterday.
             Action action = new Action(issue);
             for (final History history : issue.changelog.histories) {
-                if (isOnYesterday(history.created)) break;
+                if (isCreatedDuringRange(history.created)) break;
                 action = new Action(action, history);
             }
             return action;
@@ -86,7 +94,7 @@ public class ActionsBuilder {
 
         int currentActionIndex = 0;
         for (final Comment comment : issue.fields.comment.comments) {
-            if (!isOnYesterday(comment.created)) continue;
+            if (!isCreatedDuringRange(comment.created)) continue;
             if (actions.isEmpty() || !commentIsAfter(comment, actions.get(0))) {
                 final Action commentAction = new Action(getLatestAction(), comment);
                 actions.add(0, commentAction);
@@ -109,22 +117,17 @@ public class ActionsBuilder {
     // For interpreting if the date is new
     //
 
-    private boolean isOnYesterday(final String dateString) throws ParseException {
-        final Calendar date = Calendar.getInstance();
-        date.setTime(parseDate(dateString));
+    private boolean isCreatedDuringRange(final String dateString) throws ParseException {
+        final DateTime createdDate = JiraActionUtil.parseDateTime(dateString);
 
-        final Calendar yesterday = Calendar.getInstance();
-        yesterday.add(Calendar.DAY_OF_YEAR, -1);
-
-        return date.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR)
-                && date.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR);
+        return startDate.compareTo(createdDate) <= 0 || endDate.compareTo(createdDate) == 1;
     }
 
     private boolean commentIsAfter(final Comment comment, final Action action) throws ParseException {
         // return true if comment is made after the action
-        final Date commentDate = parseDate(comment.created);
-        final Date actionDate = parseDate(action.timestamp);
-        return commentDate.after(actionDate);
+        final DateTime commentDate = JiraActionUtil.parseDateTime(comment.created);
+        final DateTime actionDate = JiraActionUtil.parseDateTime(action.timestamp);
+        return commentDate.isAfter(actionDate);
     }
 
     private boolean commentIsRightAfter(final Comment comment, final int actionIndex) throws ParseException {
@@ -133,12 +136,5 @@ public class ActionsBuilder {
         final Action nextAction = actions.size() > nextIndex ? actions.get(nextIndex) : null;
         return commentIsAfter(comment, action) &&
                 ( nextAction == null || !commentIsAfter(comment, nextAction) );
-    }
-
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-    private Date parseDate(final String dateString) throws ParseException {
-        final String strippedCreatedString = dateString.replace('T', ' ');
-        final Date date = DATE_FORMAT.parse(strippedCreatedString);
-        return date;
     }
 }

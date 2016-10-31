@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.common.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
+
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,9 +13,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 /**
  * @author soono
@@ -96,34 +94,31 @@ public class IssuesAPICaller {
     }
 
     private String getIssuesURL() throws UnsupportedEncodingException {
-        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?");
-        url.append(getJQLParam());
-        url.append("&");
-        url.append(getFieldsParam());
-        url.append("&");
-        url.append(getExpandParam());
-        url.append("&");
-        url.append(getStartAtParam());
-        url.append("&");
-        url.append(getMaxResults());
+        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?")
+                .append(getJQLParam())
+                .append("&")
+                .append(getFieldsParam())
+                .append("&")
+                .append(getExpandParam())
+                .append("&")
+                .append(getStartAtParam())
+                .append("&")
+                .append(getMaxResults());
         return url.toString();
     }
 
     private String getBasicInfoURL() throws UnsupportedEncodingException {
-        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?");
-        url.append(getJQLParam());
-        url.append("&maxResults=0");
+        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?")
+                .append(getJQLParam())
+                .append("&maxResults=0");
         return url.toString();
     }
 
     private String getJQLParam() throws UnsupportedEncodingException {
-        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -1);
-        final String yesterday = dateFormat.format(cal.getTime());
-
         final StringBuilder query = new StringBuilder();
-        query.append("updatedDate>=").append(yesterday);
+        query.append("updatedDate>=").append(config.getStartDate())
+                .append(" AND updatedDate<").append(config.getEndDate());
+
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
         }
