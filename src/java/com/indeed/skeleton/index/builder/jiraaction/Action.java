@@ -35,7 +35,7 @@ public class Action {
         action = "create";
         actor = issue.fields.creator.displayName;
         assignee = issue.initialValue("assignee");
-        fieldschanged = "";
+        fieldschanged = "created";
         issueage = 0;
         issuekey = issue.key;
         issuetype = issue.initialValue("issuetype");
@@ -77,7 +77,7 @@ public class Action {
         action = "comment";
         actor =  comment.author.displayName;
         assignee = prevAction.assignee;
-        fieldschanged = "";
+        fieldschanged = "comment";
         issueage = prevAction.issueage + getTimeDiff(prevAction.timestamp, comment.created);
         issuekey = prevAction.issuekey;
         issuetype = prevAction.issuetype;

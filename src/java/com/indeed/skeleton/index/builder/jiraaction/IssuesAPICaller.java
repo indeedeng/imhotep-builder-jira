@@ -2,6 +2,7 @@ package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.indeed.common.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -121,9 +122,13 @@ public class IssuesAPICaller {
         cal.add(Calendar.DATE, -1);
         final String yesterday = dateFormat.format(cal.getTime());
 
-        return "jql=" + URLEncoder.encode(
-                String.format("updatedDate>=%s AND project=%S", yesterday, config.getJiraProject()),
-                "UTF-8");
+        final StringBuilder query = new StringBuilder();
+        query.append("updatedDate>=").append(yesterday);
+        if(!StringUtils.isEmpty(config.getJiraProject())) {
+            query.append(" AND project IN (").append(config.getJiraProject()).append(")");
+        }
+
+        return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
     }
 
     private String getFieldsParam() {
