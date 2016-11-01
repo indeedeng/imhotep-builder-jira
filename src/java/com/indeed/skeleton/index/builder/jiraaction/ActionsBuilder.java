@@ -5,7 +5,6 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
 import org.joda.time.DateTime;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class ActionsBuilder {
     private boolean isNewIssue;
     public final List<Action> actions = new ArrayList<Action>();
 
-    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate) throws ParseException {
+    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate) {
         this.issue = issue;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -39,7 +38,7 @@ public class ActionsBuilder {
         return actions;
     }
 
-    private void setIsNewIssue() throws ParseException {
+    private void setIsNewIssue() {
         this.isNewIssue = isCreatedDuringRange(issue.fields.created);
     }
 
@@ -94,7 +93,9 @@ public class ActionsBuilder {
 
         int currentActionIndex = 0;
         for (final Comment comment : issue.fields.comment.comments) {
-            if (!isCreatedDuringRange(comment.created)) continue;
+            if (!isCreatedDuringRange(comment.created)) {
+                continue;
+            }
             if (actions.isEmpty() || !commentIsAfter(comment, actions.get(0))) {
                 final Action commentAction = new Action(getLatestAction(), comment);
                 actions.add(0, commentAction);
@@ -117,20 +118,20 @@ public class ActionsBuilder {
     // For interpreting if the date is new
     //
 
-    private boolean isCreatedDuringRange(final String dateString) throws ParseException {
+    private boolean isCreatedDuringRange(final String dateString) {
         final DateTime createdDate = JiraActionUtil.parseDateTime(dateString);
 
-        return startDate.compareTo(createdDate) <= 0 || endDate.compareTo(createdDate) == 1;
+        return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) == 1;
     }
 
-    private boolean commentIsAfter(final Comment comment, final Action action) throws ParseException {
+    private boolean commentIsAfter(final Comment comment, final Action action) {
         // return true if comment is made after the action
         final DateTime commentDate = JiraActionUtil.parseDateTime(comment.created);
         final DateTime actionDate = JiraActionUtil.parseDateTime(action.timestamp);
         return commentDate.isAfter(actionDate);
     }
 
-    private boolean commentIsRightAfter(final Comment comment, final int actionIndex) throws ParseException {
+    private boolean commentIsRightAfter(final Comment comment, final int actionIndex) {
         final Action action = actions.get(actionIndex);
         final int nextIndex = actionIndex + 1;
         final Action nextAction = actions.size() > nextIndex ? actions.get(nextIndex) : null;

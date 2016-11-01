@@ -25,7 +25,7 @@ public class TsvFileWriter {
     private final JiraActionIndexBuilderConfig config;
 
     public static final String [] FILE_HEADER = {
-        "action", "actor", "assignee", "category", "fieldschanged*", "issueage", "issuekey", "issuetype", "project", "prevstatus", "reporter",
+        "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*", "issueage", "issuekey", "issuetype", "project", "prevstatus", "reporter",
             "resolution", "status", "summary", "timeinstate", "time", "verifier"
     };
 
@@ -58,6 +58,8 @@ public class TsvFileWriter {
             bw.write(action.category);
             bw.write("\t");
             bw.write(action.fieldschanged);
+            bw.write("\t");
+            bw.write(action.fixversions);
             bw.write("\t");
             final String issueage = String.valueOf(action.issueage);
             bw.write(issueage);

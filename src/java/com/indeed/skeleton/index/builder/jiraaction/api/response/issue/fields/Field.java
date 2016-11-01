@@ -2,6 +2,7 @@ package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Joiner;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.CommentCollection;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 
@@ -23,7 +24,9 @@ public class Field {
     public Status status;
     public String summary;
     public User verifier;
+    public FixVersion[] fixVersions;
 
+    @SuppressWarnings("unused")
     @JsonProperty("customfield_10003")
     public void setVerifier(final User verifier) {
         this.verifier = verifier;
@@ -49,6 +52,7 @@ public class Field {
                         ? ""
                         : category.name;
             }
+            case "fixversions": return fixVersions == null ? "" : Joiner.on(" ").join(fixVersions);
         }
         throw new Exception("Wrong Input name");
     }
