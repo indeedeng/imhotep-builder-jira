@@ -29,6 +29,7 @@ public class Action {
     public String timestamp;
     public String verifier;
     public String category;
+    public String fixversions;
 
     // For Create Action
     public Action(final Issue issue) throws Exception {
@@ -49,6 +50,7 @@ public class Action {
         timestamp = issue.fields.created;
         verifier = issue.initialValue("verifier");
         category = issue.initialValue("category");
+        fixversions = issue.initialValue("fixversions");
     }
 
     // For Update Action
@@ -70,6 +72,7 @@ public class Action {
         timestamp = history.created;
         verifier = history.itemExist("verifier") ? history.getItemLastValue("verifier") : prevAction.verifier;
         category = history.itemExist("category") ? history.getItemLastValue("category") : prevAction.category;
+        fixversions = history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.fixversions;
     }
 
     // For Comment Action
@@ -91,6 +94,7 @@ public class Action {
         timestamp = comment.created;
         verifier = prevAction.verifier;
         category = prevAction.category;
+        fixversions = prevAction.fixversions;
     }
 
     private long timeinstateForComment(final Action prevAction, final Comment comment) throws ParseException {
