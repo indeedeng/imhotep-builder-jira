@@ -13,4 +13,5 @@ public class Comment {
     public User author;
     public String body;
     public String created;
+    public String updated;
 }
