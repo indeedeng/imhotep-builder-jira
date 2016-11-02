@@ -16,7 +16,7 @@ public class ActionsBuilder {
     private final DateTime startDate;
     private final DateTime endDate;
     private boolean isNewIssue;
-    public final List<Action> actions = new ArrayList<Action>();
+    public final List<Action> actions = new ArrayList<>();
 
     public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate) {
         this.issue = issue;
@@ -77,7 +77,9 @@ public class ActionsBuilder {
             // Get the last action by day before yesterday.
             Action action = new Action(issue);
             for (final History history : issue.changelog.histories) {
-                if (isCreatedDuringRange(history.created)) break;
+                if (isCreatedDuringRange(history.created)) {
+                    break;
+                }
                 action = new Action(action, history);
             }
             return action;
