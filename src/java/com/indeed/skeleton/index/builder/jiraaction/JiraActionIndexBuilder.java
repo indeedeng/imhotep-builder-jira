@@ -57,11 +57,16 @@ public class JiraActionIndexBuilder {
                         continue;
                     }
 
-                    // Build Action objects from parsed API response Object.
-                    final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+                    try {
+                        // Build Action objects from parsed API response Object.
+                        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
 
-                    // Set built actions to actions list.
-                    actions.addAll(actionsBuilder.buildActions());
+                        // Set built actions to actions list.
+                        actions.addAll(actionsBuilder.buildActions());
+                    } catch(final Exception e) {
+                        Loggers.error(log, "Error parsing comments for issue %s.", e, issue.key);
+                        continue;
+                    }
                 }
                 end = System.currentTimeMillis();
                 Loggers.info(log, "%d ms to get actions from a set of issues.", end - start);
