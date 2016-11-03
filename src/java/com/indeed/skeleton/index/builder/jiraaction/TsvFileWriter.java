@@ -5,6 +5,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedWriter;
@@ -34,8 +35,14 @@ public class TsvFileWriter {
         this.config = config;
     }
 
+    private String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd.HH";
+    private String reformatDate(final String date) {
+        final DateTime dateTime = JiraActionUtil.parseDateTime(date);
+        return dateTime.toString(FILENAME_DATE_TIME_PATTERN);
+    }
+
     public void createTSVFile(final List<Action> actions) throws IOException, ParseException {
-        final String filename = "jiraactions_" + getYesterday() + ".tsv";
+        final String filename = String.format("jiraactions_%s-%s.tsv", reformatDate(config.getStartDate()), reformatDate(config.getEndDate()));
         final File file = new File(filename);
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 

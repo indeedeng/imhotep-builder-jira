@@ -13,6 +13,6 @@ public class FixVersion {
 
     @Override
     public String toString() {
-        return name;
+        return name.replace(' ', '\u00A0');
     }
 }
