@@ -14,9 +14,12 @@ public class JiraActionIndexBuilderConfig {
     private final String startDate;
     private final String endDate;
 
+    private int jiraBatchSize;
+
     public JiraActionIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
                                         final String jiraFields, final String jiraExpand, final String jiraProject,
-                                        final String iuploadUrl, final String startDate, final String endDate) {
+                                        final String iuploadUrl, final String startDate, final String endDate,
+                                        final int jiraBatchSize) {
         this.jiraUsernameIndexer = jiraUsername;
         this.jiraPasswordIndexer = jiraPassword;
         this.jiraBaseURL = jiraUrl;
@@ -26,6 +29,7 @@ public class JiraActionIndexBuilderConfig {
         this.iuploadURL = iuploadUrl;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.jiraBatchSize = jiraBatchSize;
     }
 
     public String getJiraUsernameIndexer() {
@@ -62,5 +66,9 @@ public class JiraActionIndexBuilderConfig {
 
     public String getEndDate() {
         return endDate;
+    }
+
+    public int getJiraBatchSize() {
+        return jiraBatchSize;
     }
 }

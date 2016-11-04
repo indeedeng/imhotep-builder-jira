@@ -58,16 +58,24 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
                     .hasArg()
                     .withArgName("YYYY-MM-DD")
                     .withDescription("ISO-8601 Formatted date string specifying end date (exclusive")
-                    .create("end"));
+                    .create("end"))
+         .addOption(OptionBuilder
+                    .withLongOpt("jiraBatchSize")
+                    .isRequired()
+                    .hasArg()
+                    .withDescription("Number of issues to retrieve in each batch")
+                    .create("jiraBatchSize"));
 
         final String startDate;
         final String endDate;
+        final int jiraBatchSize;
         final CommandLineParser parser = new GnuParser();
         final CommandLine commandLineArgs;
         try {
             commandLineArgs = parser.parse(options, cmdLineUtil.getArgs());
             startDate = commandLineArgs.getOptionValue("start");
             endDate = commandLineArgs.getOptionValue("end");
+            jiraBatchSize = Integer.parseInt(commandLineArgs.getOptionValue("jiraBatchSize"));
         } catch (final ParseException e) {
             log.error("Threw an exception trying to run the index builder", e);
             System.exit(-1);
@@ -75,7 +83,8 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         }
 
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
-                jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, iuploadUrl, startDate, endDate);
+                jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, iuploadUrl, startDate, endDate,
+                jiraBatchSize);
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 
