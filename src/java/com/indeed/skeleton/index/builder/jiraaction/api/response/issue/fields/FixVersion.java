@@ -3,7 +3,7 @@ package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * author kbinswanger
+ * @author kbinswanger
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
@@ -13,6 +13,6 @@ public class FixVersion {
 
     @Override
     public String toString() {
-        return name.replace(' ', '\u00A0');
+        return name;
     }
 }

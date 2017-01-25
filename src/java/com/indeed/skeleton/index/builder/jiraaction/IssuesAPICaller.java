@@ -66,8 +66,8 @@ public class IssuesAPICaller {
         return (page * numPerPage) < numTotal;
     }
 
-    private int setNextPage() {
-            return ++page;
+    private void setNextPage() {
+            page +=1;
     }
 
     private int getStartAt() {

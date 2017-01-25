@@ -14,7 +14,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class TsvFileWriter {
     private final JiraActionIndexBuilderConfig config;
 
     public static final String [] FILE_HEADER = {
-        "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*", "issueage", "issuekey", "issuetype", "project", "prevstatus", "reporter",
+        "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "project", "prevstatus", "reporter",
             "resolution", "status", "summary", "timeinstate", "time", "verifier"
     };
 
@@ -35,7 +34,7 @@ public class TsvFileWriter {
         this.config = config;
     }
 
-    private String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd.HH";
+    private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd.HH";
     private String reformatDate(final String date) {
         final DateTime dateTime = JiraActionUtil.parseDateTime(date);
         return dateTime.toString(FILENAME_DATE_TIME_PATTERN);
@@ -98,13 +97,6 @@ public class TsvFileWriter {
         bw.close();
 
         uploadTsvFile(file);
-    }
-
-    private static String getYesterday() {
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        return sdf.format(cal.getTime());
     }
 
     private static String getUnixTimestamp(final String jiraTimestamp) throws ParseException {

@@ -19,7 +19,7 @@ import java.util.Date;
 public class CommentCollection {
     public Comment[] comments;
 
-    public void sortComments() throws ParseException {
+    public void sortComments() {
         // It seems JIRA API's response is already sorted, but
         // just in case, use this method to make sure.
         // Because it's usually already sorted, use insertion sort algorithm here.
@@ -33,23 +33,6 @@ public class CommentCollection {
                 return date1.compareTo(date2);
             }
         });
-        /*
-        for (int i=1; i<comments.length; i++) {
-            final Comment comment = comments[i];
-            final Date date = parseDate(comment.created);
-            for (int j=i-1; j>=0; j--) {
-                final Comment comparedComment = comments[j];
-                final Date comparedDate = parseDate(comparedComment.created);
-                if (date.after(comparedDate)) {
-                    comments[j+1] = comment;
-                    break;
-                }
-                else {
-                    comments[j+1] = comments[j];
-                }
-            }
-        }
-        */
     }
 
     private Date parseDate(final String dateString) throws ParseException {

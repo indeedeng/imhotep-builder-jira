@@ -19,19 +19,22 @@ public class JiraActionUtil {
     public static DateTime parseDateTime(final String arg) {
         try {
             return new DateTime(arg.trim().replace(" ", "T"), ZONE);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             // ignore
         }
         final DateTime now = new DateTime(ZONE);
 
-        if (arg.equals("now")) {
-            return now.withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0); // align with start of the hour
-        } else if(arg.equals("today")) {
-            return now.withTimeAtStartOfDay();  // align with start of the day
-        } else if(arg.equals("yesterday")) {
-            return now.minusDays(1).withTimeAtStartOfDay();
-        } else if(arg.equals("tomorrow")) {
-            return now.plusDays(1).withTimeAtStartOfDay();
+        switch (arg) {
+            case "now":
+                return now.withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0); // align with start of the hour
+
+            case "today":
+                return now.withTimeAtStartOfDay();  // align with start of the day
+
+            case "yesterday":
+                return now.minusDays(1).withTimeAtStartOfDay();
+            case "tomorrow":
+                return now.plusDays(1).withTimeAtStartOfDay();
         }
 
         final Period p = PeriodParser.parseString(arg);

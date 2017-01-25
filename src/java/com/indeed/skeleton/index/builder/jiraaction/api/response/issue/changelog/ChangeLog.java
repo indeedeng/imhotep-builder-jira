@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.Item;
 
+import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +25,7 @@ public class ChangeLog {
         return false;
     }
 
+    @Nullable
     public Item getFirstHistoryItem(final String field) {
         // Return the first history item about the field.
         // If there is no history item about the field, return null.
@@ -42,20 +44,18 @@ public class ChangeLog {
         // just in case, use this method to make sure.
         // Because it's usually already sorted, use insertion sort algorithm here.
 
-        for (int i=1; i<histories.length; i++) {
+        for (int i=1; i < histories.length; i++) {
             final History history = histories[i];
             final Date date = parseDate(history.created);
-            for (int k=i-1; k>=0; k--) {
-                final History comparedHistory = histories[k];
-                final Date comparedDate = parseDate(comparedHistory.created);
+            int j;
+            for (j=i-1; j >= 0; j--) {
+                final Date comparedDate = parseDate(histories[j].created);
                 if (date.after(comparedDate)) {
-                    histories[k+1] = history;
                     break;
                 }
-                else {
-                    histories[k+1] = histories[k];
-                }
+                    histories[j+1] = histories[j];
             }
+            histories[j+1] = history;
         }
     }
 

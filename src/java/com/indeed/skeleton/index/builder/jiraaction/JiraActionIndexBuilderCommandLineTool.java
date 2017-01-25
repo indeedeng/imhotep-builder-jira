@@ -88,7 +88,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 
-    private final String arrayToCommaDelimetedString(final String[] array) {
+    private String arrayToCommaDelimetedString(final String[] array) {
         final StringBuilder builder = new StringBuilder();
         for (final String token : array) {
             if (builder.length() > 0) {

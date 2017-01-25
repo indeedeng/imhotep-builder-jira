@@ -52,7 +52,7 @@ public class Field {
                         ? ""
                         : category.name;
             }
-            case "fixversions": return fixVersions == null ? "" : Joiner.on(" ").join(fixVersions);
+            case "fixversions": return fixVersions == null ? "" : Joiner.on("|").join(fixVersions);
         }
         throw new Exception("Wrong Input name");
     }
