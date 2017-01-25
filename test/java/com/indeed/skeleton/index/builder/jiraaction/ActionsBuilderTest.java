@@ -1,8 +1,5 @@
-package com.indeed.skeleton.index.builder.tests.jiraactiontests;
+package com.indeed.skeleton.index.builder.jiraaction;
 
-import com.indeed.skeleton.index.builder.jiraaction.Action;
-import com.indeed.skeleton.index.builder.jiraaction.ActionsBuilder;
-import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.ChangeLog;
@@ -54,12 +51,12 @@ public class ActionsBuilderTest {
 
         final ChangeLog changeLog = EasyMock.createNiceMock(ChangeLog.class);
         issue.changelog = changeLog;
-        final History[] histories = new History[]{};
+        final History[] histories = {};
         issue.changelog.histories = histories;
 
         final CommentCollection comment = new CommentCollection();
         issue.fields.comment = comment;
-        final Comment[] comments = new Comment[]{};
+        final Comment[] comments = {};
         issue.fields.comment.comments = comments;
 
         EasyMock.replay(issue);
@@ -196,7 +193,7 @@ public class ActionsBuilderTest {
         history.author = historyAuthor;
         EasyMock.replay(history);
 
-        final History[] histories = new History[] { history };
+        final History[] histories = { history };
         issue.changelog.histories = histories;        
     }
     private void setHistoryNew() {
@@ -219,7 +216,7 @@ public class ActionsBuilderTest {
         comment.author = commentAuthor;
         EasyMock.replay(comment);
 
-        final Comment[] comments = new Comment[] { comment };
+        final Comment[] comments = { comment };
         issue.fields.comment.comments = comments;
     }
 

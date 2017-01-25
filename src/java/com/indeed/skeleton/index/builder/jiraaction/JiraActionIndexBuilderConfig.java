@@ -14,6 +14,7 @@ public class JiraActionIndexBuilderConfig {
     private final String startDate;
     private final String endDate;
 
+    @SuppressWarnings("FieldMayBeFinal")
     private int jiraBatchSize;
 
     public JiraActionIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,

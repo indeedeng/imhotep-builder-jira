@@ -1,4 +1,4 @@
-package com.indeed.skeleton.index.builder.tests.jiraactiontests;
+package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.indeed.skeleton.index.builder.jiraaction.Action;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
@@ -7,29 +7,26 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.co
 import com.indeed.test.junit.Check;
 import org.easymock.EasyMock;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.ParseException;
-
-import static org.easymock.EasyMock.anyObject;
 
 /**
  * Created by soono on 9/2/16.
  */
 public class ActionTest {
-    Action prevAction;
-    History history;
-    User author;
-    Comment comment;
+    private Action prevAction;
+    private History history;
+    private User author;
+    private Comment comment;
 
     // default values
-    final long prevActionIssueage = 100;
-    final long prevActionTimeinstate = 50;
-    final String prevActionTimestamp = "2016-09-02T01:01:00";
-    final String historyCreated = "2016-09-02T01:01:10"; // diff with prevAction is 10s.
-    final String commentCreated = "2016-09-02T01:01:10"; // diff with prevAction is 10s.
-    final long timeDiffWithPrevAction = 10;
+    private final long prevActionIssueage = 100;
+    private final long prevActionTimeinstate = 50;
+    private final String prevActionTimestamp = "2016-09-02T01:01:00";
+    private final String historyCreated = "2016-09-02T01:01:10"; // diff with prevAction is 10s.
+    private final String commentCreated = "2016-09-02T01:01:10"; // diff with prevAction is 10s.
+    private final long timeDiffWithPrevAction = 10;
 
     @Before
     public void initialize() {
