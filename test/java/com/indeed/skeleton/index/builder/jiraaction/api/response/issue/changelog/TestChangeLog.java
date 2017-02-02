@@ -14,7 +14,7 @@ public class TestChangeLog {
     public void setup() {
 
     }
-    
+
     @Test
     public void testSort() throws ParseException {
         final History a = new History();

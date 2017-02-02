@@ -1,5 +1,6 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.indeed.common.cli.CommandLineTool;
 import com.indeed.common.cli.CommandLineUtil;
 import com.indeed.common.dbutil.CronToolStatusUpdater;
@@ -11,6 +12,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
+
+import javax.annotation.Nullable;
 
 /**
  * @author soono
@@ -88,7 +91,12 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 
-    private String arrayToCommaDelimetedString(final String[] array) {
+    @VisibleForTesting
+    protected static String arrayToCommaDelimetedString(@Nullable final String[] array) {
+        if(array == null) {
+            return "";
+        }
+
         final StringBuilder builder = new StringBuilder();
         for (final String token : array) {
             if (builder.length() > 0) {
