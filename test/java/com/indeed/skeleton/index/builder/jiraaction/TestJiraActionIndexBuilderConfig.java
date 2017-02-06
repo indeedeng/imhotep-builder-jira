@@ -23,6 +23,6 @@ public class TestJiraActionIndexBuilderConfig {
                 .add("jiraBatchSize")
                 .build();
 
-        JavaBeanAsserter.assertJavaBeanImmutableConstructor(JiraActionIndexBuilderConfig.class, args);
+        JavaBeanAsserter.assertContructorMatchesProperties(JiraActionIndexBuilderConfig.class, args);
     }
 }
