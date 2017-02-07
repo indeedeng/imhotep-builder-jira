@@ -1,13 +1,13 @@
 package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.Item;
+import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by soono on 8/25/16.
@@ -46,23 +46,16 @@ public class ChangeLog {
 
         for (int i=1; i < histories.length; i++) {
             final History history = histories[i];
-            final Date date = parseDate(history.created);
+            final DateTime date = JiraActionUtil.parseDateTime(history.created);
             int j;
             for (j=i-1; j >= 0; j--) {
-                final Date comparedDate = parseDate(histories[j].created);
-                if (date.after(comparedDate)) {
+                final DateTime comparedDate = JiraActionUtil.parseDateTime(histories[j].created);
+                if (date.isAfter(comparedDate) || date.equals(comparedDate)) {
                     break;
                 }
-                    histories[j+1] = histories[j];
+                histories[j+1] = histories[j];
             }
             histories[j+1] = history;
         }
-    }
-
-    private Date parseDate(final String dateString) throws ParseException {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        final String strippedCreatedString = dateString.replace('T', ' ');
-        final Date date = dateFormat.parse(strippedCreatedString);
-        return date;
     }
 }

@@ -4,11 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import org.joda.time.DateTime;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 
 /**
  * Created by soono on 8/25/16.
@@ -33,12 +30,5 @@ public class CommentCollection {
                 return date1.compareTo(date2);
             }
         });
-    }
-
-    private Date parseDate(final String dateString) throws ParseException {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        final String strippedCreatedString = dateString.replace('T', ' ');
-        final Date date = dateFormat.parse(strippedCreatedString);
-        return date;
     }
 }

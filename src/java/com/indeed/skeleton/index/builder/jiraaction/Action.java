@@ -3,10 +3,9 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
+import org.joda.time.DateTime;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by soono on 8/31/16.
@@ -106,17 +105,10 @@ public class Action {
     }
 
     private long getTimeDiff(final String before, final String after) throws ParseException {
-        final Date beforeDate = parseDate(before);
-        final Date afterDate = parseDate(after);
-        final long seconds = (afterDate.getTime() - beforeDate.getTime()) / 1000;
+        final DateTime beforeDate = JiraActionUtil.parseDateTime(before);
+        final DateTime afterDate = JiraActionUtil.parseDateTime(after);
+        final long seconds = (afterDate.getMillis() - beforeDate.getMillis()) / 1000;
         return seconds;
-    }
-
-    private Date parseDate(final String dateString) throws ParseException {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        final String strippedCreatedString = dateString.replace('T', ' ');
-        final Date date = dateFormat.parse(strippedCreatedString);
-        return date;
     }
 
 }
