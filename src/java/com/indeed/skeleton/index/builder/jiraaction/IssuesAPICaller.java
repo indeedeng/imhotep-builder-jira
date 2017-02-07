@@ -3,6 +3,7 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.common.util.StringUtils;
+import com.indeed.util.logging.Loggers;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
@@ -27,7 +28,7 @@ public class IssuesAPICaller {
 
     private final int numPerPage; // Max number of issues per page
     private int page = 0; // Current Page
-    private int numTotal = -1; // Max number of issues per page
+    private int numTotal = -1; // Total number of issues remaining
 
     public IssuesAPICaller(final JiraActionIndexBuilderConfig config) {
         this.config = config;
@@ -83,7 +84,6 @@ public class IssuesAPICaller {
     //
 
     private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
-        log.info(urlString);
         final URL url = new URL(urlString);
         final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", getBasicAuth());
@@ -97,7 +97,7 @@ public class IssuesAPICaller {
     }
 
     private String getIssuesURL() throws UnsupportedEncodingException {
-        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?")
+        final String url = new StringBuilder(config.getJiraBaseURL() + "?")
                 .append(getJQLParam())
                 .append("&")
                 .append(getFieldsParam())
@@ -106,8 +106,14 @@ public class IssuesAPICaller {
                 .append("&")
                 .append(getStartAtParam())
                 .append("&")
-                .append(getMaxResults());
-        return url.toString();
+                .append(getMaxResults())
+                .toString();
+
+        final int start = getStartAt();
+        Loggers.debug(log, "Trying URL: %s", url);
+        Loggers.info(log, "%f%% complete, %d/%d", (float)start/numTotal, start, numTotal);
+
+        return url;
     }
 
     private String getBasicInfoURL() throws UnsupportedEncodingException {
