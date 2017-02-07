@@ -23,6 +23,6 @@ public class TestJiraActionIndexBuilderConfig {
                 .add("jiraBatchSize")
                 .build();
 
-        JavaBeanAsserter.assertContructorMatchesProperties(JiraActionIndexBuilderConfig.class, args);
+        JavaBeanAsserter.assertConstructorMatchesProperties(JiraActionIndexBuilderConfig.class, args);
     }
 }

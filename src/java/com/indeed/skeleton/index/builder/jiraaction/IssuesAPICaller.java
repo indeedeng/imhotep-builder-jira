@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.common.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ import java.net.URLEncoder;
  * @author soono
  */
 public class IssuesAPICaller {
+    private static final Logger log = Logger.getLogger(IssuesAPICaller.class);
     private final JiraActionIndexBuilderConfig config;
     //
     // For Pagination
@@ -81,7 +83,7 @@ public class IssuesAPICaller {
     //
 
     private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
-        System.out.println(urlString);
+        log.info(urlString);
         final URL url = new URL(urlString);
         final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", getBasicAuth());
@@ -123,6 +125,8 @@ public class IssuesAPICaller {
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
         }
+
+        query.append(" AND ISSUE=JASX-23729");
 
         return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
     }
