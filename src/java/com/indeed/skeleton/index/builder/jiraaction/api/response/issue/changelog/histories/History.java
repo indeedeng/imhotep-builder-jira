@@ -25,7 +25,9 @@ public class History {
 
     public boolean itemExist(final String field) {
         for (final Item item : items) {
-            if (item.field.equals(field)) return true;
+            if (item.field.equals(field)) {
+                return true;
+            }
         }
         return false;
     }

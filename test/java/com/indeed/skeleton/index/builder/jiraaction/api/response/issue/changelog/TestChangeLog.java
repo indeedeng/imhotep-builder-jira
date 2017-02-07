@@ -30,7 +30,7 @@ public class TestChangeLog {
         final History b = new History();
         b.author = new User();
         b.author.displayName = "authorB";
-        b.created = "2017-01-02 00:00:00";
+        b.created = "2017-01-02 01:00:00";
         final Item changeB = new Item();
         changeB.field = "fixVersion";
         changeB.fromString = "End of Week 2017-01-06";
@@ -40,15 +40,25 @@ public class TestChangeLog {
         final History c = new History();
         c.author = new User();
         c.author.displayName = "authorC";
-        c.created = "2017-01-02 01:00:00";
+        c.created = "2017-01-02 12:00:00";
         final Item changeC = new Item();
         changeC.field = "fixVersion";
         changeC.fromString = "End of Week 2017-01-12";
         changeC.toString = "";
         c.items = new Item[]{ changeC };
 
+        final History d = new History();
+        d.author = new User();
+        d.author.displayName = "authorD";
+        d.created = "2017-02-01 12:00:00";
+        final Item changeD = new Item();
+        changeD.field = "fixVersion";
+        changeD.fromString = "NEXT_DEPLOY";
+        changeD.toString = "";
+        d.items = new Item[]{ changeD };
 
-        final History[] histories = { c, b, a };
+
+        final History[] histories = { c, b, d, a, };
         final ChangeLog changelog = new ChangeLog();
         changelog.histories = histories;
 
@@ -57,5 +67,6 @@ public class TestChangeLog {
         Assert.assertEquals(a, changelog.histories[0]);
         Assert.assertEquals(b, changelog.histories[1]);
         Assert.assertEquals(c, changelog.histories[2]);
+        Assert.assertEquals(d, changelog.histories[3]);
     }
 }
