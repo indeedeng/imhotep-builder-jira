@@ -126,8 +126,6 @@ public class IssuesAPICaller {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
         }
 
-        query.append(" AND ISSUE=JASX-23729");
-
         return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
     }
 
