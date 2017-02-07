@@ -13,8 +13,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 
@@ -89,7 +87,7 @@ public class TsvFileWriter {
             final String timeinstate = String.valueOf(action.timeinstate);
             bw.write(timeinstate);
             bw.write("\t");
-            bw.write(getUnixTimestamp(action.timestamp));
+            bw.write(JiraActionUtil.getUnixTimestamp(action.timestamp));
             bw.write("\t");
             bw.write(action.verifier);
             bw.write("\n");
@@ -97,14 +95,6 @@ public class TsvFileWriter {
         bw.close();
 
         uploadTsvFile(file);
-    }
-
-    private static String getUnixTimestamp(final String jiraTimestamp) throws ParseException {
-        final String timestamp = jiraTimestamp.replace('T', ' ');
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        final Date date = dateFormat.parse(timestamp);
-        final long unixTime = date.getTime()/1000;
-        return String.valueOf(unixTime);
     }
 
     private void uploadTsvFile(@Nonnull final File tsvFile) throws IOException {
