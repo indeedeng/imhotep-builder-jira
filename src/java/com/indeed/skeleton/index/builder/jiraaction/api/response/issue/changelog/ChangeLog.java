@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import java.text.ParseException;
 
 /**
- * Created by soono on 8/25/16.
+ * @author soono
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
@@ -20,7 +20,9 @@ public class ChangeLog {
 
     public boolean historyItemExist(final String field) {
         for (final History history : histories) {
-            if (history.itemExist(field)) return true;
+            if (history.itemExist(field)) {
+                return true;
+            }
         }
         return false;
     }
@@ -33,7 +35,9 @@ public class ChangeLog {
         // Sort history items in time order.
         for (final History history : histories) {
             for (final Item item : history.items) {
-                if (item.field.equals(field)) return item;
+                if (item.field.equals(field)) {
+                    return item;
+                }
             }
         }
         return null;
