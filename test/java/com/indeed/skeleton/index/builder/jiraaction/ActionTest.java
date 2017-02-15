@@ -1,32 +1,34 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
-import com.indeed.skeleton.index.builder.jiraaction.Action;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
+import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.Item;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
 import com.indeed.test.junit.Check;
 import org.easymock.EasyMock;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 
 /**
- * Created by soono on 9/2/16.
+ * @author soono
  */
 public class ActionTest {
     private Action prevAction;
     private History history;
+    private History history2;
     private User author;
     private Comment comment;
 
     // default values
-    private final long prevActionIssueage = 100;
     private final long prevActionTimeinstate = 50;
-    private final String prevActionTimestamp = "2016-09-02T01:01:00";
-    private final String historyCreated = "2016-09-02T01:01:10"; // diff with prevAction is 10s.
-    private final String commentCreated = "2016-09-02T01:01:10"; // diff with prevAction is 10s.
-    private final long timeDiffWithPrevAction = 10;
+    private static final String prevActionTimestamp = "2016-09-02T01:00:00";
+    private static final String historyCreated = "2016-09-02T01:00:10";
+    private static final String historyCreated2 = "2016-09-02T01:00:20"; // diff with prevAction is 10s.
+    private static final String commentCreated = "2016-09-02T01:00:30"; // diff with prevAction is 10s.
+    private static final long timeDiffWithPrevAction = 10;
 
     @Before
     public void initialize() {
@@ -34,14 +36,25 @@ public class ActionTest {
         author = EasyMock.createNiceMock(User.class);
 
         // Set default values
-        prevAction.action = "update";
-        prevAction.issueage = prevActionIssueage;
+        prevAction.action = "create";
         prevAction.timestamp = prevActionTimestamp;
+        prevAction.prevstatus = "";
+        prevAction.status = "Pending Triage";
 
-        // For Update Action
-        history = EasyMock.createNiceMock(History.class);
+        history = new History();
         history.author = author;
         history.created = historyCreated;
+        final Item historyItem = new Item();
+        historyItem.setField("verifier");
+        historyItem.fromString = "";
+        historyItem.toString = "Test User";
+        history.items = new Item[] { historyItem };
+
+        // For Update Action
+        history2 = new History();
+        history2.author = author;
+        history2.created = historyCreated2;
+        history2.items = new Item[] { };
 
         // For Comment Action
         comment = EasyMock.createNiceMock(Comment.class);
@@ -61,16 +74,12 @@ public class ActionTest {
 
     @Test
     public void testAction_update_action() throws ParseException {
-        EasyMock.replay(history);
-
         final Action action = new Action(prevAction, history);
         Check.checkTrue("update".equals(action.action));
     }
 
     @Test
     public void testAction_update_actor() throws ParseException {
-        EasyMock.replay(history);
-
         final String actor = "Test Actor";
         author.displayName = actor;
 
@@ -80,21 +89,20 @@ public class ActionTest {
 
     @Test
     public void testAction_update_assignee_whenAssigneeChanged() throws ParseException {
-        final String assignee = "Test Assignee";
-        EasyMock.expect(history.itemExist("assignee")).andReturn(true);
-        EasyMock.expect(history.getItemLastValue("assignee")).andReturn(assignee);
-        EasyMock.replay(history);
+        final Item item = new Item();
+        item.setField("assignee");
+        item.fromString = "old";
+        item.toString = "new";
+        history2.items = new Item[] { item };
 
-
-        final Action action = new Action(prevAction, history);
-        Check.checkTrue(action.assignee.equals(assignee));
+        final Action action = new Action(prevAction, history2);
+        Check.checkTrue(action.assignee.equals(item.toString));
+        Check.checkTrue(action.fieldschanged.contains(item.field));
     }
 
     @Test
     public void testAction_update_assignee_whenAssigneeNotChanged() throws ParseException {
         final String assignee = "Test Assignee";
-        EasyMock.expect(history.itemExist("assignee")).andReturn(false);
-        EasyMock.replay(history);
         prevAction.assignee = assignee;
 
         final Action action = new Action(prevAction, history);
@@ -102,19 +110,21 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_update_issueage() throws ParseException {
-        EasyMock.replay(history);
-
+    public void testAction_updatenotstate_timing() throws ParseException {
         final Action action = new Action(prevAction, history);
-        Check.checkEquals(prevActionIssueage + timeDiffWithPrevAction, action.issueage);
+        Check.checkEquals(timeDiffWithPrevAction, action.issueage);
+        Check.checkEquals(timeDiffWithPrevAction, action.timeinstate);
+        Check.checkEquals(timeDiffWithPrevAction, action.timesinceaction);
     }
 
     @Test
     public void testAction_update_timeinstate() throws ParseException {
-        EasyMock.replay(history);
-
         final Action action = new Action(prevAction, history);
-        Check.checkEquals(timeDiffWithPrevAction, action.issueage);
+
+        final Action action2 = new Action(action, history2);
+        Assert.assertEquals(timeDiffWithPrevAction*2, action2.issueage);
+        Assert.assertEquals(timeDiffWithPrevAction*2, action2.timeinstate);
+        Assert.assertEquals(timeDiffWithPrevAction, action2.timesinceaction);
     }
 
     //
@@ -123,8 +133,12 @@ public class ActionTest {
 
     @Test
     public void testAction_comment_issueage() throws ParseException {
-        final Action action = new Action(prevAction, comment);
-        Check.checkEquals(prevActionTimeinstate + timeDiffWithPrevAction, action.issueage);
+        final Action action = new Action(prevAction, history);
+
+        final Action action2 = new Action(action, comment);
+        Assert.assertEquals(timeDiffWithPrevAction*3, action2.issueage);
+        Assert.assertEquals(timeDiffWithPrevAction*3, action2.timeinstate);
+        Assert.assertEquals(timeDiffWithPrevAction*2, action2.timesinceaction);
     }
 
     @Test
