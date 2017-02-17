@@ -111,7 +111,7 @@ public class IssuesAPICaller {
 
         final int start = getStartAt();
         Loggers.debug(log, "Trying URL: %s", url);
-        Loggers.info(log, "%f%% complete, %d/%d", (float)start/numTotal, start, numTotal);
+        Loggers.info(log, "%f%% complete, %d/%d", (float)start*100/numTotal, start, numTotal);
 
         return url;
     }
