@@ -90,6 +90,7 @@ public class TsvFileWriter {
             bw.write("\t");
             final String timesinceaction = String.valueOf(action.timesinceaction);
             bw.write(timesinceaction);
+            bw.write("\t");
             bw.write(JiraActionUtil.getUnixTimestamp(action.timestamp));
             bw.write("\t");
             bw.write(action.verifier);
