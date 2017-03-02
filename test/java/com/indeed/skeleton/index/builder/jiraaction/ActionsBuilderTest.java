@@ -69,7 +69,7 @@ public class ActionsBuilderTest {
         setIssueOkay();
         setExpectationsForCreateAction();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
         actionsBuilder.buildActions();
 
         Assert.assertTrue(true);
@@ -84,7 +84,7 @@ public class ActionsBuilderTest {
 
         setHistoryOkay();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
         actionsBuilder.buildActions();
 
         Check.checkFalse("create".equals(actionsBuilder.actions.get(0).action));
@@ -97,7 +97,7 @@ public class ActionsBuilderTest {
 
         setHistoryOkay();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
         actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
@@ -116,7 +116,7 @@ public class ActionsBuilderTest {
 
         setHistoryOld();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
         actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
@@ -135,7 +135,7 @@ public class ActionsBuilderTest {
 
         setCommentOkay();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
         actionsBuilder.buildActions();
 
         boolean containsComment = false;
@@ -154,7 +154,7 @@ public class ActionsBuilderTest {
 
         setCommentOld();
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
         actionsBuilder.buildActions();
 
         boolean containsComment = false;
