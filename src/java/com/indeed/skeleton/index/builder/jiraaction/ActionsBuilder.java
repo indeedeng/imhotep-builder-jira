@@ -16,16 +16,19 @@ import java.util.List;
 public class ActionsBuilder {
     private static final Logger log = Logger.getLogger(ActionsBuilder.class);
 
+    private final boolean backfill;
     private final Issue issue;
     private final DateTime startDate;
     private final DateTime endDate;
     private boolean isNewIssue;
     public final List<Action> actions = new ArrayList<>();
 
-    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate) {
+    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate,
+                          final boolean backfill) {
         this.issue = issue;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.backfill = backfill;
     }
 
     public List<Action> buildActions() throws Exception {
@@ -131,6 +134,9 @@ public class ActionsBuilder {
     private boolean isCreatedDuringRange(final String dateString) {
         final DateTime createdDate = JiraActionUtil.parseDateTime(dateString);
 
+        if(backfill) {
+            return startDate.compareTo(createdDate) <= 0;
+        }
         return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) == 1;
     }
 

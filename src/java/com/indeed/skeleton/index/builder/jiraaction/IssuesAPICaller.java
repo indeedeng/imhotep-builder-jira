@@ -125,8 +125,20 @@ public class IssuesAPICaller {
 
     private String getJQLParam() throws UnsupportedEncodingException {
         final StringBuilder query = new StringBuilder();
-        query.append("updatedDate>=").append(config.getStartDate())
-                .append(" AND updatedDate<").append(config.getEndDate());
+        if(config.isBackfill()) {
+            query.append("(");
+        }
+        query.append("(").append("updatedDate>=").append(config.getStartDate())
+                .append(" AND updatedDate<").append(config.getEndDate())
+                .append(")");
+        if(config.isBackfill()) {
+            query.append(" AND ")
+                    .append("(")
+                    .append("createdDate>=").append(config.getStartDate())
+                    .append(" AND createdDate<").append(config.getEndDate())
+                    .append(")")
+                    .append(")");
+        }
 
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
