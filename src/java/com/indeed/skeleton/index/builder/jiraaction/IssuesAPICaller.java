@@ -132,7 +132,7 @@ public class IssuesAPICaller {
                 .append(" AND updatedDate<").append(config.getEndDate())
                 .append(")");
         if(config.isBackfill()) {
-            query.append(" AND ")
+            query.append(" OR ")
                     .append("(")
                     .append("createdDate>=").append(config.getStartDate())
                     .append(" AND createdDate<").append(config.getEndDate())

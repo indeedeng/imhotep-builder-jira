@@ -67,7 +67,12 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
                     .isRequired()
                     .hasArg()
                     .withDescription("Number of issues to retrieve in each batch")
-                    .create("jiraBatchSize"));
+                    .create("jiraBatchSize"))
+         .addOption(OptionBuilder
+                    .isRequired(false)
+                    .hasArg()
+                    .withDescription("Do extra work if we're trying to backfill")
+                    .create("backfill"));
 
         final String startDate;
         final String endDate;
