@@ -59,7 +59,7 @@ public class JiraActionIndexBuilder {
 
                     try {
                         // Build Action objects from parsed API response Object.
-                        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+                        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, config.isBackfill());
 
                         // Set built actions to actions list.
                         actions.addAll(actionsBuilder.buildActions());

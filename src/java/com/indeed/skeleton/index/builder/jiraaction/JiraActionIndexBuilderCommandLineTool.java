@@ -72,6 +72,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final String startDate;
         final String endDate;
         final int jiraBatchSize;
+        final boolean backfill;
         final CommandLineParser parser = new GnuParser();
         final CommandLine commandLineArgs;
         try {
@@ -79,6 +80,8 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
             startDate = commandLineArgs.getOptionValue("start");
             endDate = commandLineArgs.getOptionValue("end");
             jiraBatchSize = Integer.parseInt(commandLineArgs.getOptionValue("jiraBatchSize"));
+            backfill = Boolean.parseBoolean(commandLineArgs.getOptionValue("backfill"));
+
         } catch (final ParseException e) {
             log.error("Threw an exception trying to run the index builder", e);
             System.exit(-1);
@@ -87,7 +90,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
 
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
                 jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, iuploadUrl, startDate, endDate,
-                jiraBatchSize);
+                jiraBatchSize, backfill);
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 
