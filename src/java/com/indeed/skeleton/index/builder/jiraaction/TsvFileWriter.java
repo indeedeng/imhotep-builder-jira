@@ -51,7 +51,7 @@ public class TsvFileWriter {
             final String header = FILE_HEADER[i];
             bw.write(header);
         }
-        bw.write("\n");
+        bw.newLine();
         bw.flush();
     }
 
@@ -98,7 +98,7 @@ public class TsvFileWriter {
             bw.write(JiraActionUtil.getUnixTimestamp(action.timestamp));
             bw.write("\t");
             bw.write(action.verifier);
-            bw.write("\n");
+            bw.newLine();
         }
 
         bw.flush();

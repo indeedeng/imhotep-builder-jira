@@ -23,7 +23,7 @@ public class ActionTest {
     private Comment comment;
 
     // default values
-    private final long prevActionTimeinstate = 50;
+    private static final long prevActionTimeinstate = 50;
     private static final String prevActionTimestamp = "2016-09-02T01:00:00";
     private static final String historyCreated = "2016-09-02T01:00:10";
     private static final String historyCreated2 = "2016-09-02T01:00:20"; // diff with prevAction is 10s.

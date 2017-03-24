@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * Created by soono on 8/25/16.
+ * @author soono
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
