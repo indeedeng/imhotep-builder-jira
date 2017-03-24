@@ -2,9 +2,8 @@ package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.indeed.common.util.StringUtils;
-import com.indeed.util.logging.Loggers;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -110,8 +109,10 @@ public class IssuesAPICaller {
                 .toString();
 
         final int start = getStartAt();
-        Loggers.debug(log, "Trying URL: %s", url);
-        Loggers.info(log, "%f%% complete, %d/%d", (float)start*100/numTotal, start, numTotal);
+        if(log.isDebugEnabled()) {
+            log.debug(String.format("Trying URL: %s", url));
+        }
+        log.info(String.format("%f%% complete, %d/%d", (float)start*100/numTotal, start, numTotal));
 
         return url;
     }

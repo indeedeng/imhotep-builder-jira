@@ -2,7 +2,6 @@ package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
-import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
@@ -30,7 +29,7 @@ public class JiraActionIndexBuilder {
                 final long start = System.currentTimeMillis();
                 final int total = issuesAPICaller.setNumTotal();
                 final long end = System.currentTimeMillis();
-                Loggers.info(log, "%d ms, found %d total issues.", end - start, total);
+                log.info(String.format("%d ms, found %d total issues.", end - start, total));
             }
 
             long apiTime =0;
@@ -54,7 +53,7 @@ public class JiraActionIndexBuilder {
                 final JsonNode issuesNode = issuesAPICaller.getIssuesNode();
                 end = System.currentTimeMillis();
                 apiTime += end-start;
-                Loggers.info(log, "%d ms for an API call.", end - start);
+                log.info(String.format("%d ms for an API call.", end - start));
 
                 start = System.currentTimeMillis();
                 for (final JsonNode issueNode : issuesNode) {
@@ -81,11 +80,11 @@ public class JiraActionIndexBuilder {
                         final long file_end = System.currentTimeMillis();
                         fileTime += file_end - file_start;
                     } catch(final Exception e) {
-                        Loggers.error(log, "Error parsing comments for issue %s.", e, issue.key);
+                        log.error(String.format("Error parsing comments for issue %s.", issue.key), e);
                     }
                 }
                 end = System.currentTimeMillis();
-                Loggers.info(log, "%d ms to get actions from a set of issues.", end - start);
+                log.info(String.format("%d ms to get actions from a set of issues.", end - start));
 
                 Thread.sleep(10000);
             }
@@ -94,13 +93,13 @@ public class JiraActionIndexBuilder {
             // Create and Upload a TSV file.
             writer.uploadTsvFile();
             end = System.currentTimeMillis();
-            Loggers.info(log, "%d ms to create and upload TSV.", end - start);
+            log.info(String.format("%d ms to create and upload TSV.", end - start));
             fileTime += end - start;
 
             end_total = System.currentTimeMillis();
 
-            Loggers.info(log, "%d ms for the whole process.", end_total - start_total);
-            Loggers.info(log, "apiTime: %dms, processTime: %dms, fileTime: %dms", apiTime, processTime, fileTime);
+            log.info(String.format("%d ms for the whole process.", end_total - start_total));
+            log.info(String.format("apiTime: %dms, processTime: %dms, fileTime: %dms", apiTime, processTime, fileTime));
         } catch (final Exception e) {
             log.error("Threw an exception trying to run the index builder", e);
             throw e;
