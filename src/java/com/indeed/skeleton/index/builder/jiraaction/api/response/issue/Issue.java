@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-
+@SuppressWarnings("CanBeFinal")
 public class Issue {
     private static final Logger log = Logger.getLogger(ActionsBuilder.class);
 

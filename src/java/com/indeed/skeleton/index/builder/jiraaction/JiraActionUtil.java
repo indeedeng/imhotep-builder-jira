@@ -1,6 +1,6 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
-import com.indeed.common.util.PeriodParser;
+import com.indeed.imhotep.sql.parser.PeriodParser;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -57,7 +57,7 @@ public class JiraActionUtil {
         throw new IllegalArgumentException("could not parse date: " + arg);
     }
 
-    public static String getUnixTimestamp(final String jiraTimestamp) throws ParseException {
+    public static String getUnixTimestamp(final String jiraTimestamp) {
         final DateTime date = JiraActionUtil.parseDateTime(jiraTimestamp);
         final long unixTime = date.getMillis()/1000;
         return String.valueOf(unixTime);
