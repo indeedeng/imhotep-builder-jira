@@ -4,17 +4,19 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.ChangeLog;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
+import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.Item;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.Field;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.CommentCollection;
 import com.indeed.test.junit.Check;
-import org.easymock.EasyMock;
 import org.joda.time.DateTime;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author soono
@@ -22,34 +24,19 @@ import java.text.ParseException;
  */
 public class ActionsBuilderTest {
     private Issue issue;
-    private DateTime withinRange;
-    private DateTime withinRangeComment;
-    private DateTime beforeRange;
-    private DateTime beforeRangeComment;
-    private DateTime afterRange;
-    private DateTime afterRangeComment;
-
-    private DateTime startDate;
-    private DateTime endDate;
+    private static final DateTime startDate = JiraActionUtil.parseDateTime("2016-08-01 00:00:00");
+    private static final DateTime endDate = JiraActionUtil.parseDateTime("2016-08-07 00:00:00");
 
     @Before
     public void initialize() throws ParseException {
-        startDate = JiraActionUtil.parseDateTime("2016-08-01 00:00:00");
-        endDate = JiraActionUtil.parseDateTime("2016-08-02 00:00:00");
+        issue = new Issue();
+        issue.fields = new Field();
 
-        withinRange = JiraActionUtil.parseDateTime("2016-08-01 01:00:00");
-        withinRangeComment = JiraActionUtil.parseDateTime("2016-08-01 02:00:00");
-        beforeRange = JiraActionUtil.parseDateTime("2016-07-30 11:00:00");
-        beforeRangeComment = JiraActionUtil.parseDateTime("2016-07-30 11:59:59");
-        afterRange = JiraActionUtil.parseDateTime("2016-08-02 01:00:00");
-        afterRangeComment = JiraActionUtil.parseDateTime("2016-08-03");
+        final User issueCreator = new User();
+        issueCreator.displayName = "Test issueCreator";
+        issue.fields.creator = issueCreator;
 
-        issue = EasyMock.createNiceMock(Issue.class);
-
-        final Field field = EasyMock.createNiceMock(Field.class);
-        issue.fields = field;
-
-        final ChangeLog changeLog = EasyMock.createNiceMock(ChangeLog.class);
+        final ChangeLog changeLog = new ChangeLog();
         issue.changelog = changeLog;
         final History[] histories = {};
         issue.changelog.histories = histories;
@@ -58,50 +45,46 @@ public class ActionsBuilderTest {
         issue.fields.comment = comment;
         final Comment[] comments = {};
         issue.fields.comment.comments = comments;
-
-        EasyMock.replay(issue);
-        EasyMock.replay(field);
-        EasyMock.replay(changeLog);
     }
 
     @Test
     public void testBuildActions_newIssueHasCreateAction() throws Exception {
-        setIssueOkay();
-        setExpectationsForCreateAction();
+        final DateTime issueDate = startDate.plusDays(1);
+        setCreationDate(issueDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
-        actionsBuilder.buildActions();
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final List<Action> actions = actionsBuilder.buildActions();
 
-        Assert.assertTrue(true);
-        Check.checkTrue(false);
-        Check.checkTrue("create".equals(actionsBuilder.actions.get(0).action));
+        Check.checkTrue("create".equals(actions.get(0).action));
     }
 
     @Test
     public void testBuildActions_oldIssueDoesNotHaveCreateAction() throws Exception {
-        setIssueOld();
-        setExpectationsForCreateAction();
+        final DateTime issueDate = startDate.minusDays(7);
+        setCreationDate(issueDate);
 
-        setHistoryOkay();
+        final DateTime updateDate = startDate.plusDays(1);
+        createHistory(updateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
-        actionsBuilder.buildActions();
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final List<Action> actions = actionsBuilder.buildActions();
 
-        Check.checkFalse("create".equals(actionsBuilder.actions.get(0).action));
+        Check.checkFalse("create".equals(actions.get(0).action));
     }
 
     @Test
     public void testBuildActions_setNewUpdate() throws Exception {
-        setIssueOkay();
-        setExpectationsForCreateAction();
+        final DateTime issueDate = startDate.plusDays(1);
+        setCreationDate(issueDate);
 
-        setHistoryOkay();
+        final DateTime updateDate = issueDate.plusDays(1);
+        createHistory(updateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
-        actionsBuilder.buildActions();
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
-        for (final Action action : actionsBuilder.actions) {
+        for (final Action action : actions) {
             if ("update".equals(action.action)) {
                 containsUpdate = true;
             }
@@ -111,16 +94,20 @@ public class ActionsBuilderTest {
 
     @Test
     public void testBuildActions_doesNotSetOldUpdate() throws Exception {
-        setIssueOkay();
-        setExpectationsForCreateAction();
+        final DateTime issueDate = startDate.minusDays(7);
+        setCreationDate(issueDate);
 
-        setHistoryOld();
+        final DateTime tooOldUpdateDate = issueDate.plusDays(1);
+        createHistory(tooOldUpdateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
-        actionsBuilder.buildActions();
+        final DateTime tooNewUpdateDate = endDate.plusDays(1);
+        createHistory(tooNewUpdateDate);
+
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
-        for (final Action action : actionsBuilder.actions) {
+        for (final Action action : actions) {
             if ("update".equals(action.action)) {
                 containsUpdate = true;
             }
@@ -130,17 +117,18 @@ public class ActionsBuilderTest {
 
     @Test
     public void testBuildActions_setNewComments() throws Exception {
-        setIssueOkay();
-        setExpectationsForCreateAction();
+        final DateTime issueDate = startDate.plusDays(1);
+        setCreationDate(issueDate);
 
-        setCommentOkay();
+        final DateTime commentDate = issueDate.plusDays(1);
+        createComment(commentDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
-        actionsBuilder.buildActions();
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsComment = false;
-        for (final Action action : actionsBuilder.actions) {
-            if ("update".equals(action.action)) {
+        for (final Action action : actions) {
+            if ("comment".equals(action.action)) {
                 containsComment = true;
             }
         }
@@ -149,90 +137,68 @@ public class ActionsBuilderTest {
 
     @Test
     public void testBuildActions_doesNotSetOldComments() throws Exception {
-        setIssueOkay();
-        setExpectationsForCreateAction();
+        final DateTime issueDate = startDate.minusDays(7);
+        setCreationDate(issueDate);
 
-        setCommentOld();
+        final DateTime tooOldUpdateDate = issueDate.plusDays(1);
+        createComment(tooOldUpdateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, false);
-        actionsBuilder.buildActions();
+        final DateTime tooNewUpdateDate = endDate.plusDays(1);
+        createComment(tooNewUpdateDate);
+
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsComment = false;
-        for (final Action action : actionsBuilder.actions) {
-            if ("update".equals(action.action)) {
+        for (final Action action : actions) {
+            if ("comment".equals(action.action)) {
                 containsComment = true;
             }
         }
         Check.checkFalse(containsComment);
     }
 
-    private void setIssueNew() {
-        issue.fields.created = parseDateToString(afterRange);
-    }
-    
-    private void setIssueOkay() {
-        issue.fields.created = parseDateToString(withinRange);
-    }
-
-
-    private void setIssueOld() {
-        issue.fields.created = parseDateToString(beforeRange);
-    }
-
-    private void setExpectationsForCreateAction() {
-        final User issueCreator = EasyMock.createNiceMock(User.class);
-        issueCreator.displayName = "Test issueCreator";
-        issue.fields.creator = issueCreator;
-    }
-
     private void createHistory(final DateTime created) {
-        final History history = EasyMock.createNiceMock(History.class);
+        final History history = new History();
+        history.items = new Item[0];
+
         history.created = parseDateToString(created);
 
-        final User historyAuthor = EasyMock.createNiceMock(User.class);
+        final User historyAuthor = new User();
         history.author = historyAuthor;
-        EasyMock.replay(history);
 
-        final History[] histories = { history };
-        issue.changelog.histories = histories;        
-    }
-    private void setHistoryNew() {
-        createHistory(afterRange);
-    }
-    
-    private void setHistoryOkay() {
-        createHistory(withinRange);
-    }
+        if(issue.changelog.histories == null) {
+            issue.changelog.histories = new History[0];
+        }
 
-    private void setHistoryOld() {
-        createHistory(beforeRange);
+        final List<History> tempHistories = new ArrayList<>(Arrays.asList(issue.changelog.histories));
+        tempHistories.add(history);
+        final History[] histories = tempHistories.toArray(new History[tempHistories.size()]);
+        issue.changelog.histories = histories;
     }
 
     private void createComment(final DateTime created) {
-        final Comment comment = EasyMock.createNiceMock(Comment.class);
+        final Comment comment = new Comment();
         comment.created = parseDateToString(created);
 
-        final User commentAuthor = EasyMock.createNiceMock(User.class);
+        final User commentAuthor = new User();
         comment.author = commentAuthor;
-        EasyMock.replay(comment);
 
-        final Comment[] comments = { comment };
+        if(issue.fields.comment.comments == null) {
+            issue.fields.comment.comments = new Comment[0];
+        }
+
+        final List<Comment> tempComments = new ArrayList<>(Arrays.asList(issue.fields.comment.comments));
+        tempComments.add(comment);
+        final Comment[] comments = tempComments.toArray(new Comment[tempComments.size()]);
         issue.fields.comment.comments = comments;
     }
 
-    private void setCommentNew() {
-        createComment(afterRangeComment);
+    private void setCreationDate(final DateTime date) {
+        issue.fields.created = parseDateToString(date);
     }
 
-    private void setCommentOkay() {
-        createComment(withinRangeComment);
-    }
-
-    private void setCommentOld() {
-        createComment(beforeRangeComment);
-    }
-
-    private static String parseDateToString(final DateTime date) {
+    private String parseDateToString(final DateTime date) {
         return date.toString(JiraActionUtil.DATE_TIME_FORMATTER);
     }
 }

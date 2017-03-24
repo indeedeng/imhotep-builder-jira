@@ -6,7 +6,6 @@ import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,38 +33,55 @@ public class JiraActionIndexBuilder {
                 Loggers.info(log, "%d ms, found %d total issues.", end - start, total);
             }
 
-            final List<Action> actions = new ArrayList<>();
+            long apiTime =0;
+            long processTime = 0;
+            long fileTime = 0;
 
             long start, end;
 
             final DateTime startDate = JiraActionUtil.parseDateTime(config.getStartDate());
-
             final DateTime endDate = JiraActionUtil.parseDateTime(config.getEndDate());
+
+            final TsvFileWriter writer = new TsvFileWriter(config);
+            start = System.currentTimeMillis();
+            writer.createFileAndWriteHeaders();
+            end = System.currentTimeMillis();
+            fileTime += end - start;
 
             while (issuesAPICaller.currentPageExist()) {
                 // Get issues from API.
                 start = System.currentTimeMillis();
                 final JsonNode issuesNode = issuesAPICaller.getIssuesNode();
                 end = System.currentTimeMillis();
+                apiTime += end-start;
                 Loggers.info(log, "%d ms for an API call.", end - start);
 
                 start = System.currentTimeMillis();
                 for (final JsonNode issueNode : issuesNode) {
                     // Parse Each Issue API response to Object.
+                    long process_start = System.currentTimeMillis();
                     final Issue issue = IssueAPIParser.getObject(issueNode);
+                    long process_end = System.currentTimeMillis();
+                    processTime += process_end - process_start;
                     if(issue == null) {
                         continue;
                     }
 
                     try {
                         // Build Action objects from parsed API response Object.
-                        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate, config.isBackfill());
+                        process_start = System.currentTimeMillis();
+                        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+                        final List<Action> actions = actionsBuilder.buildActions();
+                        process_end = System.currentTimeMillis();
+                        processTime += process_end - process_start;
 
                         // Set built actions to actions list.
-                        actions.addAll(actionsBuilder.buildActions());
+                        final long file_start = System.currentTimeMillis();
+                        writer.writeActions(actions);
+                        final long file_end = System.currentTimeMillis();
+                        fileTime += file_end - file_start;
                     } catch(final Exception e) {
                         Loggers.error(log, "Error parsing comments for issue %s.", e, issue.key);
-                        continue;
                     }
                 }
                 end = System.currentTimeMillis();
@@ -74,17 +90,17 @@ public class JiraActionIndexBuilder {
                 Thread.sleep(10000);
             }
 
-
             start = System.currentTimeMillis();
             // Create and Upload a TSV file.
-            final TsvFileWriter writer = new TsvFileWriter(config);
-            writer.createTSVFile(actions);
+            writer.uploadTsvFile();
             end = System.currentTimeMillis();
             Loggers.info(log, "%d ms to create and upload TSV.", end - start);
+            fileTime += end - start;
 
             end_total = System.currentTimeMillis();
 
             Loggers.info(log, "%d ms for the whole process.", end_total - start_total);
+            Loggers.info(log, "apiTime: %dms, processTime: %dms, fileTime: %dms", apiTime, processTime, fileTime);
         } catch (final Exception e) {
             log.error("Threw an exception trying to run the index builder", e);
             throw e;

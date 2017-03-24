@@ -7,7 +7,6 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 
-import javax.annotation.Nonnull;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -21,6 +20,8 @@ import java.util.List;
  */
 public class TsvFileWriter {
     private final JiraActionIndexBuilderConfig config;
+    private File file;
+    private BufferedWriter bw;
 
     public static final String [] FILE_HEADER = {
         "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*|", "issueage", "issuekey",
@@ -39,10 +40,10 @@ public class TsvFileWriter {
         return dateTime.toString(FILENAME_DATE_TIME_PATTERN);
     }
 
-    public void createTSVFile(final List<Action> actions) throws IOException, ParseException {
+    public void createFileAndWriteHeaders() throws IOException {
         final String filename = String.format("jiraactions_%s-%s.tsv", reformatDate(config.getStartDate()), reformatDate(config.getEndDate()));
-        final File file = new File(filename);
-        final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        file = new File(filename);
+        bw = new BufferedWriter(new FileWriter(file));
 
         // Write header
         for (int i=0; i< FILE_HEADER.length; i++) {
@@ -51,7 +52,10 @@ public class TsvFileWriter {
             bw.write(header);
         }
         bw.write("\n");
+        bw.flush();
+    }
 
+    public void writeActions(final List<Action> actions) throws IOException, ParseException {
         // Write body
         for (final Action action : actions) {
             bw.write(action.action);
@@ -96,12 +100,13 @@ public class TsvFileWriter {
             bw.write(action.verifier);
             bw.write("\n");
         }
-        bw.close();
 
-        uploadTsvFile(file);
+        bw.flush();
     }
 
-    private void uploadTsvFile(@Nonnull final File tsvFile) throws IOException {
+    public void uploadTsvFile() throws IOException {
+        bw.close();
+
         final String iuploadUrl = config.getIuploadURL();
 
         final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
@@ -110,7 +115,7 @@ public class TsvFileWriter {
         final HttpPost httpPost = new HttpPost(iuploadUrl);
         httpPost.setHeader("Authorization", basicAuth);
         httpPost.setEntity(MultipartEntityBuilder.create()
-                .addBinaryBody("file", tsvFile, ContentType.MULTIPART_FORM_DATA, tsvFile.getName())
+                .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
                 .build());
 
         HttpClientBuilder.create().build().execute(httpPost);
