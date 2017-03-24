@@ -17,12 +17,10 @@ public class JiraActionIndexBuilderConfig {
     @SuppressWarnings("FieldMayBeFinal")
     private int jiraBatchSize;
 
-    private final boolean backfill;
-
     public JiraActionIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
                                         final String jiraFields, final String jiraExpand, final String jiraProject,
                                         final String iuploadUrl, final String startDate, final String endDate,
-                                        final int jiraBatchSize, final boolean backfill) {
+                                        final int jiraBatchSize) {
         this.jiraUsernameIndexer = jiraUsername;
         this.jiraPasswordIndexer = jiraPassword;
         this.jiraBaseURL = jiraUrl;
@@ -33,7 +31,6 @@ public class JiraActionIndexBuilderConfig {
         this.startDate = startDate;
         this.endDate = endDate;
         this.jiraBatchSize = jiraBatchSize;
-        this.backfill = backfill;
     }
 
     public String getJiraUsernameIndexer() {
@@ -74,9 +71,5 @@ public class JiraActionIndexBuilderConfig {
 
     public int getJiraBatchSize() {
         return jiraBatchSize;
-    }
-
-    public boolean isBackfill() {
-        return backfill;
     }
 }
