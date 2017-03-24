@@ -125,20 +125,14 @@ public class IssuesAPICaller {
 
     private String getJQLParam() throws UnsupportedEncodingException {
         final StringBuilder query = new StringBuilder();
-        if(config.isBackfill()) {
-            query.append("(");
-        }
-        query.append("(").append("updatedDate>=").append(config.getStartDate())
-                .append(" AND updatedDate<").append(config.getEndDate())
-                .append(")");
-        if(config.isBackfill()) {
-            query.append(" OR ")
-                    .append("(")
-                    .append("createdDate>=").append(config.getStartDate())
-                    .append(" AND createdDate<").append(config.getEndDate())
-                    .append(")")
-                    .append(")");
-        }
+
+        /* We want to get everything that existed between our start and end dates, and we'll filter out individual
+         * actions. So only filter out stuff that was last modified before our start date.
+         * No need to do more than this because updatedDate is always greater than or equal to createdDate.
+         */
+        query.append("updatedDate>=").append(config.getStartDate());
+
+        query.append(" AND issuekey=RAVENS-12");
 
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
