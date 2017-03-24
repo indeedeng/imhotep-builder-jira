@@ -3,7 +3,6 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
-import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
@@ -71,8 +70,8 @@ public class ActionsBuilder {
         int currentActionIndex = 0;
         for (final Comment comment : issue.fields.comment.comments) {
             if (!comment.isValid()) {
-                Loggers.warn(log, "Invalid comment for issue %s with id %s, created %s, updated %s, and body \"%s\".",
-                        issue.key, comment.id, comment.created, comment.updated, comment.body);
+                log.warn(String.format("Invalid comment for issue %s with id %s, created %s, updated %s, and body \"%s\".",
+                        issue.key, comment.id, comment.created, comment.updated, comment.body));
             }
             while (true) {
                 if (commentIsRightAfter(comment, currentActionIndex)) {

@@ -1,6 +1,6 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
-import com.indeed.common.util.PeriodParser;
+import com.indeed.imhotep.sql.parser.PeriodParser;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;

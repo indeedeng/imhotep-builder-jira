@@ -3,7 +3,6 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
-import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
@@ -123,8 +122,8 @@ public class Action {
         final DateTime afterDate = JiraActionUtil.parseDateTime(after);
         final long seconds = (afterDate.getMillis() - beforeDate.getMillis()) / 1000;
         if(seconds < 0) {
-            Loggers.error(log, "Invalid time difference between %s and %s for issue %s, action %s, fieldschanged %s.",
-                    before, after, issuekey, action, fieldschanged);
+            log.error(String.format("Invalid time difference between %s and %s for issue %s, action %s, fieldschanged %s.",
+                    before, after, issuekey, action, fieldschanged));
         }
         return seconds;
     }
