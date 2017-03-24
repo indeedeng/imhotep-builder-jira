@@ -7,7 +7,6 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
-import java.text.ParseException;
 
 /**
  * @author soono
@@ -43,7 +42,7 @@ public class ChangeLog {
         return null;
     }
 
-    public void sortHistories() throws ParseException {
+    public void sortHistories() {
         // It seems JIRA API's response is already sorted, but
         // just in case, use this method to make sure.
         // Because it's usually already sorted, use insertion sort algorithm here.

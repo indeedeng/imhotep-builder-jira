@@ -48,6 +48,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final String iuploadUrl = config.getString("iupload.url");
 
 
+        @SuppressWarnings("AccessStaticViaInstance")
         final Options options = new Options().addOption((OptionBuilder
                     .withLongOpt("start")
                     .isRequired()
