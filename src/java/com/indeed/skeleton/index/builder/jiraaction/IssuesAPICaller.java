@@ -132,8 +132,6 @@ public class IssuesAPICaller {
          */
         query.append("updatedDate>=").append(config.getStartDate());
 
-        query.append(" AND issuekey=RAVENS-12");
-
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
         }
