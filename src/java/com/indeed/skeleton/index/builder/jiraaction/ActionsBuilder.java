@@ -64,7 +64,7 @@ public class ActionsBuilder {
     // For Comment Action
     //
 
-    private void setCommentActions() throws Exception {
+    private void setCommentActions() {
         issue.fields.comment.sortComments();
 
         int currentActionIndex = 0;

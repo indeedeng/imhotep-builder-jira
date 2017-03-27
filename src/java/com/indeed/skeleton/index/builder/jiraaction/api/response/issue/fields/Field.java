@@ -11,7 +11,7 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-
+@SuppressWarnings("CanBeFinal")
 public class Field {
     public User assignee;
     public CommentCollection comment;
