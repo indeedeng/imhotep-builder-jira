@@ -80,7 +80,7 @@ public class JiraActionIndexBuilder {
                         final long file_end = System.currentTimeMillis();
                         fileTime += file_end - file_start;
                     } catch(final Exception e) {
-                        log.error(String.format("Error parsing comments for issue %s.", issue.key), e);
+                        log.error(String.format("Error parsing actions for issue %s.", issue.key), e);
                     }
                 }
                 end = System.currentTimeMillis();
