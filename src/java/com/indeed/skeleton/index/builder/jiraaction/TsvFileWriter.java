@@ -23,7 +23,7 @@ public class TsvFileWriter {
     private File file;
     private BufferedWriter bw;
 
-    public static final String [] FILE_HEADER = {
+    private static final String [] FILE_HEADER = {
         "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*|", "issueage", "issuekey",
             "issuetype", "project", "prevstatus", "reporter", "resolution", "status", "summary", "timeinstate",
             "timesinceaction", "time", "verifier"

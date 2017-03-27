@@ -96,10 +96,12 @@ public class ActionsBuilder {
     }
 
     private boolean commentIsAfter(final Comment comment, final Action action) {
-        // return true if comment is made after the action
+        /* return true if comment is made after the action. Or if it's the same instant as the action, because some
+         * automated tools are that fast (or because of a comment made at the same time you do an edit.
+         */
         final DateTime commentDate = JiraActionUtil.parseDateTime(comment.created);
         final DateTime actionDate = JiraActionUtil.parseDateTime(action.timestamp);
-        return commentDate.isAfter(actionDate);
+        return commentDate.isAfter(actionDate) || commentDate.isEqual(actionDate);
     }
 
     private boolean commentIsRightAfter(final Comment comment, final int actionIndex) {
