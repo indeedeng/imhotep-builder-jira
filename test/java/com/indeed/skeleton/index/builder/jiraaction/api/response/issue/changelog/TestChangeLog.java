@@ -4,17 +4,11 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.Item;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 
 public class TestChangeLog {
-    @Before
-    public void setup() {
-
-    }
-
     @Test
     public void testSort() throws ParseException {
         final History a = new History();

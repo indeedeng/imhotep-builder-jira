@@ -57,7 +57,7 @@ public class JiraActionUtil {
         throw new IllegalArgumentException("could not parse date: " + arg);
     }
 
-    public static String getUnixTimestamp(final String jiraTimestamp) throws ParseException {
+    public static String getUnixTimestamp(final String jiraTimestamp) {
         final DateTime date = JiraActionUtil.parseDateTime(jiraTimestamp);
         final long unixTime = date.getMillis()/1000;
         return String.valueOf(unixTime);
