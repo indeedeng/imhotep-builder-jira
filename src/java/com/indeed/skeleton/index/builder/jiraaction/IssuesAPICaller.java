@@ -20,9 +20,10 @@ import java.net.URLEncoder;
  */
 public class IssuesAPICaller {
     private static final Logger log = Logger.getLogger(IssuesAPICaller.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private final JiraActionIndexBuilderConfig config;
     private final String urlBase;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String authentication;
 
     // For Pagination
     private final int numPerPage; // Max number of issues per page
@@ -34,6 +35,7 @@ public class IssuesAPICaller {
         this.numPerPage = config.getJiraBatchSize();
 
         this.urlBase = getIssuesUrlBase();
+        this.authentication = getBasicAuth();
     }
 
     public JsonNode getIssuesNode() throws IOException {
@@ -47,6 +49,7 @@ public class IssuesAPICaller {
         final InputStream in = urlConnection.getInputStream();
         final BufferedReader br = new BufferedReader(new InputStreamReader(in));
         final String apiRes = br.readLine();
+        br.close();
         return objectMapper.readTree(apiRes);
     }
 
@@ -73,7 +76,7 @@ public class IssuesAPICaller {
     private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
         final URL url = new URL(urlString);
         final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Authorization", getBasicAuth());
+        urlConnection.setRequestProperty("Authorization", authentication);
         return urlConnection;
     }
 
