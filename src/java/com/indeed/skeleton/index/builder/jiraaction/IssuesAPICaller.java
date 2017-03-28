@@ -20,18 +20,22 @@ import java.net.URLEncoder;
  */
 public class IssuesAPICaller {
     private static final Logger log = Logger.getLogger(IssuesAPICaller.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private final JiraActionIndexBuilderConfig config;
-    //
-    // For Pagination
-    //
+    private final String urlBase;
+    private final String authentication;
 
+    // For Pagination
     private final int numPerPage; // Max number of issues per page
     private int page = 0; // Current Page
     private int numTotal = -1; // Total number of issues remaining
 
-    public IssuesAPICaller(final JiraActionIndexBuilderConfig config) {
+    public IssuesAPICaller(final JiraActionIndexBuilderConfig config) throws UnsupportedEncodingException {
         this.config = config;
         this.numPerPage = config.getJiraBatchSize();
+
+        this.urlBase = getIssuesUrlBase();
+        this.authentication = getBasicAuth();
     }
 
     public JsonNode getIssuesNode() throws IOException {
@@ -40,22 +44,14 @@ public class IssuesAPICaller {
         return apiRes.get("issues");
     }
 
-    //
-    // Call API with URL and parse response to JSON node.
-    //
-
     private JsonNode getJsonNode(final String url) throws IOException {
         final HttpsURLConnection urlConnection = getURLConnection(url);
         final InputStream in = urlConnection.getInputStream();
         final BufferedReader br = new BufferedReader(new InputStreamReader(in));
         final String apiRes = br.readLine();
-        final ObjectMapper mapper = new ObjectMapper();
-        return mapper.readTree(apiRes);
+        br.close();
+        return objectMapper.readTree(apiRes);
     }
-
-    //
-    // For Pagination
-    //
 
     public int setNumTotal() throws IOException {
         final JsonNode apiRes = getJsonNode(getBasicInfoURL());
@@ -77,15 +73,10 @@ public class IssuesAPICaller {
         return page * numPerPage;
     }
 
-
-    //
-    // For Getting URL Connection
-    //
-
     private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
         final URL url = new URL(urlString);
         final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Authorization", getBasicAuth());
+        urlConnection.setRequestProperty("Authorization", authentication);
         return urlConnection;
     }
 
@@ -95,18 +86,19 @@ public class IssuesAPICaller {
         return basicAuth;
     }
 
-    private String getIssuesURL() throws UnsupportedEncodingException {
-        final String url = new StringBuilder(config.getJiraBaseURL() + "?")
-                .append(getJQLParam())
-                .append("&")
-                .append(getFieldsParam())
-                .append("&")
-                .append(getExpandParam())
-                .append("&")
-                .append(getStartAtParam())
-                .append("&")
-                .append(getMaxResults())
-                .toString();
+    private String getIssuesUrlBase() throws UnsupportedEncodingException {
+        return config.getJiraBaseURL() + "?" +
+                getJQLParam() +
+                "&" +
+                getFieldsParam() +
+                "&" +
+                getExpandParam() +
+                "&" +
+                getMaxResults();
+    }
+
+    private String getIssuesURL() {
+        final String url = urlBase + "&" + getStartAtParam();
 
         final int start = getStartAt();
         if(log.isDebugEnabled()) {
@@ -118,10 +110,10 @@ public class IssuesAPICaller {
     }
 
     private String getBasicInfoURL() throws UnsupportedEncodingException {
-        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?")
-                .append(getJQLParam())
-                .append("&maxResults=0");
-        return url.toString();
+        final String url = config.getJiraBaseURL() + "?" +
+                getJQLParam() +
+                "&maxResults=0";
+        return url;
     }
 
     private String getJQLParam() throws UnsupportedEncodingException {

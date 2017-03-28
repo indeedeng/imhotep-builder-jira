@@ -25,7 +25,7 @@ public class IssueAPIParser {
                 return null;
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            log.error("Caught an error trying to parse a JSON node", e);
             return null;
         }
         return issue;
