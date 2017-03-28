@@ -32,7 +32,7 @@ public class JiraActionIndexBuilder {
                 log.info(String.format("%d ms, found %d total issues.", end - start, total));
             }
 
-            long apiTime =0;
+            long apiTime = 0;
             long processTime = 0;
             long fileTime = 0;
 
