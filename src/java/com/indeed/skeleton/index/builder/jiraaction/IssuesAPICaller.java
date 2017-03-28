@@ -128,10 +128,12 @@ public class IssuesAPICaller {
         final StringBuilder query = new StringBuilder();
 
         /* We want to get everything that existed between our start and end dates, and we'll filter out individual
-         * actions. So only filter out stuff that was last modified before our start date.
-         * No need to do more than this because updatedDate is always greater than or equal to createdDate.
+         * actions elsewhere. So only select issues that were updated since we started (i.e., exclude things that
+         * have not been updated since our start) and only issues that were created before our end (i.e., exclude things
+         * that were created after we started).
          */
-        query.append("updatedDate>=").append(config.getStartDate());
+        query.append("updatedDate>=").append(config.getStartDate())
+                .append(" AND createdDate<").append(config.getEndDate());
 
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
