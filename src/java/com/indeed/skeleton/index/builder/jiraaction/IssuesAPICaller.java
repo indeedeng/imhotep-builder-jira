@@ -32,6 +32,7 @@ public class IssuesAPICaller {
 
     public IssuesAPICaller(final JiraActionIndexBuilderConfig config) throws UnsupportedEncodingException {
         this.config = config;
+        log.debug("Did we find a password? u:" + config.getJiraUsernameIndexer() + " p: " + config.getJiraPasswordIndexer());
         this.numPerPage = config.getJiraBatchSize();
 
         this.urlBase = getIssuesUrlBase();

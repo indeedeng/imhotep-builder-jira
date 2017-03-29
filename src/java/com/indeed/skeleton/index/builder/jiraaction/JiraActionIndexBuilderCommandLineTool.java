@@ -38,6 +38,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final Configuration config = cmdLineUtil.getProperties();
         final String jiraUsername = config.getString("jira.username.indexer");
         final String jiraPassword = config.getString("jira.password.indexer");
+        log.debug("Did we find a password? u:" + jiraUsername + " p: " + jiraPassword);
 
         final String jiraBaseUrl = config.getString("jira.baseurl");
         final String[] jiraFieldArray = config.getStringArray("jira.fields");
