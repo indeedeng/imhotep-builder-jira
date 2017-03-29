@@ -77,7 +77,7 @@ public class IssuesAPICaller {
         final URL url = new URL(urlString);
         final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", authentication);
-        log.debug("Trying authorization " + urlConnection.getRequestProperty("Authorization") + " with u:" + config.getJiraUsernameIndexer() + " and p:" + config.getJiraPasswordIndexer());
+        log.debug("Trying authorization " + authentication + " with u:" + config.getJiraUsernameIndexer() + " and p:" + config.getJiraPasswordIndexer());
         return urlConnection;
     }
 
