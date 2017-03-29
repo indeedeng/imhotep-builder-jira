@@ -74,6 +74,7 @@ public class IssuesAPICaller {
     private JsonNode getIssuesNode() throws IOException {
         final JsonNode apiRes = getJsonNode(getIssuesURL());
         setNextPage();
+        this.numTotal = apiRes.get("total").intValue();
         return apiRes.get("issues");
     }
 
