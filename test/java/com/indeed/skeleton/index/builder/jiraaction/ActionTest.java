@@ -6,6 +6,7 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
 import com.indeed.test.junit.Check;
 import org.easymock.EasyMock;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +25,10 @@ public class ActionTest {
 
     // default values
     private static final long prevActionTimeinstate = 50;
-    private static final String prevActionTimestamp = "2016-09-02T01:00:00";
-    private static final String historyCreated = "2016-09-02T01:00:10";
-    private static final String historyCreated2 = "2016-09-02T01:00:20"; // diff with prevAction is 10s.
-    private static final String commentCreated = "2016-09-02T01:00:30"; // diff with prevAction is 10s.
+    private static final DateTime prevActionTimestamp = JiraActionUtil.parseDateTime("2016-09-02T01:00:00");
+    private static final DateTime historyCreated = JiraActionUtil.parseDateTime("2016-09-02T01:00:10");
+    private static final DateTime historyCreated2 = JiraActionUtil.parseDateTime("2016-09-02T01:00:20"); // diff with prevAction is 10s.
+    private static final DateTime commentCreated = JiraActionUtil.parseDateTime("2016-09-02T01:00:30"); // diff with prevAction is 10s.
     private static final long timeDiffWithPrevAction = 10;
 
     @Before
