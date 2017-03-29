@@ -27,7 +27,7 @@ public class Action {
     public String summary;
     public long timeinstate;
     public long timesinceaction;
-    public String timestamp;
+    public DateTime timestamp;
     public String verifier;
     public String category;
     public String fixversions;
@@ -109,7 +109,7 @@ public class Action {
         return timeInState(prevAction, history.created);
     }
 
-    private long timeInState(final Action prevAction, final String changeTimestamp) {
+    private long timeInState(final Action prevAction, final DateTime changeTimestamp) {
         if(!prevAction.prevstatus.equals(prevAction.status)) {
             return getTimeDiff(prevAction.timestamp, changeTimestamp);
         }
@@ -117,10 +117,8 @@ public class Action {
         return getTimeDiff(prevAction.timestamp, changeTimestamp) + prevAction.timeinstate;
     }
 
-    private long getTimeDiff(final String before, final String after) {
-        final DateTime beforeDate = JiraActionUtil.parseDateTime(before);
-        final DateTime afterDate = JiraActionUtil.parseDateTime(after);
-        final long seconds = (afterDate.getMillis() - beforeDate.getMillis()) / 1000;
+    private long getTimeDiff(final DateTime before, final DateTime after) {
+        final long seconds = (after.getMillis() - before.getMillis()) / 1000;
         if(seconds < 0) {
             log.error(String.format("Invalid time difference between %s and %s for issue %s, action %s, fieldschanged %s.",
                     before, after, issuekey, action, fieldschanged));
