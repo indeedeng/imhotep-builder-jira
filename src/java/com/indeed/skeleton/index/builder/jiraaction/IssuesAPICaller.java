@@ -26,30 +26,45 @@ public class IssuesAPICaller {
     private final String authentication;
 
     // For Pagination
-    private final int numPerPage; // Max number of issues per page
-    private int page = 0; // Current Page
+    private final int maxPerPage; // Max number of issues per page
+    private int batchSize;
+    private int start = 0; // Current Page
     private int numTotal = -1; // Total number of issues remaining
+
     private int backoff = 10_000;
 
     public IssuesAPICaller(final JiraActionIndexBuilderConfig config) throws UnsupportedEncodingException {
         this.config = config;
-        this.numPerPage = config.getJiraBatchSize();
+        this.maxPerPage = config.getJiraBatchSize();
+        this.batchSize = config.getJiraBatchSize();
 
         this.urlBase = getIssuesUrlBase();
         this.authentication = getBasicAuth();
     }
 
     public JsonNode getIssuesNodeWithBackoff() throws InterruptedException {
-        backoff = backoff > 10_000 ? backoff / 2 : 10_000;
+        int tries = 0;
         while (true) {
+            final long start = System.currentTimeMillis();
             try {
-                return getIssuesNode();
+                tries++;
+                final JsonNode node = getIssuesNode();
+                backoff = Math.max(backoff / 2, 10_000);
+                batchSize = Math.min(batchSize + 2, maxPerPage);
+                return node;
             } catch (final IOException e) {
-                if (backoff >= 120_000) {
-                    log.error("Tried too many times to get issues and failed, aborting.");
+                final long end = System.currentTimeMillis();
+                log.error(String.format("On try %d/5, caught IOException getting %d issues, after %d milliseconds.",
+                        tries, batchSize, end - start));
+
+                if(tries >= 5) {
+                    log.error("Tried too many times to get issues and failed, aborting.", e);
                     throw new RuntimeException(e);
                 }
-                log.warn("Caught exception when trying to get issues, backing off for %d milliseconds.", e);
+
+                batchSize = Math.max(batchSize - 2, 1);
+                log.warn("Caught exception when trying to get issues, backing off for " + backoff + " milliseconds" +
+                        " and trying again with batchSize = " + batchSize, e);
                 Thread.sleep(backoff);
                 backoff *= 2;
             }
@@ -79,16 +94,11 @@ public class IssuesAPICaller {
     }
 
     public boolean currentPageExist() {
-        return (page * numPerPage) < numTotal;
+        return start < numTotal;
     }
 
     private void setNextPage() {
-            page +=1;
-    }
-
-    private int getStartAt() {
-        // startAt starts from 0
-        return page * numPerPage;
+        start += batchSize;
     }
 
     private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
@@ -110,15 +120,14 @@ public class IssuesAPICaller {
                 "&" +
                 getFieldsParam() +
                 "&" +
-                getExpandParam() +
-                "&" +
-                getMaxResults();
+                getExpandParam();
     }
 
     private String getIssuesURL() {
-        final String url = urlBase + "&" + getStartAtParam();
+        final String url = urlBase +
+                "&" + getStartAtParam() +
+                "&" + getMaxResults();
 
-        final int start = getStartAt();
         if(log.isDebugEnabled()) {
             log.debug(String.format("Trying URL: %s", url));
         }
@@ -149,6 +158,10 @@ public class IssuesAPICaller {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
         }
 
+        if(!StringUtils.isEmpty(config.getExcludedJiraProject())) {
+            query.append(" AND project NOT IN (").append(config.getExcludedJiraProject()).append(")");
+        }
+
         return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
     }
 
@@ -161,10 +174,10 @@ public class IssuesAPICaller {
     }
 
     private String getStartAtParam() {
-        return String.format("startAt=%d", getStartAt());
+        return String.format("startAt=%d", start);
     }
 
     private String getMaxResults() {
-        return String.format("maxResults=%d", numPerPage);
+        return String.format("maxResults=%d", batchSize);
     }
 }
