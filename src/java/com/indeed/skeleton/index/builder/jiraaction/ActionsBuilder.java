@@ -85,13 +85,7 @@ public class ActionsBuilder {
         }
     }
 
-
-    //
-    // For interpreting if the date is new
-    //
-
-    private boolean isCreatedDuringRange(final String dateString) {
-        final DateTime createdDate = JiraActionUtil.parseDateTime(dateString);
+    private boolean isCreatedDuringRange(final DateTime createdDate) {
         return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) == 1;
     }
 
@@ -99,8 +93,8 @@ public class ActionsBuilder {
         /* return true if comment is made after the action. Or if it's the same instant as the action, because some
          * automated tools are that fast (or because of a comment made at the same time you do an edit.
          */
-        final DateTime commentDate = JiraActionUtil.parseDateTime(comment.created);
-        final DateTime actionDate = JiraActionUtil.parseDateTime(action.timestamp);
+        final DateTime commentDate = comment.created;
+        final DateTime actionDate = action.timestamp;
         return commentDate.isAfter(actionDate) || commentDate.isEqual(actionDate);
     }
 

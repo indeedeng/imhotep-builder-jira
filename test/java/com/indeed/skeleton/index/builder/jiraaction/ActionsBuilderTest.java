@@ -162,7 +162,7 @@ public class ActionsBuilderTest {
         final History history = new History();
         history.items = new Item[0];
 
-        history.created = parseDateToString(created);
+        history.created = created;
 
         final User historyAuthor = new User();
         history.author = historyAuthor;
@@ -179,7 +179,7 @@ public class ActionsBuilderTest {
 
     private void createComment(final DateTime created) {
         final Comment comment = new Comment();
-        comment.created = parseDateToString(created);
+        comment.created = created;
 
         final User commentAuthor = new User();
         comment.author = commentAuthor;
@@ -195,10 +195,6 @@ public class ActionsBuilderTest {
     }
 
     private void setCreationDate(final DateTime date) {
-        issue.fields.created = parseDateToString(date);
-    }
-
-    private String parseDateToString(final DateTime date) {
-        return date.toString(JiraActionUtil.DATE_TIME_FORMATTER);
+        issue.fields.created = date;
     }
 }
