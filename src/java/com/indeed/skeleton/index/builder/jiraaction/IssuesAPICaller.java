@@ -40,7 +40,7 @@ public class IssuesAPICaller {
     }
 
     public JsonNode getIssuesNodeWithBackoff() throws InterruptedException {
-        backoff = Math.min(backoff/2, 10_000);
+        backoff = backoff > 10_000 ? backoff / 2 : 10_000;
         while (true) {
             try {
                 return getIssuesNode();
@@ -56,7 +56,7 @@ public class IssuesAPICaller {
         }
     }
 
-    public JsonNode getIssuesNode() throws IOException {
+    private JsonNode getIssuesNode() throws IOException {
         final JsonNode apiRes = getJsonNode(getIssuesURL());
         setNextPage();
         return apiRes.get("issues");
