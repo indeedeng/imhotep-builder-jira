@@ -48,11 +48,10 @@ public class JiraActionIndexBuilder {
             fileTime += end - start;
 
             while (issuesAPICaller.currentPageExist()) {
-                // Get issues from API.
                 start = System.currentTimeMillis();
-                final JsonNode issuesNode = issuesAPICaller.getIssuesNode();
+                final JsonNode issuesNode = issuesAPICaller.getIssuesNodeWithBackoff();
                 end = System.currentTimeMillis();
-                apiTime += end-start;
+                apiTime += end - start;
                 log.info(String.format("%d ms for an API call.", end - start));
 
                 start = System.currentTimeMillis();
@@ -85,8 +84,6 @@ public class JiraActionIndexBuilder {
                 }
                 end = System.currentTimeMillis();
                 log.info(String.format("%d ms to get actions from a set of issues.", end - start));
-
-                Thread.sleep(10000);
             }
 
             start = System.currentTimeMillis();

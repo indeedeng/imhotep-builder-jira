@@ -29,6 +29,7 @@ public class IssuesAPICaller {
     private final int numPerPage; // Max number of issues per page
     private int page = 0; // Current Page
     private int numTotal = -1; // Total number of issues remaining
+    private int backoff = 10_000;
 
     public IssuesAPICaller(final JiraActionIndexBuilderConfig config) throws UnsupportedEncodingException {
         this.config = config;
@@ -36,6 +37,23 @@ public class IssuesAPICaller {
 
         this.urlBase = getIssuesUrlBase();
         this.authentication = getBasicAuth();
+    }
+
+    public JsonNode getIssuesNodeWithBackoff() throws InterruptedException {
+        backoff = Math.min(backoff/2, 10_000);
+        while (true) {
+            try {
+                return getIssuesNode();
+            } catch (final IOException e) {
+                if (backoff >= 120_000) {
+                    log.error("Tried too many times to get issues and failed, aborting.");
+                    throw new RuntimeException(e);
+                }
+                log.warn("Caught exception when trying to get issues, backing off for %d milliseconds.", e);
+                Thread.sleep(backoff);
+                backoff *= 2;
+            }
+        }
     }
 
     public JsonNode getIssuesNode() throws IOException {
