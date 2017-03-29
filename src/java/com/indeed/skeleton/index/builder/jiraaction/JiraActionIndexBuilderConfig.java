@@ -8,25 +8,26 @@ public class JiraActionIndexBuilderConfig {
     private final String jiraFields;
     private final String jiraExpand;
     private final String jiraProject;
+    private final String excludedJiraProject;
 
     private final String iuploadURL;
 
     private final String startDate;
     private final String endDate;
 
-    @SuppressWarnings("FieldMayBeFinal")
-    private int jiraBatchSize;
+    private final int jiraBatchSize;
 
     public JiraActionIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
                                         final String jiraFields, final String jiraExpand, final String jiraProject,
-                                        final String iuploadUrl, final String startDate, final String endDate,
-                                        final int jiraBatchSize) {
+                                        final String excludedJiraProject, final String iuploadUrl,
+                                        final String startDate, final String endDate, final int jiraBatchSize) {
         this.jiraUsernameIndexer = jiraUsername;
         this.jiraPasswordIndexer = jiraPassword;
         this.jiraBaseURL = jiraUrl;
         this.jiraFields = jiraFields;
         this.jiraExpand = jiraExpand;
         this.jiraProject = jiraProject;
+        this.excludedJiraProject = excludedJiraProject;
         this.iuploadURL = iuploadUrl;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -55,6 +56,10 @@ public class JiraActionIndexBuilderConfig {
 
     public String getJiraProject() {
         return jiraProject;
+    }
+
+    public String getExcludedJiraProject() {
+        return excludedJiraProject;
     }
 
     public String getIuploadURL() {
