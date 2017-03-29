@@ -56,7 +56,10 @@ public class TsvFileWriter {
     }
 
     public void writeActions(final List<Action> actions) throws IOException, ParseException {
-        // Write body
+        if(actions.isEmpty()) {
+            return;
+        }
+
         for (final Action action : actions) {
             bw.write(action.action);
             bw.write("\t");
@@ -70,8 +73,7 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.fixversions);
             bw.write("\t");
-            final String issueage = String.valueOf(action.issueage);
-            bw.write(issueage);
+            bw.write(String.valueOf(action.issueage));
             bw.write("\t");
             bw.write(action.issuekey);
             bw.write("\t");
@@ -89,11 +91,9 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.summary);
             bw.write("\t");
-            final String timeinstate = String.valueOf(action.timeinstate);
-            bw.write(timeinstate);
+            bw.write(String.valueOf(action.timeinstate));
             bw.write("\t");
-            final String timesinceaction = String.valueOf(action.timesinceaction);
-            bw.write(timesinceaction);
+            bw.write(String.valueOf(action.timesinceaction));
             bw.write("\t");
             bw.write(JiraActionUtil.getUnixTimestamp(action.timestamp));
             bw.write("\t");

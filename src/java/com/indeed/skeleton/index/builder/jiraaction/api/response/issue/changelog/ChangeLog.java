@@ -1,7 +1,6 @@
 package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.Item;
 import org.joda.time.DateTime;
@@ -49,10 +48,10 @@ public class ChangeLog {
 
         for (int i=1; i < histories.length; i++) {
             final History history = histories[i];
-            final DateTime date = JiraActionUtil.parseDateTime(history.created);
+            final DateTime date = history.created;
             int j;
             for (j=i-1; j >= 0; j--) {
-                final DateTime comparedDate = JiraActionUtil.parseDateTime(histories[j].created);
+                final DateTime comparedDate = histories[j].created;
                 if (date.isAfter(comparedDate) || date.equals(comparedDate)) {
                     break;
                 }
