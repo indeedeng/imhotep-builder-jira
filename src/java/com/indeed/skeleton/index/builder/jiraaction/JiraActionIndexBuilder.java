@@ -5,7 +5,9 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author oono
@@ -47,6 +49,8 @@ public class JiraActionIndexBuilder {
             end = System.currentTimeMillis();
             fileTime += end - start;
 
+            final Set<String> seenIssues = new HashSet<>();
+
             while (issuesAPICaller.currentPageExist()) {
                 start = System.currentTimeMillis();
                 final JsonNode issuesNode = issuesAPICaller.getIssuesNodeWithBackoff();
@@ -61,9 +65,10 @@ public class JiraActionIndexBuilder {
                     final Issue issue = IssueAPIParser.getObject(issueNode);
                     long process_end = System.currentTimeMillis();
                     processTime += process_end - process_start;
-                    if(issue == null) {
+                    if(issue == null || seenIssues.contains(issue.key)) {
                         continue;
                     }
+                    seenIssues.add(issue.key);
 
                     try {
                         // Build Action objects from parsed API response Object.
