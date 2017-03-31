@@ -1,14 +1,13 @@
 package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import org.joda.time.DateTime;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * Created by soono on 8/25/16.
+ * @author soono
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
@@ -25,8 +24,8 @@ public class CommentCollection {
         Arrays.sort(comments, new Comparator<Comment>() {
             @Override
             public int compare(final Comment o1, final Comment o2) {
-                final DateTime date1 = JiraActionUtil.parseDateTime(o1.created);
-                final DateTime date2 = JiraActionUtil.parseDateTime(o2.created);
+                final DateTime date1 = o1.created;
+                final DateTime date2 = o2.created;
                 return date1.compareTo(date2);
             }
         });

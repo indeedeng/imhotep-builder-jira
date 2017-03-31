@@ -2,9 +2,8 @@ package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.indeed.common.util.StringUtils;
-import com.indeed.util.logging.Loggers;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -21,42 +20,72 @@ import java.net.URLEncoder;
  */
 public class IssuesAPICaller {
     private static final Logger log = Logger.getLogger(IssuesAPICaller.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private final JiraActionIndexBuilderConfig config;
-    //
-    // For Pagination
-    //
+    private final String urlBase;
+    private final String authentication;
 
-    private final int numPerPage; // Max number of issues per page
-    private int page = 0; // Current Page
+    // For Pagination
+    private final int maxPerPage; // Max number of issues per page
+    private int batchSize;
+    private int start = 0; // Current Page
     private int numTotal = -1; // Total number of issues remaining
 
-    public IssuesAPICaller(final JiraActionIndexBuilderConfig config) {
+    private int backoff = 10_000;
+
+    public IssuesAPICaller(final JiraActionIndexBuilderConfig config) throws UnsupportedEncodingException {
         this.config = config;
-        this.numPerPage = config.getJiraBatchSize();
+        this.maxPerPage = config.getJiraBatchSize();
+        this.batchSize = config.getJiraBatchSize();
+
+        this.urlBase = getIssuesUrlBase();
+        this.authentication = getBasicAuth();
     }
 
-    public JsonNode getIssuesNode() throws IOException {
+    public JsonNode getIssuesNodeWithBackoff() throws InterruptedException {
+        int tries = 0;
+        while (true) {
+            final long start = System.currentTimeMillis();
+            try {
+                tries++;
+                final JsonNode node = getIssuesNode();
+                backoff = Math.max(backoff / 2, 10_000);
+                batchSize = Math.min(batchSize + 2, maxPerPage);
+                return node;
+            } catch (final IOException e) {
+                final long end = System.currentTimeMillis();
+                log.error(String.format("On try %d/5, caught IOException getting %d issues, after %d milliseconds.",
+                        tries, batchSize, end - start));
+
+                if(tries >= 5) {
+                    log.error("Tried too many times to get issues and failed, aborting.", e);
+                    throw new RuntimeException(e);
+                }
+
+                batchSize = Math.max(batchSize - 2, 1);
+                log.warn("Caught exception when trying to get issues, backing off for " + backoff + " milliseconds" +
+                        " and trying again with batchSize = " + batchSize, e);
+                Thread.sleep(backoff);
+                backoff *= 2;
+            }
+        }
+    }
+
+    private JsonNode getIssuesNode() throws IOException {
         final JsonNode apiRes = getJsonNode(getIssuesURL());
         setNextPage();
+        this.numTotal = apiRes.get("total").intValue();
         return apiRes.get("issues");
     }
-
-    //
-    // Call API with URL and parse response to JSON node.
-    //
 
     private JsonNode getJsonNode(final String url) throws IOException {
         final HttpsURLConnection urlConnection = getURLConnection(url);
         final InputStream in = urlConnection.getInputStream();
         final BufferedReader br = new BufferedReader(new InputStreamReader(in));
         final String apiRes = br.readLine();
-        final ObjectMapper mapper = new ObjectMapper();
-        return mapper.readTree(apiRes);
+        br.close();
+        return objectMapper.readTree(apiRes);
     }
-
-    //
-    // For Pagination
-    //
 
     public int setNumTotal() throws IOException {
         final JsonNode apiRes = getJsonNode(getBasicInfoURL());
@@ -66,27 +95,17 @@ public class IssuesAPICaller {
     }
 
     public boolean currentPageExist() {
-        return (page * numPerPage) < numTotal;
+        return start < numTotal;
     }
 
     private void setNextPage() {
-            page +=1;
+        start += batchSize;
     }
-
-    private int getStartAt() {
-        // startAt starts from 0
-        return page * numPerPage;
-    }
-
-
-    //
-    // For Getting URL Connection
-    //
 
     private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
         final URL url = new URL(urlString);
         final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Authorization", getBasicAuth());
+        urlConnection.setRequestProperty("Authorization", authentication);
         return urlConnection;
     }
 
@@ -96,52 +115,52 @@ public class IssuesAPICaller {
         return basicAuth;
     }
 
-    private String getIssuesURL() throws UnsupportedEncodingException {
-        final String url = new StringBuilder(config.getJiraBaseURL() + "?")
-                .append(getJQLParam())
-                .append("&")
-                .append(getFieldsParam())
-                .append("&")
-                .append(getExpandParam())
-                .append("&")
-                .append(getStartAtParam())
-                .append("&")
-                .append(getMaxResults())
-                .toString();
+    private String getIssuesUrlBase() throws UnsupportedEncodingException {
+        return config.getJiraBaseURL() + "?" +
+                getJQLParam() +
+                "&" +
+                getFieldsParam() +
+                "&" +
+                getExpandParam();
+    }
 
-        final int start = getStartAt();
-        Loggers.debug(log, "Trying URL: %s", url);
-        Loggers.info(log, "%f%% complete, %d/%d", (float)start*100/numTotal, start, numTotal);
+    private String getIssuesURL() {
+        final String url = urlBase +
+                "&" + getStartAtParam() +
+                "&" + getMaxResults();
+
+        if(log.isDebugEnabled()) {
+            log.debug(String.format("Trying URL: %s", url));
+        }
+        log.info(String.format("%f%% complete, %d/%d", (float)start*100/numTotal, start, numTotal));
 
         return url;
     }
 
     private String getBasicInfoURL() throws UnsupportedEncodingException {
-        final StringBuilder url = new StringBuilder(config.getJiraBaseURL() + "?")
-                .append(getJQLParam())
-                .append("&maxResults=0");
-        return url.toString();
+        final String url = config.getJiraBaseURL() + "?" +
+                getJQLParam() +
+                "&maxResults=0";
+        return url;
     }
 
     private String getJQLParam() throws UnsupportedEncodingException {
         final StringBuilder query = new StringBuilder();
-        if(config.isBackfill()) {
-            query.append("(");
-        }
-        query.append("(").append("updatedDate>=").append(config.getStartDate())
-                .append(" AND updatedDate<").append(config.getEndDate())
-                .append(")");
-        if(config.isBackfill()) {
-            query.append(" OR ")
-                    .append("(")
-                    .append("createdDate>=").append(config.getStartDate())
-                    .append(" AND createdDate<").append(config.getEndDate())
-                    .append(")")
-                    .append(")");
-        }
+
+        /* We want to get everything that existed between our start and end dates, and we'll filter out individual
+         * actions elsewhere. So only select issues that were updated since we started (i.e., exclude things that
+         * have not been updated since our start) and only issues that were created before our end (i.e., exclude things
+         * that were created after we started).
+         */
+        query.append("updatedDate>=").append(config.getStartDate())
+                .append(" AND createdDate<").append(config.getEndDate());
 
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");
+        }
+
+        if(!StringUtils.isEmpty(config.getExcludedJiraProject())) {
+            query.append(" AND project NOT IN (").append(config.getExcludedJiraProject()).append(")");
         }
 
         return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
@@ -156,10 +175,10 @@ public class IssuesAPICaller {
     }
 
     private String getStartAtParam() {
-        return String.format("startAt=%d", getStartAt());
+        return String.format("startAt=%d", start);
     }
 
     private String getMaxResults() {
-        return String.format("maxResults=%d", numPerPage);
+        return String.format("maxResults=%d", batchSize);
     }
 }

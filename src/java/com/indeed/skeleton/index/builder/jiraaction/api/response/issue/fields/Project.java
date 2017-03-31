@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-
+@SuppressWarnings("CanBeFinal")
 public class Project {
     public ProjectCategory projectCategory;
     public String name;

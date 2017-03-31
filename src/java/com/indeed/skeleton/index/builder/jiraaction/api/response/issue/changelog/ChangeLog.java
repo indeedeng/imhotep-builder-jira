@@ -1,13 +1,11 @@
 package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.Item;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
-import java.text.ParseException;
 
 /**
  * @author soono
@@ -43,17 +41,17 @@ public class ChangeLog {
         return null;
     }
 
-    public void sortHistories() throws ParseException {
+    public void sortHistories() {
         // It seems JIRA API's response is already sorted, but
         // just in case, use this method to make sure.
         // Because it's usually already sorted, use insertion sort algorithm here.
 
         for (int i=1; i < histories.length; i++) {
             final History history = histories[i];
-            final DateTime date = JiraActionUtil.parseDateTime(history.created);
+            final DateTime date = history.created;
             int j;
             for (j=i-1; j >= 0; j--) {
-                final DateTime comparedDate = JiraActionUtil.parseDateTime(histories[j].created);
+                final DateTime comparedDate = histories[j].created;
                 if (date.isAfter(comparedDate) || date.equals(comparedDate)) {
                     break;
                 }
