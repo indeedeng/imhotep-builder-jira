@@ -1,18 +1,12 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
-import com.indeed.common.util.PeriodParser;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.Period;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-import java.text.ParseException;
 
 public class JiraActionUtil {
     private JiraActionUtil() { /* No */ }
-    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     private static final DateTimeZone ZONE = DateTimeZone.forOffsetHours(-6);
 
@@ -57,8 +51,7 @@ public class JiraActionUtil {
         throw new IllegalArgumentException("could not parse date: " + arg);
     }
 
-    public static String getUnixTimestamp(final String jiraTimestamp) throws ParseException {
-        final DateTime date = JiraActionUtil.parseDateTime(jiraTimestamp);
+    public static String getUnixTimestamp(final DateTime date) {
         final long unixTime = date.getMillis()/1000;
         return String.valueOf(unixTime);
     }

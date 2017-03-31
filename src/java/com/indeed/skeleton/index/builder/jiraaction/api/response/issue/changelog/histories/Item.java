@@ -2,8 +2,8 @@ package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import org.python.google.common.annotations.VisibleForTesting;
 
 import java.util.Map;
 

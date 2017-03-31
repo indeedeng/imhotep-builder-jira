@@ -3,19 +3,21 @@ package com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Joiner;
-import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.CommentCollection;
+import com.indeed.skeleton.index.builder.jiraaction.JiraActionUtil;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.User;
+import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.CommentCollection;
+import org.joda.time.DateTime;
 
 /**
  * @author soono
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-
+@SuppressWarnings("CanBeFinal")
 public class Field {
     public User assignee;
     public CommentCollection comment;
-    public String created;
+    public DateTime created;
     public User creator;
     public Issuetype issuetype;
     public Project project;
@@ -27,6 +29,12 @@ public class Field {
     public FixVersion[] fixVersions;
 
     @SuppressWarnings("unused")
+    @JsonProperty("created")
+    public void setCreate(final String created) {
+        this.created = JiraActionUtil.parseDateTime(created);
+    }
+
+    @SuppressWarnings("unused")
     @JsonProperty("customfield_10003")
     public void setVerifier(final User verifier) {
         this.verifier = verifier;
@@ -35,7 +43,6 @@ public class Field {
     public String getStringValue(final String attribute) throws Exception {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
-            case "created": return created;
             case "creator": return creator == null ? "" : creator.displayName;
             case "issuetype": return issuetype == null ? "" : issuetype.name;
             case "project": return project == null ? "" : project.name;

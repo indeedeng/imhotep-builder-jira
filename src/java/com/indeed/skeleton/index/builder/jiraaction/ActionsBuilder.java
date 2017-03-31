@@ -3,12 +3,12 @@ package com.indeed.skeleton.index.builder.jiraaction;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.Issue;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.changelog.histories.History;
 import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.comment.Comment;
-import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author soono
@@ -16,37 +16,24 @@ import java.util.List;
 public class ActionsBuilder {
     private static final Logger log = Logger.getLogger(ActionsBuilder.class);
 
-    private final boolean backfill;
     private final Issue issue;
     private final DateTime startDate;
     private final DateTime endDate;
-    private boolean isNewIssue;
-    public final List<Action> actions = new ArrayList<>();
+    private final List<Action> actions;
 
-    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate,
-                          final boolean backfill) {
+    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate) {
         this.issue = issue;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.backfill = backfill;
+
+        actions = new ArrayList<>(issue.changelog.histories.length + issue.fields.comment.comments.length);
     }
 
     public List<Action> buildActions() throws Exception {
-        setIsNewIssue();
-
-        if (isNewIssue) {
-            setCreateAction();
-        }
-
+        setCreateAction();
         setUpdateActions();
-
         setCommentActions();
-
-        return actions;
-    }
-
-    private void setIsNewIssue() {
-        this.isNewIssue = isCreatedDuringRange(issue.fields.created);
+        return actions.stream().filter(a -> isCreatedDuringRange(a.timestamp)).collect(Collectors.toList());
     }
 
     //
@@ -65,31 +52,11 @@ public class ActionsBuilder {
     private void setUpdateActions() throws Exception {
         issue.changelog.sortHistories();
 
-        Action prevAction = getLatestAction();
+        Action prevAction = actions.get(actions.size()-1); // safe because we always add the create action
         for (final History history : issue.changelog.histories) {
-            if (!isCreatedDuringRange(history.created)) {
-                continue;
-            }
             final Action updateAction = new Action(prevAction, history);
             actions.add(updateAction);
             prevAction = updateAction;
-        }
-    }
-
-    private Action getLatestAction() throws Exception {
-        if (isNewIssue) {
-            return actions.get(0); // returns create action.
-        }
-        else {
-            // Get the last action by day before yesterday.
-            Action action = new Action(issue);
-            for (final History history : issue.changelog.histories) {
-                if (isCreatedDuringRange(history.created)) {
-                    break;
-                }
-                action = new Action(action, history);
-            }
-            return action;
         }
     }
 
@@ -97,54 +64,38 @@ public class ActionsBuilder {
     // For Comment Action
     //
 
-    private void setCommentActions() throws Exception {
+    private void setCommentActions() {
         issue.fields.comment.sortComments();
 
         int currentActionIndex = 0;
         for (final Comment comment : issue.fields.comment.comments) {
             if (!comment.isValid()) {
-                Loggers.warn(log, "Invalid comment for issue %s with id %s, created %s, updated %s, and body \"%s\".",
-                        issue.key, comment.id, comment.created, comment.updated, comment.body);
+                log.warn(String.format("Invalid comment for issue %s with id %s, created %s, updated %s, and body \"%s\".",
+                        issue.key, comment.id, comment.created, comment.updated, comment.body));
             }
-            if (!isCreatedDuringRange(comment.created)) {
-                continue;
-            }
-            if (actions.isEmpty() || !commentIsAfter(comment, actions.get(0))) {
-                final Action commentAction = new Action(getLatestAction(), comment);
-                actions.add(0, commentAction);
-            } else {
-                while(true) {
-                    if(commentIsRightAfter(comment, currentActionIndex)) {
-                        final Action commentAction = new Action(actions.get(currentActionIndex), comment);
-                        actions.add(currentActionIndex+1, commentAction);
-                        break;
-                    } else {
-                        currentActionIndex++;
-                    }
+            while (true) {
+                if (commentIsRightAfter(comment, currentActionIndex)) {
+                    final Action commentAction = new Action(actions.get(currentActionIndex), comment);
+                    actions.add(currentActionIndex + 1, commentAction);
+                    break;
+                } else {
+                    currentActionIndex++;
                 }
             }
         }
     }
 
-
-    //
-    // For interpreting if the date is new
-    //
-
-    private boolean isCreatedDuringRange(final String dateString) {
-        final DateTime createdDate = JiraActionUtil.parseDateTime(dateString);
-
-        if(backfill) {
-            return startDate.compareTo(createdDate) <= 0;
-        }
+    private boolean isCreatedDuringRange(final DateTime createdDate) {
         return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) == 1;
     }
 
     private boolean commentIsAfter(final Comment comment, final Action action) {
-        // return true if comment is made after the action
-        final DateTime commentDate = JiraActionUtil.parseDateTime(comment.created);
-        final DateTime actionDate = JiraActionUtil.parseDateTime(action.timestamp);
-        return commentDate.isAfter(actionDate);
+        /* return true if comment is made after the action. Or if it's the same instant as the action, because some
+         * automated tools are that fast (or because of a comment made at the same time you do an edit.
+         */
+        final DateTime commentDate = comment.created;
+        final DateTime actionDate = action.timestamp;
+        return commentDate.isAfter(actionDate) || commentDate.isEqual(actionDate);
     }
 
     private boolean commentIsRightAfter(final Comment comment, final int actionIndex) {

@@ -8,32 +8,30 @@ public class JiraActionIndexBuilderConfig {
     private final String jiraFields;
     private final String jiraExpand;
     private final String jiraProject;
+    private final String excludedJiraProject;
 
     private final String iuploadURL;
 
     private final String startDate;
     private final String endDate;
 
-    @SuppressWarnings("FieldMayBeFinal")
-    private int jiraBatchSize;
-
-    private final boolean backfill;
+    private final int jiraBatchSize;
 
     public JiraActionIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
                                         final String jiraFields, final String jiraExpand, final String jiraProject,
-                                        final String iuploadUrl, final String startDate, final String endDate,
-                                        final int jiraBatchSize, final boolean backfill) {
+                                        final String excludedJiraProject, final String iuploadUrl,
+                                        final String startDate, final String endDate, final int jiraBatchSize) {
         this.jiraUsernameIndexer = jiraUsername;
         this.jiraPasswordIndexer = jiraPassword;
         this.jiraBaseURL = jiraUrl;
         this.jiraFields = jiraFields;
         this.jiraExpand = jiraExpand;
         this.jiraProject = jiraProject;
+        this.excludedJiraProject = excludedJiraProject;
         this.iuploadURL = iuploadUrl;
         this.startDate = startDate;
         this.endDate = endDate;
         this.jiraBatchSize = jiraBatchSize;
-        this.backfill = backfill;
     }
 
     public String getJiraUsernameIndexer() {
@@ -60,6 +58,10 @@ public class JiraActionIndexBuilderConfig {
         return jiraProject;
     }
 
+    public String getExcludedJiraProject() {
+        return excludedJiraProject;
+    }
+
     public String getIuploadURL() {
         return iuploadURL;
     }
@@ -74,9 +76,5 @@ public class JiraActionIndexBuilderConfig {
 
     public int getJiraBatchSize() {
         return jiraBatchSize;
-    }
-
-    public boolean isBackfill() {
-        return backfill;
     }
 }

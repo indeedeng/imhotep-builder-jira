@@ -7,4 +7,5 @@ web-build/
 dist/
 build.properties
 out/
+clippy-lib/
 jirapassword.properties
