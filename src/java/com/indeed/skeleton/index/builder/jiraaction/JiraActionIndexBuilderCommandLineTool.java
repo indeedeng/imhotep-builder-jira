@@ -1,6 +1,7 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.indeed.common.cli.CommandLineTool;
 import com.indeed.common.cli.CommandLineUtil;
 import com.indeed.common.dbutil.CronToolStatusUpdater;
@@ -48,7 +49,8 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final String[] excludedJiraProjectArray = config.getStringArray("jira.projectexcluded");
         final String excludedJiraProject = arrayToCommaDelimetedString(excludedJiraProjectArray);
         final String iuploadUrl = config.getString("iupload.url");
-
+        final String indexName = config.getString("indexname");
+        final String[] ignoredFields = config.getStringArray("jira.ignoredfields");
 
         @SuppressWarnings("AccessStaticViaInstance")
         final Options options = new Options().addOption((OptionBuilder
@@ -90,7 +92,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
 
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
                 jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, excludedJiraProject, iuploadUrl,
-                startDate, endDate, jiraBatchSize);
+                startDate, endDate, jiraBatchSize, indexName, ImmutableSet.<String>copyOf(ignoredFields));
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 

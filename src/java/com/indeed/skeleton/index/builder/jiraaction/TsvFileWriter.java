@@ -41,15 +41,22 @@ public class TsvFileWriter {
     }
 
     public void createFileAndWriteHeaders() throws IOException {
-        final String filename = String.format("jiraactions_%s-%s.tsv", reformatDate(config.getStartDate()), reformatDate(config.getEndDate()));
+        final String filename = String.format("%s%s-%s.tsv", config.getIndexName(), reformatDate(config.getStartDate()), reformatDate(config.getEndDate()));
         file = new File(filename);
         bw = new BufferedWriter(new FileWriter(file));
 
+
+        boolean hasWritten = false;
         // Write header
-        for (int i=0; i< FILE_HEADER.length; i++) {
-            if (i > 0) bw.write("\t");
-            final String header = FILE_HEADER[i];
+        for (final String header : FILE_HEADER) {
+            if(config.getIgnoredFields().contains(header)) {
+                continue;
+            }
+            if (hasWritten) {
+                bw.write("\t");
+            }
             bw.write(header);
+            hasWritten = true;
         }
         bw.newLine();
         bw.flush();
