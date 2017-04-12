@@ -49,7 +49,7 @@ public class TsvFileWriter {
         boolean hasWritten = false;
         // Write header
         for (final String header : FILE_HEADER) {
-            if(config.getIgnoredFields().contains(header)) {
+            if(config.isIgnoreCustomFields() && "verifier".equals(header)) {
                 continue;
             }
             if (hasWritten) {
@@ -103,8 +103,11 @@ public class TsvFileWriter {
             bw.write(String.valueOf(action.timesinceaction));
             bw.write("\t");
             bw.write(JiraActionUtil.getUnixTimestamp(action.timestamp));
-            bw.write("\t");
-            bw.write(action.verifier);
+
+            if(!config.isIgnoreCustomFields()) {
+                bw.write("\t");
+                bw.write(action.verifier);
+            }
             bw.newLine();
         }
 

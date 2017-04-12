@@ -1,7 +1,5 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
-import java.util.Set;
-
 public class JiraActionIndexBuilderConfig {
     private final String jiraUsernameIndexer;
     private final String jiraPasswordIndexer;
@@ -21,13 +19,13 @@ public class JiraActionIndexBuilderConfig {
 
     private final int jiraBatchSize;
 
-    private final Set<String> ignoredFields;
+    private final boolean ignoreCustomFields;
 
     public JiraActionIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
                                         final String jiraFields, final String jiraExpand, final String jiraProject,
                                         final String excludedJiraProject, final String iuploadUrl,
                                         final String startDate, final String endDate, final int jiraBatchSize,
-                                        final String indexName, final Set<String> ignoredFields) {
+                                        final String indexName, final boolean ignoreCustomFields) {
         this.jiraUsernameIndexer = jiraUsername;
         this.jiraPasswordIndexer = jiraPassword;
         this.jiraBaseURL = jiraUrl;
@@ -40,7 +38,7 @@ public class JiraActionIndexBuilderConfig {
         this.endDate = endDate;
         this.jiraBatchSize = jiraBatchSize;
         this.indexName = indexName;
-        this.ignoredFields = ignoredFields;
+        this.ignoreCustomFields = ignoreCustomFields;
     }
 
     public String getJiraUsernameIndexer() {
@@ -91,7 +89,7 @@ public class JiraActionIndexBuilderConfig {
         return indexName;
     }
 
-    public Set<String> getIgnoredFields() {
-        return ignoredFields;
+    public boolean isIgnoreCustomFields() {
+        return ignoreCustomFields;
     }
 }
