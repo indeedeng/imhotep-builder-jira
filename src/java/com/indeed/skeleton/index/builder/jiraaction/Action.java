@@ -35,7 +35,7 @@ public class Action {
     // For Create Action
     public Action(final Issue issue) throws Exception {
         action = "create";
-        actor = issue.fields.creator.displayName;
+        actor = issue.fields.creator == null ? "No User" : issue.fields.creator.displayName;
         assignee = issue.initialValue("assignee");
         fieldschanged = "created";
         issueage = 0;
@@ -50,7 +50,7 @@ public class Action {
         timeinstate = 0;
         timesinceaction = 0;
         timestamp = issue.fields.created;
-        verifier = issue.initialValue("verifier");
+        verifier = issue.initialValue("verifier", true);
         category = issue.initialValue("category");
         fixversions = issue.initialValue("fixversions");
     }
@@ -58,7 +58,7 @@ public class Action {
     // For Update Action
     public Action(final Action prevAction, final History history) {
         action = "update";
-        actor = history.author.displayName;
+        actor = history.author == null ? "No User" : history.author.displayName;
         assignee = history.itemExist("assignee") ? history.getItemLastValue("assignee") : prevAction.assignee;
         fieldschanged = history.getChangedFields();
         issueage = prevAction.issueage + getTimeDiff(prevAction.timestamp, history.created);
@@ -73,7 +73,7 @@ public class Action {
         timeinstate = timeInState(prevAction, history);
         timesinceaction = getTimeDiff(prevAction.timestamp, history.created);
         timestamp = history.created;
-        verifier = history.itemExist("verifier") ? history.getItemLastValue("verifier") : prevAction.verifier;
+        verifier = history.itemExist("verifier", true) ? history.getItemLastValue("verifier", true) : prevAction.verifier;
         category = history.itemExist("category") ? history.getItemLastValue("category") : prevAction.category;
         fixversions = history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.fixversions;
     }
@@ -81,7 +81,7 @@ public class Action {
     // For Comment Action
     public Action(final Action prevAction, final Comment comment) {
         action = "comment";
-        actor =  comment.author == null ? "Unknown User" : comment.author.displayName; // sometimes JIRA posts errors
+        actor =  comment.author == null ? "No User" : comment.author.displayName; // sometimes JIRA posts errors
         assignee = prevAction.assignee;
         fieldschanged = "comment";
         issueage = prevAction.issueage + getTimeDiff(prevAction.timestamp, comment.created);
