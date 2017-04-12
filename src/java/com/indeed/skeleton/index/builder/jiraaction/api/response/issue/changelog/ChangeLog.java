@@ -16,9 +16,9 @@ import javax.annotation.Nullable;
 public class ChangeLog {
     public History[] histories;
 
-    public boolean historyItemExist(final String field) {
+    public boolean historyItemExist(final String field, final boolean acceptCustom) {
         for (final History history : histories) {
-            if (history.itemExist(field)) {
+            if (history.itemExist(field, acceptCustom)) {
                 return true;
             }
         }
@@ -26,16 +26,15 @@ public class ChangeLog {
     }
 
     @Nullable
-    public Item getFirstHistoryItem(final String field) {
+    public Item getFirstHistoryItem(final String field, final boolean acceptCustom) {
         // Return the first history item about the field.
         // If there is no history item about the field, return null.
 
         // Sort history items in time order.
         for (final History history : histories) {
-            for (final Item item : history.items) {
-                if (item.field.equals(field)) {
-                    return item;
-                }
+            final Item item = history.getItem(field, acceptCustom);
+            if(item != null) {
+                return item;
             }
         }
         return null;
