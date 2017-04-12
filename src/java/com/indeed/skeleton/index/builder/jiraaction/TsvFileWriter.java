@@ -41,7 +41,7 @@ public class TsvFileWriter {
     }
 
     public void createFileAndWriteHeaders() throws IOException {
-        final String filename = String.format("%s%s-%s.tsv", config.getIndexName(), reformatDate(config.getStartDate()), reformatDate(config.getEndDate()));
+        final String filename = String.format("%s_%s-%s.tsv", config.getIndexName(), reformatDate(config.getStartDate()), reformatDate(config.getEndDate()));
         file = new File(filename);
         bw = new BufferedWriter(new FileWriter(file));
 
