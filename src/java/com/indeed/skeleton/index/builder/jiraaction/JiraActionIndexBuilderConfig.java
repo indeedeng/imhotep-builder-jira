@@ -1,5 +1,7 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
+import java.util.Set;
+
 public class JiraActionIndexBuilderConfig {
     private final String jiraUsernameIndexer;
     private final String jiraPasswordIndexer;
@@ -12,15 +14,20 @@ public class JiraActionIndexBuilderConfig {
 
     private final String iuploadURL;
 
+    private final String indexName;
+
     private final String startDate;
     private final String endDate;
 
     private final int jiraBatchSize;
 
+    private final Set<String> ignoredFields;
+
     public JiraActionIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
                                         final String jiraFields, final String jiraExpand, final String jiraProject,
                                         final String excludedJiraProject, final String iuploadUrl,
-                                        final String startDate, final String endDate, final int jiraBatchSize) {
+                                        final String startDate, final String endDate, final int jiraBatchSize,
+                                        final String indexName, final Set<String> ignoredFields) {
         this.jiraUsernameIndexer = jiraUsername;
         this.jiraPasswordIndexer = jiraPassword;
         this.jiraBaseURL = jiraUrl;
@@ -32,6 +39,8 @@ public class JiraActionIndexBuilderConfig {
         this.startDate = startDate;
         this.endDate = endDate;
         this.jiraBatchSize = jiraBatchSize;
+        this.indexName = indexName;
+        this.ignoredFields = ignoredFields;
     }
 
     public String getJiraUsernameIndexer() {
@@ -76,5 +85,13 @@ public class JiraActionIndexBuilderConfig {
 
     public int getJiraBatchSize() {
         return jiraBatchSize;
+    }
+
+    public String getIndexName() {
+        return indexName;
+    }
+
+    public Set<String> getIgnoredFields() {
+        return ignoredFields;
     }
 }
