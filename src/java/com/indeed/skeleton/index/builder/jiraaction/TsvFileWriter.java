@@ -96,7 +96,7 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.status);
             bw.write("\t");
-            bw.write(action.summary);
+            bw.write(action.summary.replace("   ", "<tab>"));
             bw.write("\t");
             bw.write(String.valueOf(action.timeinstate));
             bw.write("\t");
