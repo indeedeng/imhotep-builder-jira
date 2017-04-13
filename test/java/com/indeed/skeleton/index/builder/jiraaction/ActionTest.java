@@ -7,7 +7,6 @@ import com.indeed.skeleton.index.builder.jiraaction.api.response.issue.fields.co
 import com.indeed.test.junit.Check;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,7 +33,8 @@ public class ActionTest {
     @Before
     public void initialize() {
         prevAction = EasyMock.createNiceMock(Action.class);
-        author = EasyMock.createNiceMock(User.class);
+        author = new User();
+        author.displayName = "Author";
 
         // Set default values
         prevAction.action = "create";
@@ -58,7 +58,7 @@ public class ActionTest {
         history2.items = new Item[] { };
 
         // For Comment Action
-        comment = EasyMock.createNiceMock(Comment.class);
+        comment = new Comment();
         comment.author = author;
         comment.created = commentCreated;
 
@@ -123,9 +123,9 @@ public class ActionTest {
         final Action action = new Action(prevAction, history);
 
         final Action action2 = new Action(action, history2);
-        Assert.assertEquals(timeDiffWithPrevAction*2, action2.issueage);
-        Assert.assertEquals(timeDiffWithPrevAction*2, action2.timeinstate);
-        Assert.assertEquals(timeDiffWithPrevAction, action2.timesinceaction);
+        Check.checkEquals(timeDiffWithPrevAction*2, action2.issueage);
+        Check.checkEquals(timeDiffWithPrevAction*2, action2.timeinstate);
+        Check.checkEquals(timeDiffWithPrevAction, action2.timesinceaction);
     }
 
     //
@@ -137,9 +137,9 @@ public class ActionTest {
         final Action action = new Action(prevAction, history);
 
         final Action action2 = new Action(action, comment);
-        Assert.assertEquals(timeDiffWithPrevAction*3, action2.issueage);
-        Assert.assertEquals(timeDiffWithPrevAction*3, action2.timeinstate);
-        Assert.assertEquals(timeDiffWithPrevAction*2, action2.timesinceaction);
+        Check.checkEquals(timeDiffWithPrevAction*3, action2.issueage);
+        Check.checkEquals(timeDiffWithPrevAction*3, action2.timeinstate);
+        Check.checkEquals(timeDiffWithPrevAction*2, action2.timesinceaction);
     }
 
     @Test
@@ -155,5 +155,23 @@ public class ActionTest {
         prevAction.timeinstate = prevActionTimeinstate;
         final Action action = new Action(prevAction, comment);
         Check.checkEquals(prevActionTimeinstate + timeDiffWithPrevAction, action.issueage);
+    }
+
+    @Test
+    public void testChangeStatusAndChangeBack() {
+        prevAction.action = "update";
+        prevAction.fieldschanged = "status";
+        prevAction.prevstatus = "On Backlog";
+        prevAction.status = "Accepted";
+        prevAction.timeinstate = 100;
+
+        final Item item = new Item();
+        item.setField("status");
+        item.fromString = "Accepted";
+        item.toString = "On Backlog";
+        history2.items = new Item[] { item };
+
+        final Action action = new Action(prevAction, history2);
+        Check.checkEquals(history2.created.getMillis() - prevAction.timestamp.getMillis(), action.timeinstate);
     }
 }
