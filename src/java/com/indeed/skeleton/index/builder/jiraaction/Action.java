@@ -81,7 +81,7 @@ public class Action {
     // For Comment Action
     public Action(final Action prevAction, final Comment comment) {
         action = "comment";
-        actor =  comment.author == null ? "No User" : comment.author.displayName; // sometimes JIRA posts errors
+        actor =  comment.author == null ? "No User" : comment.author.displayName;
         assignee = prevAction.assignee;
         fieldschanged = "comment";
         issueage = prevAction.issueage + getTimeDiff(prevAction.timestamp, comment.created);
