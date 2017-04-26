@@ -117,7 +117,7 @@ public class TsvFileWriter {
     public void uploadTsvFile() throws IOException {
         bw.close();
 
-        final String iuploadUrl = config.getIuploadURL();
+        final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
         final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
