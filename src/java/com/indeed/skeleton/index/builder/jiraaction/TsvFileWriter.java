@@ -5,6 +5,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.io.BufferedWriter;
@@ -19,6 +20,8 @@ import java.util.List;
  * @author soono
  */
 public class TsvFileWriter {
+    private static final Logger log = Logger.getLogger(TsvFileWriter.class);
+
     private final JiraActionIndexBuilderConfig config;
     private File file;
     private BufferedWriter bw;
@@ -118,6 +121,8 @@ public class TsvFileWriter {
         bw.close();
 
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
+
+        log.debug("Uploading to " + iuploadUrl);
 
         final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
