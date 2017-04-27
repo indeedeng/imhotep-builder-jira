@@ -56,6 +56,8 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final String[] excludedJiraProjectArray = config.getStringArray("jira.projectexcluded");
         final String excludedJiraProject = arrayToCommaDelimetedString(excludedJiraProjectArray);
         final String iuploadUrl = config.getString("iupload.url");
+        final String iuploadUsername = config.getString("jira.username.indexer");
+        final String iuploadPassword = config.getString("jira.password.indexer");
         final String indexName = config.getString("indexname");
         final boolean ignoreCustomFields = config.getBoolean("ignorecustomfields");
 
@@ -99,7 +101,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
 
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
                 jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, excludedJiraProject, iuploadUrl,
-                startDate, endDate, jiraBatchSize, indexName, ignoreCustomFields);
+                iuploadUsername, iuploadPassword, startDate, endDate, jiraBatchSize, indexName, ignoreCustomFields);
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 
