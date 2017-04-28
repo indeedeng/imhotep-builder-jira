@@ -7,25 +7,29 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
+import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
- * @author soono
+ * @author soono, kbinswanger
  */
 public class TsvFileWriter {
     private static final Logger log = Logger.getLogger(TsvFileWriter.class);
 
     private final JiraActionIndexBuilderConfig config;
-    private File file;
-    private BufferedWriter bw;
+    private final Map<DateMidnight, File> openFiles;
+    private final Map<DateMidnight, BufferedWriter> openWriters;
 
     private static final String [] FILE_HEADER = {
         "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*|", "issueage", "issuekey",
@@ -36,6 +40,10 @@ public class TsvFileWriter {
 
     public TsvFileWriter(final JiraActionIndexBuilderConfig config) {
         this.config = config;
+        final int days = Days.daysBetween(JiraActionUtil.parseDateTime(config.getStartDate()),
+                JiraActionUtil.parseDateTime(config.getEndDate())).getDays();
+        openFiles = new HashMap<>(days);
+        openWriters = new HashMap<>(days);
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd.HH";
@@ -44,11 +52,22 @@ public class TsvFileWriter {
         return dateTime.toString(FILENAME_DATE_TIME_PATTERN);
     }
 
-    public void createFileAndWriteHeaders() throws IOException {
-        final String filename = String.format("%s_%s-%s.tsv", config.getIndexName(), reformatDate(config.getStartDate()), reformatDate(config.getEndDate()));
-        file = new File(filename);
-        bw = new BufferedWriter(new FileWriter(file));
+    private String reformatDate(final DateTime date) {
+        return date.toString(FILENAME_DATE_TIME_PATTERN);
+    }
 
+    public void createFileAndWriteHeaders() throws IOException {
+        final DateTime endDate = JiraActionUtil.parseDateTime(config.getEndDate());
+        for(DateTime date = JiraActionUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
+            createFileAndWriteHeaders(date);
+        }
+    }
+
+    private void createFileAndWriteHeaders(final DateTime day) throws IOException {
+        final String filename = String.format("%s_%s.tsv", config.getIndexName(), reformatDate(day));
+        final File file = new File(filename);
+
+        final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
         boolean hasWritten = false;
         // Write header
@@ -64,6 +83,9 @@ public class TsvFileWriter {
         }
         bw.newLine();
         bw.flush();
+
+        openFiles.put(day.toDateMidnight(), file);
+        openWriters.put(day.toDateMidnight(), bw);
     }
 
     public void writeActions(final List<Action> actions) throws IOException, ParseException {
@@ -72,6 +94,7 @@ public class TsvFileWriter {
         }
 
         for (final Action action : actions) {
+            final BufferedWriter bw = openWriters.get(action.timestamp.toDateMidnight());
             bw.write(action.action);
             bw.write("\t");
             bw.write(action.actor);
@@ -115,11 +138,23 @@ public class TsvFileWriter {
             bw.newLine();
         }
 
-        bw.flush();
+        openWriters.values().forEach(x -> {
+            try {
+                x.flush();
+            } catch (final IOException e) {
+                log.error("Failed to flush.", e);
+            }
+        });
     }
 
     public void uploadTsvFile() throws IOException {
-        bw.close();
+        openWriters.values().forEach(x -> {
+            try {
+                x.close();
+            } catch (final IOException e) {
+                log.error("Failed to close.", e);
+            }
+        });
 
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
@@ -128,15 +163,20 @@ public class TsvFileWriter {
         final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
-        final HttpPost httpPost = new HttpPost(iuploadUrl);
-        httpPost.setHeader("Authorization", basicAuth);
-        httpPost.setEntity(MultipartEntityBuilder.create()
-                .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
-                .build());
+        openFiles.values().forEach(file -> {
+            final HttpPost httpPost = new HttpPost(iuploadUrl);
+            httpPost.setHeader("Authorization", basicAuth);
+            httpPost.setEntity(MultipartEntityBuilder.create()
+                    .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
+                    .build());
 
-        final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
-
-        log.debug("Http response: " + response.getStatusLine().toString());
+            try {
+                final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
+                log.info("Http response: " + response.getStatusLine().toString());
+            } catch (final IOException e) {
+                log.error("Failed to upload file.", e);
+            }
+        });
 
     }
 }
