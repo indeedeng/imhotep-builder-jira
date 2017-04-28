@@ -1,10 +1,12 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.io.BufferedWriter;
@@ -19,6 +21,8 @@ import java.util.List;
  * @author soono
  */
 public class TsvFileWriter {
+    private static final Logger log = Logger.getLogger(TsvFileWriter.class);
+
     private final JiraActionIndexBuilderConfig config;
     private File file;
     private BufferedWriter bw;
@@ -117,9 +121,11 @@ public class TsvFileWriter {
     public void uploadTsvFile() throws IOException {
         bw.close();
 
-        final String iuploadUrl = config.getIuploadURL();
+        final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
-        final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
+        log.debug("Uploading to " + iuploadUrl);
+
+        final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
         final HttpPost httpPost = new HttpPost(iuploadUrl);
@@ -128,6 +134,9 @@ public class TsvFileWriter {
                 .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
                 .build());
 
-        HttpClientBuilder.create().build().execute(httpPost);
+        final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
+
+        log.debug("Http response: " + response.getStatusLine().toString());
+
     }
 }
