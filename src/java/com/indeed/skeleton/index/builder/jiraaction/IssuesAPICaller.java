@@ -117,7 +117,7 @@ public class IssuesAPICaller {
     }
 
     private String getBasicAuth() {
-        final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
+        final String userPass = config.getJiraUsername() + ":" + config.getJiraPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
     }
