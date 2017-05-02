@@ -56,7 +56,7 @@ public class JiraActionIndexBuilder {
                 final JsonNode issuesNode = issuesAPICaller.getIssuesNodeWithBackoff();
                 end = System.currentTimeMillis();
                 apiTime += end - start;
-                log.debug(String.format("%d ms for an API call.", end - start));
+                log.trace(String.format("%d ms for an API call.", end - start));
 
                 start = System.currentTimeMillis();
                 for (final JsonNode issueNode : issuesNode) {
@@ -88,7 +88,7 @@ public class JiraActionIndexBuilder {
                     }
                 }
                 end = System.currentTimeMillis();
-                log.debug(String.format("%d ms to get actions from a set of issues.", end - start));
+                log.trace(String.format("%d ms to get actions from a set of issues.", end - start));
             }
 
             start = System.currentTimeMillis();

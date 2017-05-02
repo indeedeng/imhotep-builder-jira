@@ -146,6 +146,7 @@ public class TsvFileWriter {
         });
     }
 
+    private static final int NUM_RETRIES = 5;
     public void uploadTsvFile() throws IOException {
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
@@ -158,7 +159,7 @@ public class TsvFileWriter {
             try {
                 wd.getBufferedWriter().close();
             } catch (final IOException e) {
-                log.error("Failed to close.", e);
+                log.error("Failed to close " + wd.file.getName() + ".", e);
             }
 
             if (wd.isWritten()) {
@@ -169,11 +170,14 @@ public class TsvFileWriter {
                         .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
                         .build());
 
-                try {
-                    final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
-                    log.info("Http response: " + response.getStatusLine().toString());
-                } catch (final IOException e) {
-                    log.error("Failed to upload file.", e);
+                for(int i = 0; i < NUM_RETRIES; i++) {
+                    try {
+                        final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
+                        log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
+                        return;
+                    } catch (final IOException e) {
+                        log.error("Failed to upload file.", e);
+                    }
                 }
             }
         });
