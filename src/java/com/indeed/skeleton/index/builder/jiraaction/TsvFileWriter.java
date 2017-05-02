@@ -28,8 +28,7 @@ public class TsvFileWriter {
     private static final Logger log = Logger.getLogger(TsvFileWriter.class);
 
     private final JiraActionIndexBuilderConfig config;
-    private final Map<DateMidnight, File> openFiles;
-    private final Map<DateMidnight, BufferedWriter> openWriters;
+    private final Map<DateMidnight, WriterData> writerDataMap;
 
     private static final String [] FILE_HEADER = {
         "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*|", "issueage", "issuekey",
@@ -42,8 +41,7 @@ public class TsvFileWriter {
         this.config = config;
         final int days = Days.daysBetween(JiraActionUtil.parseDateTime(config.getStartDate()),
                 JiraActionUtil.parseDateTime(config.getEndDate())).getDays();
-        openFiles = new HashMap<>(days);
-        openWriters = new HashMap<>(days);
+        writerDataMap = new HashMap<>(days);
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd.HH";
@@ -84,8 +82,7 @@ public class TsvFileWriter {
         bw.newLine();
         bw.flush();
 
-        openFiles.put(day.toDateMidnight(), file);
-        openWriters.put(day.toDateMidnight(), bw);
+        writerDataMap.put(day.toDateMidnight(), new WriterData(file, bw));
     }
 
     public void writeActions(final List<Action> actions) throws IOException, ParseException {
@@ -94,7 +91,9 @@ public class TsvFileWriter {
         }
 
         for (final Action action : actions) {
-            final BufferedWriter bw = openWriters.get(action.timestamp.toDateMidnight());
+            final WriterData writerData = writerDataMap.get(action.timestamp.toDateMidnight());
+            final BufferedWriter bw = writerData.getBufferedWriter();
+            writerData.setWritten(true);
             bw.write(action.action);
             bw.write("\t");
             bw.write(action.actor);
@@ -138,9 +137,9 @@ public class TsvFileWriter {
             bw.newLine();
         }
 
-        openWriters.values().forEach(x -> {
+        writerDataMap.values().forEach(x -> {
             try {
-                x.flush();
+                x.getBufferedWriter().flush();
             } catch (final IOException e) {
                 log.error("Failed to flush.", e);
             }
@@ -148,14 +147,6 @@ public class TsvFileWriter {
     }
 
     public void uploadTsvFile() throws IOException {
-        openWriters.values().forEach(x -> {
-            try {
-                x.close();
-            } catch (final IOException e) {
-                log.error("Failed to close.", e);
-            }
-        });
-
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
         log.debug("Uploading to " + iuploadUrl);
@@ -163,20 +154,56 @@ public class TsvFileWriter {
         final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
-        openFiles.values().forEach(file -> {
-            final HttpPost httpPost = new HttpPost(iuploadUrl);
-            httpPost.setHeader("Authorization", basicAuth);
-            httpPost.setEntity(MultipartEntityBuilder.create()
-                    .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
-                    .build());
-
+        writerDataMap.values().forEach(wd -> {
             try {
-                final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
-                log.info("Http response: " + response.getStatusLine().toString());
+                wd.getBufferedWriter().close();
             } catch (final IOException e) {
-                log.error("Failed to upload file.", e);
+                log.error("Failed to close.", e);
+            }
+
+            if (wd.isWritten()) {
+                final File file = wd.getFile();
+                final HttpPost httpPost = new HttpPost(iuploadUrl);
+                httpPost.setHeader("Authorization", basicAuth);
+                httpPost.setEntity(MultipartEntityBuilder.create()
+                        .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
+                        .build());
+
+                try {
+                    final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
+                    log.info("Http response: " + response.getStatusLine().toString());
+                } catch (final IOException e) {
+                    log.error("Failed to upload file.", e);
+                }
             }
         });
+    }
 
+    private class WriterData {
+        private final File file;
+        private final BufferedWriter bw;
+        private boolean written;
+
+        public WriterData(final File file, final BufferedWriter bw) {
+            this.file = file;
+            this.bw = bw;
+            this.written = false;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public BufferedWriter getBufferedWriter() {
+            return bw;
+        }
+
+        public boolean isWritten() {
+            return written;
+        }
+
+        public void setWritten(final boolean written) {
+            this.written = written;
+        }
     }
 }
