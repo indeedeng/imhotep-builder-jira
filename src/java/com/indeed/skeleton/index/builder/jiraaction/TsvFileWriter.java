@@ -44,7 +44,7 @@ public class TsvFileWriter {
         writerDataMap = new HashMap<>(days);
     }
 
-    private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd.HH";
+    private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
     private String reformatDate(final String date) {
         final DateTime dateTime = JiraActionUtil.parseDateTime(date);
         return dateTime.toString(FILENAME_DATE_TIME_PATTERN);
