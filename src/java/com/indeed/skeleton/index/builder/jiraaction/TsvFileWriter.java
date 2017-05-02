@@ -105,7 +105,7 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.fieldschanged);
             bw.write("\t");
-            bw.write(action.fixversions);
+            bw.write(action.fixversions.replace(Character.toString('\t'), "<tab>"));
             bw.write("\t");
             bw.write(String.valueOf(action.issueage));
             bw.write("\t");
