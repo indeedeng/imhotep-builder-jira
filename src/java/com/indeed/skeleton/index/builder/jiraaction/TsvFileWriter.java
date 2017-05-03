@@ -150,7 +150,7 @@ public class TsvFileWriter {
     public void uploadTsvFile() throws IOException {
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
-        log.debug("Uploading to " + iuploadUrl);
+        log.info("Uploading to " + iuploadUrl);
 
         final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
