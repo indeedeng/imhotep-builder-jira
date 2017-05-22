@@ -15,9 +15,7 @@ public class JiraActionUtil {
     public static DateTime parseDateTime(final String arg) {
         try {
             return new DateTime(arg.trim().replace(" ", "T"), ZONE);
-        } catch (final IllegalArgumentException e) {
-            // ignore
-        }
+        } catch (final IllegalArgumentException ignored) { }
         final DateTime now = new DateTime(ZONE);
 
         switch (arg) {
