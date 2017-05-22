@@ -46,7 +46,7 @@ public class Field {
 
     @SuppressWarnings("unused")
     @JsonProperty("customfield_17090")
-    public void setVerifier(final IssueSizeEstimate estimate) {
+    public void setIssueSizeEstimate(final IssueSizeEstimate estimate) {
         this.issuesizeestimate = estimate;
     }
 
