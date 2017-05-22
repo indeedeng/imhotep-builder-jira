@@ -69,10 +69,6 @@ public class ActionsBuilder {
 
         int currentActionIndex = 0;
         for (final Comment comment : issue.fields.comment.comments) {
-            if (!comment.isValid()) {
-                log.warn(String.format("Invalid comment for issue %s with id %s, created %s, updated %s, and body \"%s\".",
-                        issue.key, comment.id, comment.created, comment.updated, comment.body));
-            }
             while (true) {
                 if (commentIsRightAfter(comment, currentActionIndex)) {
                     final Action commentAction = new Action(actions.get(currentActionIndex), comment);

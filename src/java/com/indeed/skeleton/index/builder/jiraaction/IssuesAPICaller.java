@@ -30,6 +30,7 @@ public class IssuesAPICaller {
     private int batchSize;
     private int start = 0; // Current Page
     private int numTotal = -1; // Total number of issues remaining
+    private int origTotal;
 
     private int backoff = 10_000;
 
@@ -90,12 +91,18 @@ public class IssuesAPICaller {
     public int setNumTotal() throws IOException {
         final JsonNode apiRes = getJsonNode(getBasicInfoURL());
         final JsonNode totalNode = apiRes.path("total");
-        this.numTotal = totalNode.intValue();
+        final int total = totalNode.intValue();
+        this.numTotal = total;
+        this.origTotal = total;
         return numTotal;
     }
 
     public boolean currentPageExist() {
         return start < numTotal;
+    }
+
+    public int getNumPotentiallySkipped() {
+        return numTotal - origTotal;
     }
 
     private void setNextPage() {
@@ -110,7 +117,7 @@ public class IssuesAPICaller {
     }
 
     private String getBasicAuth() {
-        final String userPass = config.getJiraUsernameIndexer() + ":" + config.getJiraPasswordIndexer();
+        final String userPass = config.getJiraUsername() + ":" + config.getJiraPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
     }
