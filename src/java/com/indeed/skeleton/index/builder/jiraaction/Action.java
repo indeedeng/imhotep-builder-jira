@@ -35,6 +35,7 @@ public class Action {
     public String components;
     public String labels;
     public String issueSizeEstimate;
+    public String directCause;
 
     // For Create Action
     public Action(final Issue issue) throws Exception {
@@ -61,6 +62,7 @@ public class Action {
         components = issue.initialValue("components");
         labels = issue.initialValue("labels");
         issueSizeEstimate = issue.initialValue("issuesizeestimate");
+        directCause = issue.initialValue("directcause");
     }
 
     // For Update Action
@@ -88,6 +90,7 @@ public class Action {
         components = history.itemExist("components") ? history.getItemLastValue("copmonents") : prevAction.components;
         labels = history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.labels;
         issueSizeEstimate = history.itemExist("issuesizeestimate", true) ? history.getItemLastValue("issuesizeestimate", true) : prevAction.issueSizeEstimate;
+        directCause = history.itemExist("directcause", true) ? history.getItemLastValue("directcause", true) : prevAction.directCause;
     }
 
     // For Comment Action
@@ -115,6 +118,7 @@ public class Action {
         components = prevAction.components;
         labels = prevAction.labels;
         issueSizeEstimate = prevAction.issueSizeEstimate;
+        directCause = prevAction.directCause;
     }
 
     private long timeInState(final Action prevAction, final Comment comment) {

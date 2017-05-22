@@ -31,6 +31,7 @@ public class Field {
     public Component[] components;
     public String[] labels;
     public IssueSizeEstimate issuesizeestimate;
+    public DirectCause directcause;
 
     @SuppressWarnings("unused")
     @JsonProperty("created")
@@ -48,6 +49,12 @@ public class Field {
     @JsonProperty("customfield_17090")
     public void setIssueSizeEstimate(final IssueSizeEstimate estimate) {
         this.issuesizeestimate = estimate;
+    }
+
+    @SuppressWarnings("unused")
+    @JsonProperty("customfield_17490")
+    public void setDirectCause(final DirectCause directCause) {
+        this.directcause = directCause;
     }
 
     public String getStringValue(final String attribute) throws Exception {
@@ -74,6 +81,7 @@ public class Field {
             case "components": return components == null ? "" : Joiner.on("|").join(components);
             case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
             case "issuesizeestimate": return issuesizeestimate == null ? "" : issuesizeestimate.value;
+            case "directcause": return directcause == null ? "" : directcause.value;
         }
         throw new Exception("Wrong Input name");
     }
