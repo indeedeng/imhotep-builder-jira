@@ -44,6 +44,12 @@ public class Field {
         this.verifier = verifier;
     }
 
+    @SuppressWarnings("unused")
+    @JsonProperty("customfield_17090")
+    public void setVerifier(final IssueSizeEstimate estimate) {
+        this.issuesizeestimate = estimate;
+    }
+
     public String getStringValue(final String attribute) throws Exception {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
