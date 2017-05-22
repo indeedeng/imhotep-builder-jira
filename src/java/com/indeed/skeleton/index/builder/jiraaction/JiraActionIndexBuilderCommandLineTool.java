@@ -1,6 +1,7 @@
 package com.indeed.skeleton.index.builder.jiraaction;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.indeed.common.base.IndeedSystemProperty;
 import com.indeed.common.cli.CommandLineTool;
 import com.indeed.common.cli.CommandLineUtil;
 import com.indeed.common.dbutil.CronToolStatusUpdater;
@@ -36,8 +37,15 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
     @Override
     public void initialize(final CommandLineUtil cmdLineUtil) {
         final Configuration config = cmdLineUtil.getProperties();
-        final String jiraUsername = config.getString("jira.username.indexer");
-        final String jiraPassword = config.getString("jira.password.indexer");
+        final String jiraUsername;
+        final String jiraPassword;
+        if(IndeedSystemProperty.INSTANCE.toString().contains("Apache")) {
+            jiraUsername = config.getString("apachejira.username.indexer");
+            jiraPassword = config.getString("apachejira.password.indexer");
+        } else {
+            jiraUsername = config.getString("jira.username.indexer");
+            jiraPassword = config.getString("jira.password.indexer");
+        }
 
         final String jiraBaseUrl = config.getString("jira.baseurl");
         final String[] jiraFieldArray = config.getStringArray("jira.fields");
@@ -48,7 +56,10 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
         final String[] excludedJiraProjectArray = config.getStringArray("jira.projectexcluded");
         final String excludedJiraProject = arrayToCommaDelimetedString(excludedJiraProjectArray);
         final String iuploadUrl = config.getString("iupload.url");
-
+        final String iuploadUsername = config.getString("jira.username.indexer");
+        final String iuploadPassword = config.getString("jira.password.indexer");
+        final String indexName = config.getString("indexname");
+        final boolean ignoreCustomFields = config.getBoolean("ignorecustomfields");
 
         @SuppressWarnings("AccessStaticViaInstance")
         final Options options = new Options().addOption((OptionBuilder
@@ -90,7 +101,7 @@ public class JiraActionIndexBuilderCommandLineTool implements CommandLineTool {
 
         final JiraActionIndexBuilderConfig indexBuilderConfig = new JiraActionIndexBuilderConfig(jiraUsername,
                 jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, excludedJiraProject, iuploadUrl,
-                startDate, endDate, jiraBatchSize);
+                iuploadUsername, iuploadPassword, startDate, endDate, jiraBatchSize, indexName, ignoreCustomFields);
         indexBuilder = new JiraActionIndexBuilder(indexBuilderConfig);
     }
 

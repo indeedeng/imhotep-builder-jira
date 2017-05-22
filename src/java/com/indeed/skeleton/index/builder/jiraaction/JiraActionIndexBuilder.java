@@ -56,7 +56,7 @@ public class JiraActionIndexBuilder {
                 final JsonNode issuesNode = issuesAPICaller.getIssuesNodeWithBackoff();
                 end = System.currentTimeMillis();
                 apiTime += end - start;
-                log.info(String.format("%d ms for an API call.", end - start));
+                log.trace(String.format("%d ms for an API call.", end - start));
 
                 start = System.currentTimeMillis();
                 for (final JsonNode issueNode : issuesNode) {
@@ -88,20 +88,21 @@ public class JiraActionIndexBuilder {
                     }
                 }
                 end = System.currentTimeMillis();
-                log.info(String.format("%d ms to get actions from a set of issues.", end - start));
+                log.trace(String.format("%d ms to get actions from a set of issues.", end - start));
             }
 
             start = System.currentTimeMillis();
             // Create and Upload a TSV file.
             writer.uploadTsvFile();
             end = System.currentTimeMillis();
-            log.info(String.format("%d ms to create and upload TSV.", end - start));
+            log.debug(String.format("%d ms to create and upload TSV.", end - start));
             fileTime += end - start;
 
             end_total = System.currentTimeMillis();
 
             log.info(String.format("%d ms for the whole process.", end_total - start_total));
             log.info(String.format("apiTime: %dms, processTime: %dms, fileTime: %dms", apiTime, processTime, fileTime));
+            log.warn(String.format("Potentially missed %d issues!", issuesAPICaller.getNumPotentiallySkipped()));
         } catch (final Exception e) {
             log.error("Threw an exception trying to run the index builder", e);
             throw e;

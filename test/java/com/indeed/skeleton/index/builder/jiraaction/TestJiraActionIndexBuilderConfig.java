@@ -17,6 +17,7 @@ public class TestJiraActionIndexBuilderConfig {
                 .add("jiraFields")
                 .add("jiraExpand")
                 .add("jiraProject")
+                .add("excludedJiraProject")
                 .add("iuploadURL")
                 .add("startDate")
                 .add("endDate")
