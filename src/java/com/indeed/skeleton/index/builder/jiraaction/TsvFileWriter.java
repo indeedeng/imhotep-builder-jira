@@ -30,10 +30,10 @@ public class TsvFileWriter {
     private final JiraActionIndexBuilderConfig config;
     private final Map<DateMidnight, WriterData> writerDataMap;
 
-    private static final String [] FILE_HEADER = {
-        "action", "actor", "assignee", "category", "fieldschanged*", "fixversion*|", "issueage", "issuekey",
-            "issuetype", "project", "prevstatus", "reporter", "resolution", "status", "summary", "timeinstate",
-            "timesinceaction", "time", "verifier"
+    private static final String[] FILE_HEADER = {
+        "action", "actor", "assignee", "category", "components*|", "duedate", "fieldschanged*", "fixversion*|", "issueage",
+            "issuekey", "issuetype", "labels*", "project", "prevstatus", "reporter", "resolution", "status", "summary",
+            "timeinstate", "timesinceaction", "time", "verifier", "issuesizeestimate", "directcause"
     };
 
 
@@ -70,7 +70,7 @@ public class TsvFileWriter {
         boolean hasWritten = false;
         // Write header
         for (final String header : FILE_HEADER) {
-            if(config.isIgnoreCustomFields() && "verifier".equals(header)) {
+            if(config.isIgnoreCustomFields() && ("verifier".equals(header) || "issuesizeestimate".equals(header) || "directCause".equals(header))) {
                 continue;
             }
             if (hasWritten) {
@@ -102,6 +102,10 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.category);
             bw.write("\t");
+            bw.write(action.components);
+            bw.write("\t");
+            bw.write(action.dueDate);
+            bw.write("\t");
             bw.write(action.fieldschanged);
             bw.write("\t");
             bw.write(action.fixversions.replace(Character.toString('\t'), "<tab>"));
@@ -111,6 +115,8 @@ public class TsvFileWriter {
             bw.write(action.issuekey);
             bw.write("\t");
             bw.write(action.issuetype);
+            bw.write("\t");
+            bw.write(action.labels);
             bw.write("\t");
             bw.write(action.project);
             bw.write("\t");
@@ -133,6 +139,10 @@ public class TsvFileWriter {
             if(!config.isIgnoreCustomFields()) {
                 bw.write("\t");
                 bw.write(action.verifier);
+                bw.write("\t");
+                bw.write(action.issueSizeEstimate);
+                bw.write("\t");
+                bw.write(action.directCause);
             }
             bw.newLine();
         }

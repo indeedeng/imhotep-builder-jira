@@ -27,6 +27,11 @@ public class Field {
     public String summary;
     public User verifier;
     public FixVersion[] fixVersions;
+    public String duedate;
+    public Component[] components;
+    public String[] labels;
+    public IssueSizeEstimate issuesizeestimate;
+    public DirectCause directcause;
 
     @SuppressWarnings("unused")
     @JsonProperty("created")
@@ -38,6 +43,18 @@ public class Field {
     @JsonProperty("customfield_10003")
     public void setVerifier(final User verifier) {
         this.verifier = verifier;
+    }
+
+    @SuppressWarnings("unused")
+    @JsonProperty("customfield_17090")
+    public void setIssueSizeEstimate(final IssueSizeEstimate estimate) {
+        this.issuesizeestimate = estimate;
+    }
+
+    @SuppressWarnings("unused")
+    @JsonProperty("customfield_17490")
+    public void setDirectCause(final DirectCause directCause) {
+        this.directcause = directCause;
     }
 
     public String getStringValue(final String attribute) throws Exception {
@@ -60,6 +77,11 @@ public class Field {
                         : category.name;
             }
             case "fixversions": return fixVersions == null ? "" : Joiner.on("|").join(fixVersions);
+            case "duedate": return duedate == null ? "" : duedate;
+            case "components": return components == null ? "" : Joiner.on("|").join(components);
+            case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
+            case "issuesizeestimate": return issuesizeestimate == null ? "" : issuesizeestimate.value;
+            case "directcause": return directcause == null ? "" : directcause.value;
         }
         throw new Exception("Wrong Input name");
     }
