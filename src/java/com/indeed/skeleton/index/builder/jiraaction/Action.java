@@ -31,6 +31,10 @@ public class Action {
     public String verifier;
     public String category;
     public String fixversions;
+    public String dueDate;
+    public String components;
+    public String labels;
+    public String issueSizeEstimate;
 
     // For Create Action
     public Action(final Issue issue) throws Exception {
@@ -53,6 +57,10 @@ public class Action {
         verifier = issue.initialValue("verifier", true);
         category = issue.initialValue("category");
         fixversions = issue.initialValue("fixversions");
+        dueDate = issue.initialValue("duedate");
+        components = issue.initialValue("components");
+        labels = issue.initialValue("labels");
+        issueSizeEstimate = issue.initialValue("issuesizeestimate");
     }
 
     // For Update Action
@@ -76,6 +84,10 @@ public class Action {
         verifier = history.itemExist("verifier", true) ? history.getItemLastValue("verifier", true) : prevAction.verifier;
         category = history.itemExist("category") ? history.getItemLastValue("category") : prevAction.category;
         fixversions = history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.fixversions;
+        dueDate = history.itemExist("duedate") ? history.getItemLastValue("duedate") : prevAction.dueDate;
+        components = history.itemExist("components") ? history.getItemLastValue("copmonents") : prevAction.components;
+        labels = history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.labels;
+        issueSizeEstimate = history.itemExist("issuesizeestimate", true) ? history.getItemLastValue("issuesizeestimate", true) : prevAction.issueSizeEstimate;
     }
 
     // For Comment Action
@@ -99,6 +111,10 @@ public class Action {
         verifier = prevAction.verifier;
         category = prevAction.category;
         fixversions = prevAction.fixversions;
+        dueDate = prevAction.dueDate;
+        components = prevAction.components;
+        labels = prevAction.labels;
+        issueSizeEstimate = prevAction.issueSizeEstimate;
     }
 
     private long timeInState(final Action prevAction, final Comment comment) {
