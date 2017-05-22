@@ -27,10 +27,10 @@ public class Field {
     public String summary;
     public User verifier;
     public FixVersion[] fixVersions;
-    public String dueDate;
+    public String duedate;
     public Component[] components;
     public String[] labels;
-    public IssueSizeEstimate issueSizeEstimate;
+    public IssueSizeEstimate issuesizeestimate;
 
     @SuppressWarnings("unused")
     @JsonProperty("created")
@@ -64,10 +64,10 @@ public class Field {
                         : category.name;
             }
             case "fixversions": return fixVersions == null ? "" : Joiner.on("|").join(fixVersions);
-            case "duedate": return dueDate == null ? "" : dueDate;
+            case "duedate": return duedate == null ? "" : duedate;
             case "components": return components == null ? "" : Joiner.on("|").join(components);
             case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
-            case "issuesizeestimate": return issueSizeEstimate == null ? "" : issueSizeEstimate.value;
+            case "issuesizeestimate": return issuesizeestimate == null ? "" : issuesizeestimate.value;
         }
         throw new Exception("Wrong Input name");
     }
