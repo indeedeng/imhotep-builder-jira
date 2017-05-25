@@ -50,7 +50,8 @@ buildPipeline(script) {
         // Ant, JDK 8, Python 2, and Node 6 are already installed on the docker image.
         buildInDockerContainer(script) {
             // This is the ant command you use to build and test your deployable
-            dockerSh "ant clean test test-bundle testability-report distribute"
+            //dockerSh "ant clean test test-bundle testability-report distribute"
+            dockerSh "ant clean test distribute"
         }
         step([$class: 'JacocoPublisher'])
     }
