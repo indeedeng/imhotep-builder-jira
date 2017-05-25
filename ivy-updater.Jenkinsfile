@@ -5,7 +5,7 @@ script = this
  
 bootstrapIvyUpdater(script) {
     gitConfig.gitUrl = "git@code.corp.indeed.com:delivery/jiraactions.git"
-    gitConfig.gitBranch = "develop"
+    gitConfig.gitBranch = "master"
     config.newBuildAvailableEmailList = "kbinswanger@indeed.com"
     config.failureEmailList = "kbinswanger@indeed.com"
  
