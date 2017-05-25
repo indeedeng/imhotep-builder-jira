@@ -21,6 +21,7 @@ public class Field {
     public User creator;
     public Issuetype issuetype;
     public Project project;
+    public String projectkey;
     public User reporter;
     public Resolution resolution;
     public Status status;
@@ -63,6 +64,7 @@ public class Field {
             case "creator": return creator == null ? "" : creator.displayName;
             case "issuetype": return issuetype == null ? "" : issuetype.name;
             case "project": return project == null ? "" : project.name;
+            case "projectkey": return project == null ? "" : project.key;
             case "reporter": return reporter == null ? "" : reporter.displayName;
             case "resolution": return resolution == null? "" : resolution.name;
             case "status": return status == null? "" : status.name;

@@ -32,8 +32,8 @@ public class TsvFileWriter {
 
     private static final String[] FILE_HEADER = {
         "action", "actor", "assignee", "category", "components*|", "duedate", "fieldschanged*", "fixversion*|", "issueage",
-            "issuekey", "issuetype", "labels*", "project", "prevstatus", "reporter", "resolution", "status", "summary",
-            "timeinstate", "timesinceaction", "time"
+            "issuekey", "issuetype", "labels*", "project", "projectkey", "prevstatus", "reporter", "resolution",
+            "status", "summary", "timeinstate", "timesinceaction", "time"
     };
 
     private static final String[] CUSTOM_HEADERS = {
@@ -122,6 +122,8 @@ public class TsvFileWriter {
             bw.write(action.labels);
             bw.write("\t");
             bw.write(action.project);
+            bw.write("\t");
+            bw.write(action.projectkey);
             bw.write("\t");
             bw.write(action.prevstatus);
             bw.write("\t");
