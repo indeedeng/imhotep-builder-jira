@@ -20,7 +20,7 @@ bootstrap(script) {
     // Jenkins will send an email if the build fails to the following list of comma-separated addresses and everyone who committed since the last successful build (e.g. one@indeed.com)
     config.failureEmailList = config.newBuildAvailableEmailList
     // Product group (e.g. indeedone)
-    config.productGroup = "delivery"
+    config.productGroup = "jobsearch"
     // This should be true to build in Docker, which is recommended
     config.buildInDocker = true
 
