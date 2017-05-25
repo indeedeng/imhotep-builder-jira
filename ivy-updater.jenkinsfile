@@ -1,0 +1,39 @@
+#!/usr/bin/env groovy
+@Library("pipeline@release/2.x") _
+
+/**
+ * This file tells Pipeline Jenkins how to lock down ivy library versions and build the project to verify that
+ * the new versions don't cause problems. Pipeline creates a merge request with the new libraries.properties.release
+ * if everything is okay.
+ * See https://wiki.indeed.com/display/PIPELINE/Updating+library+versions for details.
+ */
+
+script = this
+
+bootstrapIvyUpdater(script) {
+    // Git URL
+    gitConfig.gitUrl = "git@code.corp.indeed.com:delivery/jiraactions.git"
+    // Main development branch. Note: if you put develop here, master will be ignored by the pipeline.
+    gitConfig.gitBranch = "master"
+    // Jenkins will send an email when there is a new build available to the following list of comma-separated addresses
+    config.newBuildAvailableEmailList = "jobsearch-testing@indeed.com"
+    // Jenkins will send an email if the build fails to the following list of comma-separated addresses and everyone who committed since the last successful build
+    config.failureEmailList = config.newBuildAvailableEmailList
+    // Uses dockerized build
+    config.buildInDocker = true
+
+    // Set true to enable Slack notifications
+    slackConfig.enable = false
+    slackConfig.channel = "#channel-name"
+}
+
+updateIvyDependencies(
+        script,
+        // Branch name where the update will be pushed. A merge request to the mainline branch will also be created.
+        "ivy-update"
+) {
+    buildInDockerContainer(script) {
+        // This is the ant command you use to build and test your deployable
+        dockerSh("ant clean test distribute-hadoop-deploy")
+    }
+}
