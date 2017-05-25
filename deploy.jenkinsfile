@@ -73,3 +73,4 @@ buildPipeline(script) {
     deployToProd(script) {
         changeArcLabel(script)
     }
+}
