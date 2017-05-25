@@ -31,13 +31,14 @@ public class TsvFileWriter {
     private final Map<DateMidnight, WriterData> writerDataMap;
 
     private static final String[] FILE_HEADER = {
-        "action", "actor", "assignee", "category", "components*|", "duedate", "fieldschanged*", "fixversion*|", "issueage",
-            "issuekey", "issuetype", "labels*", "project", "projectkey", "prevstatus", "reporter", "resolution",
-            "status", "summary", "timeinstate", "timesinceaction", "time"
+        "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "duedate",
+            "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "project", "projectkey",
+            "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
+            "timesinceaction", "time"
     };
 
     private static final String[] CUSTOM_HEADERS = {
-            "verifier", "issuesizeestimate", "evnt_directcause"
+            "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause"
     };
 
 
@@ -101,7 +102,9 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.actor);
             bw.write("\t");
-            bw.write(action.assignee);
+            bw.write(action.actorusername);
+            bw.write("\t");
+            bw.write(action.assigneeusername);
             bw.write("\t");
             bw.write(action.category);
             bw.write("\t");
@@ -129,6 +132,8 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.reporter);
             bw.write("\t");
+            bw.write(action.reporterusername);
+            bw.write("\t");
             bw.write(action.resolution);
             bw.write("\t");
             bw.write(action.status);
@@ -144,6 +149,8 @@ public class TsvFileWriter {
             if(!config.isIgnoreCustomFields()) {
                 bw.write("\t");
                 bw.write(action.verifier);
+                bw.write("\t");
+                bw.write(action.verifierusername);
                 bw.write("\t");
                 bw.write(action.issueSizeEstimate);
                 bw.write("\t");
