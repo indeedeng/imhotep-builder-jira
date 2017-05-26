@@ -2,11 +2,14 @@ package com.indeed.jiraactions.api.response.issue.changelog.histories;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Joiner;
 import com.indeed.jiraactions.JiraActionsUtil;
 import com.indeed.jiraactions.api.response.issue.User;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author soono
@@ -26,12 +29,11 @@ public class History {
     }
 
     public String getChangedFields() {
-        final StringBuilder fieldsChanged = new StringBuilder();
-        for (int i = 0; i < items.length; i++) {
-            if (i != 0) fieldsChanged.append(" ");
-            fieldsChanged.append(items[i].field);
+        final Set<String> fieldsChanged = new HashSet<>();
+        for (final Item item : items) {
+            fieldsChanged.add(item.field);
         }
-        return fieldsChanged.toString();
+        return Joiner.on(" ").join(fieldsChanged.iterator());
     }
 
     public boolean itemExist(final String field) {
