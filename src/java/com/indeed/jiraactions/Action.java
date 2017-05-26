@@ -79,7 +79,7 @@ public class Action {
     public Action(final Action prevAction, final History history) {
         action = "update";
         actor = history.author == null ? "No User" : history.author.displayName;
-        actorusername = history.author == null ? "No User" : history.author.key;
+        actorusername = history.author == null ? "No User" : history.author.name;
         assignee = history.itemExist("assignee") ? history.getItemLastValue("assignee") : prevAction.assignee;
         assigneeusername = history.itemExist("assigneeusername") ? history.getItemLastValue("assigneeusername") : prevAction.assigneeusername;
         fieldschanged = history.getChangedFields();
@@ -112,7 +112,7 @@ public class Action {
     public Action(final Action prevAction, final Comment comment) {
         action = "comment";
         actor =  comment.author == null ? "No User" : comment.author.displayName;
-        actorusername =  comment.author == null ? "No User" : comment.author.key;
+        actorusername =  comment.author == null ? "No User" : comment.author.name;
         assignee = prevAction.assignee;
         assigneeusername = prevAction.assigneeusername;
         fieldschanged = "comment";
