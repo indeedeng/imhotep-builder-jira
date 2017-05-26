@@ -33,7 +33,11 @@ public class TsvFileWriter {
     private static final String[] FILE_HEADER = {
         "action", "actor", "assignee", "category", "components*|", "duedate", "fieldschanged*", "fixversion*|", "issueage",
             "issuekey", "issuetype", "labels*", "project", "prevstatus", "reporter", "resolution", "status", "summary",
-            "timeinstate", "timesinceaction", "time", "verifier", "issuesizeestimate", "directcause"
+            "timeinstate", "timesinceaction", "time"
+    };
+
+    private static final String[] CUSTOM_HEADERS = {
+            "verifier", "issuesizeestimate", "evnt_directcause"
     };
 
 
@@ -67,17 +71,16 @@ public class TsvFileWriter {
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
-        boolean hasWritten = false;
         // Write header
         for (final String header : FILE_HEADER) {
-            if(config.isIgnoreCustomFields() && ("verifier".equals(header) || "issuesizeestimate".equals(header) || "directCause".equals(header))) {
-                continue;
-            }
-            if (hasWritten) {
+            bw.write(header);
+            bw.write("\t");
+        }
+        if(!config.isIgnoreCustomFields()) {
+            for(final String header : CUSTOM_HEADERS) {
+                bw.write(header);
                 bw.write("\t");
             }
-            bw.write(header);
-            hasWritten = true;
         }
         bw.newLine();
         bw.flush();
