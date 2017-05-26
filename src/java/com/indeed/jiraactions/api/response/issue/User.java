@@ -10,4 +10,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class User {
     public String displayName;
+    public String key;
 }
