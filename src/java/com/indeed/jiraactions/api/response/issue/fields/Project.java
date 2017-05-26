@@ -11,4 +11,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Project {
     public ProjectCategory projectCategory;
     public String name;
+    public String key;
 }
