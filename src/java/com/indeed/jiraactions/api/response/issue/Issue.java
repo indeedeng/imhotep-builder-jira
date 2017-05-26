@@ -5,6 +5,8 @@ import com.indeed.jiraactions.api.response.issue.changelog.ChangeLog;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 
+import javax.annotation.Nullable;
+
 /**
  * @author soono
  */
@@ -21,12 +23,34 @@ public class Issue {
     }
 
     public String initialValue(final String field, final boolean acceptCustom) throws Exception {
-        if (this.changelog.historyItemExist(field, acceptCustom)) {
-            final Item history = this.changelog.getFirstHistoryItem(field, acceptCustom);
-            final String fromString = history != null ? history.fromString : null;
-            return fromString == null ? "" : fromString;
+        final Item history = initialItem(field, acceptCustom);
+        if(history != null) {
+            return history.fromString == null ? "" : history.fromString;
         } else {
             return this.fields.getStringValue(field);
         }
+    }
+
+
+    public String initialValueKey(final String field, final String fallbackField) throws Exception {
+        return initialValueKey(field, fallbackField, false);
+    }
+    // This name sucks
+    public String initialValueKey(final String field, final String fallbackField, final boolean acceptCustom) throws Exception {
+        final Item history = initialItem(field, acceptCustom);
+        if(history != null) {
+            return history.from == null ? "" : history.from;
+        } else {
+            return this.fields.getStringValue(fallbackField);
+        }
+    }
+
+
+    @Nullable
+    private Item initialItem(final String field, final boolean acceptCustom) throws Exception {
+        if (this.changelog.historyItemExist(field, acceptCustom)) {
+            return this.changelog.getFirstHistoryItem(field, acceptCustom);
+        }
+        return null;
     }
 }
