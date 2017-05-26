@@ -60,18 +60,18 @@ public class Field {
     public String getStringValue(final String attribute) throws Exception {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
-            case "assigneeusername": return assignee == null ? "" : assignee.key;
+            case "assigneeusername": return assignee == null ? "" : assignee.name;
             case "creator": return creator == null ? "" : creator.displayName;
             case "issuetype": return issuetype == null ? "" : issuetype.name;
             case "project": return project == null ? "" : project.name;
             case "projectkey": return project == null ? "" : project.key;
             case "reporter": return reporter == null ? "" : reporter.displayName;
-            case "reporterusername": return reporter == null ? "" : reporter.key;
+            case "reporterusername": return reporter == null ? "" : reporter.name;
             case "resolution": return resolution == null? "" : resolution.name;
             case "status": return status == null? "" : status.name;
             case "summary": return summary;
             case "verifier": return verifier == null? "" : verifier.displayName;
-            case "verifierusername": return verifier == null? "" : verifier.key;
+            case "verifierusername": return verifier == null? "" : verifier.name;
             case "category": {
                 final ProjectCategory category = project == null
                         ? null
