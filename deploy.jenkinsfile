@@ -18,11 +18,31 @@ bootstrap(script) {
     // Jenkins will send an email when there is a new build available to the following list of comma-separated addresses (e.g. one@indeed.com)
     config.newBuildAvailableEmailList = "kbinswanger@indeed.com"
     // Jenkins will send an email if the build fails to the following list of comma-separated addresses and everyone who committed since the last successful build (e.g. one@indeed.com)
-    config.failureEmailList = "kbinswanger@indeed.com"
+    config.failureEmailList = config.newBuildAvailableEmailList
     // Product group (e.g. indeedone)
-    config.productGroup = "delivery"
+    config.productGroup = "jobsearch"
     // This should be true to build in Docker, which is recommended
     config.buildInDocker = true
+
+    // A list of URLs of your current version in QA and stage
+    config.currentVersionUrlList = []
+    config.versionCheckRetries = 10
+    config.versionCheckSleepIntervalSeconds = 15
+
+    // A list of URLs of your healthchecks in QA and stage
+    config.healthCheckUrlList = []
+    config.healthCheckRetries = 10
+    config.healthCheckSleepIntervalSeconds = 5
+
+    // A list of URLs of your current version in prod
+    config.currentProdVersionUrlList = []
+
+    // Set true to fail the build if verification instructions are not provided in annotated git tags for each issue
+    config.requireVerificationInstructions = false
+
+    // Set true to enable Slack notifications
+    slackConfig.enable = false
+    slackConfig.channel = "#channel-name"
 }
  
 buildPipeline(script) {
@@ -30,7 +50,8 @@ buildPipeline(script) {
         // Ant, JDK 8, Python 2, and Node 6 are already installed on the docker image.
         buildInDockerContainer(script) {
             // This is the ant command you use to build and test your deployable
-            dockerSh "ant clean test test-bundle testability-report distribute"
+            //dockerSh "ant clean test test-bundle testability-report distribute"
+            dockerSh "ant clean test distribute"
         }
         step([$class: 'JacocoPublisher'])
     }
@@ -53,3 +74,4 @@ buildPipeline(script) {
     deployToProd(script) {
         changeArcLabel(script)
     }
+}
