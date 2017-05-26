@@ -18,8 +18,10 @@ public class Item {
     private static final Logger log = Logger.getLogger(Item.class);
 
     public String field;
+    public String from;
     public String fromString;
     public String toString;
+    public String to;
     public boolean customField;
 
     @VisibleForTesting

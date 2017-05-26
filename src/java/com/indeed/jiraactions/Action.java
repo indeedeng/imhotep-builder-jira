@@ -48,7 +48,7 @@ public class Action {
         actor = issue.fields.creator == null ? "No User" : issue.fields.creator.displayName;
         actorusername = issue.fields.creator == null ? "No User" : issue.fields.creator.name;
         assignee = issue.initialValue("assignee");
-        assigneeusername = issue.initialValue("assigneeusername");
+        assigneeusername = issue.initialValueKey("assignee", "assigneeusername");
         fieldschanged = "created";
         issueage = 0;
         issuekey = issue.key;
@@ -57,7 +57,7 @@ public class Action {
         projectkey = issue.initialValue("projectkey");
         prevstatus = "";
         reporter = issue.initialValue("reporter");
-        reporterusername = issue.initialValue("reporterusername");
+        reporterusername = issue.initialValueKey("reporter", "reporterusername");
         resolution = issue.initialValue("resolution");
         status = issue.initialValue("status");
         summary = issue.initialValue("summary");
@@ -65,7 +65,7 @@ public class Action {
         timesinceaction = 0;
         timestamp = issue.fields.created;
         verifier = issue.initialValue("verifier", true);
-        verifierusername = issue.initialValue("verifierusername", true);
+        verifierusername = issue.initialValueKey("verifier", "verifierusername", true);
         category = issue.initialValue("category");
         fixversions = issue.initialValue("fixversions");
         dueDate = issue.initialValue("duedate");
@@ -81,7 +81,7 @@ public class Action {
         actor = history.author == null ? "No User" : history.author.displayName;
         actorusername = history.author == null ? "No User" : history.author.name;
         assignee = history.itemExist("assignee") ? history.getItemLastValue("assignee") : prevAction.assignee;
-        assigneeusername = history.itemExist("assigneeusername") ? history.getItemLastValue("assigneeusername") : prevAction.assigneeusername;
+        assigneeusername = history.itemExist("assignee") ? history.getItemLastValueKey("assignee") : prevAction.assigneeusername;
         fieldschanged = history.getChangedFields();
         issueage = prevAction.issueage + getTimeDiff(prevAction.timestamp, history.created);
         issuekey = prevAction.issuekey;
@@ -90,7 +90,7 @@ public class Action {
         projectkey = history.itemExist("projectkey") ? history.getItemLastValue("projectkey") : prevAction.projectkey;
         prevstatus = prevAction.status;
         reporter = history.itemExist("reporter") ? history.getItemLastValue("reporter") : prevAction.reporter;
-        reporterusername = history.itemExist("reporterusername") ? history.getItemLastValue("reporterusername") : prevAction.reporterusername;
+        reporterusername = history.itemExist("reporter") ? history.getItemLastValueKey("reporter") : prevAction.reporterusername;
         resolution = history.itemExist("resolution") ? history.getItemLastValue("resolution") : prevAction.resolution;
         status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.status;
         summary = history.itemExist("summary") ? history.getItemLastValue("summary") : prevAction.summary;
@@ -98,7 +98,7 @@ public class Action {
         timesinceaction = getTimeDiff(prevAction.timestamp, history.created);
         timestamp = history.created;
         verifier = history.itemExist("verifier", true) ? history.getItemLastValue("verifier", true) : prevAction.verifier;
-        verifierusername = history.itemExist("verifierusername", true) ? history.getItemLastValue("verifierusername", true) : prevAction.verifierusername;
+        verifierusername = history.itemExist("verifier", true) ? history.getItemLastValueKey("verifier", true) : prevAction.verifierusername;
         category = history.itemExist("category") ? history.getItemLastValue("category") : prevAction.category;
         fixversions = history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.fixversions;
         dueDate = history.itemExist("duedate") ? history.getItemLastValue("duedate") : prevAction.dueDate;

@@ -70,4 +70,17 @@ public class History {
 
         return item.toString;
     }
+
+    public String getItemLastValueKey(final String field) {
+        return getItemLastValueKey(field, false);
+    }
+
+    public String getItemLastValueKey(final String field, final boolean acceptCustom) {
+        final Item item = getItem(field, acceptCustom);
+        if (item == null || item.to == null) {
+            return "";
+        }
+
+        return item.to;
+    }
 }
