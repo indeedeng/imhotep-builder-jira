@@ -104,6 +104,8 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.actorusername);
             bw.write("\t");
+            bw.write(action.assignee);
+            bw.write("\t");
             bw.write(action.assigneeusername);
             bw.write("\t");
             bw.write(action.category);
