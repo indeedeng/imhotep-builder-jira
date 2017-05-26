@@ -46,7 +46,7 @@ public class Action {
     public Action(final Issue issue) throws Exception {
         action = "create";
         actor = issue.fields.creator == null ? "No User" : issue.fields.creator.displayName;
-        actorusername = issue.fields.creator == null ? "No User" : issue.fields.creator.key;
+        actorusername = issue.fields.creator == null ? "No User" : issue.fields.creator.name;
         assignee = issue.initialValue("assignee");
         assigneeusername = issue.initialValue("assigneeusername");
         fieldschanged = "created";
