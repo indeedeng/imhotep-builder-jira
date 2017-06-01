@@ -5,11 +5,11 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.test.junit.Check;
-import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.text.ParseException;
 
 /**
@@ -30,17 +30,21 @@ public class ActionTest {
     private static final DateTime commentCreated = JiraActionsUtil.parseDateTime("2016-09-02T01:00:30"); // diff with prevAction is 10s.
     private static final long timeDiffWithPrevAction = 10;
 
+    private final UserLookupService userLookupService = new FriendlyUserLookupService();
+    private final ActionFactory actionFactory = new ActionFactory(userLookupService);
+
     @Before
     public void initialize() {
-        prevAction = EasyMock.createNiceMock(Action.class);
         author = new User();
         author.displayName = "Author";
 
         // Set default values
-        prevAction.action = "create";
-        prevAction.timestamp = prevActionTimestamp;
-        prevAction.prevstatus = "";
-        prevAction.status = "Pending Triage";
+        prevAction = ImmutableAction.builder()
+                .action("create")
+                .timestamp(prevActionTimestamp)
+                .prevstatus("")
+                .status("Pending Triage")
+                .build();
 
         history = new History();
         history.author = author;
@@ -74,58 +78,58 @@ public class ActionTest {
     //
 
     @Test
-    public void testAction_update_action() throws ParseException {
-        final Action action = new Action(prevAction, history);
-        Check.checkTrue("update".equals(action.action));
+    public void testAction_update_action() throws ParseException, IOException {
+        final Action action = actionFactory.update(prevAction, history);
+        Check.checkTrue("update".equals(action.getAction()));
     }
 
     @Test
-    public void testAction_update_actor() throws ParseException {
+    public void testAction_update_actor() throws ParseException, IOException {
         final String actor = "Test Actor";
         author.displayName = actor;
 
-        final Action action = new Action(prevAction, history);
-        Check.checkTrue(action.actor.equals(actor));
+        final Action action = actionFactory.update(prevAction, history);
+        Check.checkTrue(action.getActor().equals(actor));
     }
 
     @Test
-    public void testAction_update_assignee_whenAssigneeChanged() throws ParseException {
+    public void testAction_update_assignee_whenAssigneeChanged() throws ParseException, IOException {
         final Item item = new Item();
         item.setField("assignee");
         item.fromString = "old";
         item.toString = "new";
         history2.items = new Item[] { item };
 
-        final Action action = new Action(prevAction, history2);
-        Check.checkTrue(action.assignee.equals(item.toString));
-        Check.checkTrue(action.fieldschanged.contains(item.field));
+        final Action action = actionFactory.update(prevAction, history2);
+        Check.checkTrue(action.getAssignee().equals(item.toString));
+        Check.checkTrue(action.getFieldschanged().contains(item.field));
     }
 
     @Test
-    public void testAction_update_assignee_whenAssigneeNotChanged() throws ParseException {
+    public void testAction_update_assignee_whenAssigneeNotChanged() throws ParseException, IOException {
         final String assignee = "Test Assignee";
-        prevAction.assignee = assignee;
+        final Action newPrevAction = ImmutableAction.builder().from(prevAction).assignee(assignee).build();
 
-        final Action action = new Action(prevAction, history);
-        Check.checkTrue(action.assignee.equals(assignee));
+        final Action action = actionFactory.update(newPrevAction, history);
+        Check.checkTrue(action.getAssignee().equals(assignee));
     }
 
     @Test
-    public void testAction_updatenotstate_timing() throws ParseException {
-        final Action action = new Action(prevAction, history);
-        Check.checkEquals(timeDiffWithPrevAction, action.issueage);
-        Check.checkEquals(timeDiffWithPrevAction, action.timeinstate);
-        Check.checkEquals(timeDiffWithPrevAction, action.timesinceaction);
+    public void testAction_updatenotstate_timing() throws ParseException, IOException {
+        final Action action = actionFactory.update(prevAction, history);
+        Check.checkEquals(timeDiffWithPrevAction, action.getIssueage());
+        Check.checkEquals(timeDiffWithPrevAction, action.getTimeinstate());
+        Check.checkEquals(timeDiffWithPrevAction, action.getTimesinceaction());
     }
 
     @Test
-    public void testAction_update_timeinstate() throws ParseException {
-        final Action action = new Action(prevAction, history);
+    public void testAction_update_timeinstate() throws ParseException, IOException {
+        final Action action = actionFactory.update(prevAction, history);
 
-        final Action action2 = new Action(action, history2);
-        Check.checkEquals(timeDiffWithPrevAction*2, action2.issueage);
-        Check.checkEquals(timeDiffWithPrevAction*2, action2.timeinstate);
-        Check.checkEquals(timeDiffWithPrevAction, action2.timesinceaction);
+        final Action action2 = actionFactory.update(action, history2);
+        Check.checkEquals(timeDiffWithPrevAction*2, action2.getIssueage());
+        Check.checkEquals(timeDiffWithPrevAction*2, action2.getTimeinstate());
+        Check.checkEquals(timeDiffWithPrevAction, action2.getTimesinceaction());
     }
 
     //
@@ -133,37 +137,42 @@ public class ActionTest {
     //
 
     @Test
-    public void testAction_comment_issueage() throws ParseException {
-        final Action action = new Action(prevAction, history);
+    public void testAction_comment_issueage() throws ParseException, IOException {
+        final Action action = actionFactory.update(prevAction, history);
 
-        final Action action2 = new Action(action, comment);
-        Check.checkEquals(timeDiffWithPrevAction*3, action2.issueage);
-        Check.checkEquals(timeDiffWithPrevAction*3, action2.timeinstate);
-        Check.checkEquals(timeDiffWithPrevAction*2, action2.timesinceaction);
+        final Action action2 = actionFactory.comment(action, comment);
+        Check.checkEquals(timeDiffWithPrevAction*3, action2.getIssueage());
+        Check.checkEquals(timeDiffWithPrevAction*3, action2.getTimeinstate());
+        Check.checkEquals(timeDiffWithPrevAction*2, action2.getTimesinceaction());
     }
 
     @Test
     public void testAction_comment_timeinstate_afterUpdate() throws ParseException {
-        prevAction.action = "update";
-        final Action action = new Action(prevAction, comment);
-        Check.checkEquals(timeDiffWithPrevAction, action.issueage);
+        final Action newPrevAction = ImmutableAction.builder().from(prevAction).action("update").build();
+
+        final Action action = actionFactory.comment(newPrevAction, comment);
+        Check.checkEquals(timeDiffWithPrevAction, action.getIssueage());
     }
 
     @Test
     public void testAction_comment_timeinstate_afterComment() throws ParseException {
-        prevAction.action = "comment";
-        prevAction.timeinstate = prevActionTimeinstate;
-        final Action action = new Action(prevAction, comment);
-        Check.checkEquals(prevActionTimeinstate + timeDiffWithPrevAction, action.issueage);
+        final Action newPrevAction = ImmutableAction.builder().from(prevAction)
+                .action("comment")
+                .timeinstate(prevActionTimeinstate)
+                .build();
+        final Action action = actionFactory.comment(newPrevAction, comment);
+        Check.checkEquals(prevActionTimeinstate + timeDiffWithPrevAction, action.getIssueage());
     }
 
     @Test
-    public void testChangeStatusAndChangeBack() {
-        prevAction.action = "update";
-        prevAction.fieldschanged = "status";
-        prevAction.prevstatus = "On Backlog";
-        prevAction.status = "Accepted";
-        prevAction.timeinstate = 100;
+    public void testChangeStatusAndChangeBack() throws IOException {
+        final Action newPrevAction = ImmutableAction.builder().from(prevAction)
+                .action("update")
+                .fieldschanged("status")
+                .prevstatus("On Backlog")
+                .status("Accepted")
+                .timeinstate(100)
+                .build();
 
         final Item item = new Item();
         item.setField("status");
@@ -171,7 +180,7 @@ public class ActionTest {
         item.toString = "On Backlog";
         history2.items = new Item[] { item };
 
-        final Action action = new Action(prevAction, history2);
-        Check.checkEquals(history2.created.getMillis() - prevAction.timestamp.getMillis(), action.timeinstate);
+        final Action action = actionFactory.update(newPrevAction, history2);
+        Check.checkEquals(history2.created.getMillis() - prevAction.getTimestamp().getMillis(), action.getTimeinstate());
     }
 }

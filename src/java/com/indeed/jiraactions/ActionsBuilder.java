@@ -20,8 +20,10 @@ public class ActionsBuilder {
     private final DateTime startDate;
     private final DateTime endDate;
     private final List<Action> actions;
+    private final ActionFactory actionFactory;
 
-    public ActionsBuilder(final Issue issue, final DateTime startDate, final DateTime endDate) {
+    public ActionsBuilder(final ActionFactory actionFactory, final Issue issue, final DateTime startDate, final DateTime endDate) {
+        this.actionFactory = actionFactory;
         this.issue = issue;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -33,7 +35,7 @@ public class ActionsBuilder {
         setCreateAction();
         setUpdateActions();
         setCommentActions();
-        return actions.stream().filter(a -> isCreatedDuringRange(a.timestamp)).collect(Collectors.toList());
+        return actions.stream().filter(a -> isCreatedDuringRange(a.getTimestamp())).collect(Collectors.toList());
     }
 
     //
@@ -41,7 +43,7 @@ public class ActionsBuilder {
     //
 
     private void setCreateAction() throws Exception {
-        final Action createAction = new Action(issue);
+        final Action createAction = actionFactory.create(issue);
         actions.add(createAction);
     }
 
@@ -54,7 +56,7 @@ public class ActionsBuilder {
 
         Action prevAction = actions.get(actions.size()-1); // safe because we always add the create action
         for (final History history : issue.changelog.histories) {
-            final Action updateAction = new Action(prevAction, history);
+            final Action updateAction = actionFactory.update(prevAction, history);
             actions.add(updateAction);
             prevAction = updateAction;
         }
@@ -71,7 +73,7 @@ public class ActionsBuilder {
         for (final Comment comment : issue.fields.comment.comments) {
             while (true) {
                 if (commentIsRightAfter(comment, currentActionIndex)) {
-                    final Action commentAction = new Action(actions.get(currentActionIndex), comment);
+                    final Action commentAction = actionFactory.comment(actions.get(currentActionIndex), comment);
                     actions.add(currentActionIndex + 1, commentAction);
                     break;
                 } else {
@@ -90,7 +92,7 @@ public class ActionsBuilder {
          * automated tools are that fast (or because of a comment made at the same time you do an edit.
          */
         final DateTime commentDate = comment.created;
-        final DateTime actionDate = action.timestamp;
+        final DateTime actionDate = action.getTimestamp();
         return commentDate.isAfter(actionDate) || commentDate.isEqual(actionDate);
     }
 

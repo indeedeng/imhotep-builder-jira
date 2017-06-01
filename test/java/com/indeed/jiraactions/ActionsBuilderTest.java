@@ -26,6 +26,8 @@ public class ActionsBuilderTest {
     private Issue issue;
     private static final DateTime startDate = JiraActionsUtil.parseDateTime("2016-08-01 00:00:00");
     private static final DateTime endDate = JiraActionsUtil.parseDateTime("2016-08-07 00:00:00");
+    private final UserLookupService userLookupService = new FriendlyUserLookupService();
+    private final ActionFactory actionFactory = new ActionFactory(userLookupService);
 
     @Before
     public void initialize() throws ParseException {
@@ -52,10 +54,10 @@ public class ActionsBuilderTest {
         final DateTime issueDate = startDate.plusDays(1);
         setCreationDate(issueDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
-        Check.checkTrue("create".equals(actions.get(0).action));
+        Check.checkTrue("create".equals(actions.get(0).getAction()));
     }
 
     @Test
@@ -66,10 +68,10 @@ public class ActionsBuilderTest {
         final DateTime updateDate = startDate.plusDays(1);
         createHistory(updateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
-        Check.checkFalse("create".equals(actions.get(0).action));
+        Check.checkFalse("create".equals(actions.get(0).getAction()));
     }
 
     @Test
@@ -80,12 +82,12 @@ public class ActionsBuilderTest {
         final DateTime updateDate = issueDate.plusDays(1);
         createHistory(updateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
         for (final Action action : actions) {
-            if ("update".equals(action.action)) {
+            if ("update".equals(action.getAction())) {
                 containsUpdate = true;
             }
         }
@@ -103,12 +105,12 @@ public class ActionsBuilderTest {
         final DateTime tooNewUpdateDate = endDate.plusDays(1);
         createHistory(tooNewUpdateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsUpdate = false;
         for (final Action action : actions) {
-            if ("update".equals(action.action)) {
+            if ("update".equals(action.getAction())) {
                 containsUpdate = true;
             }
         }
@@ -123,12 +125,12 @@ public class ActionsBuilderTest {
         final DateTime commentDate = issueDate.plusDays(1);
         createComment(commentDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsComment = false;
         for (final Action action : actions) {
-            if ("comment".equals(action.action)) {
+            if ("comment".equals(action.getAction())) {
                 containsComment = true;
             }
         }
@@ -146,12 +148,12 @@ public class ActionsBuilderTest {
         final DateTime tooNewUpdateDate = endDate.plusDays(1);
         createComment(tooNewUpdateDate);
 
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
         boolean containsComment = false;
         for (final Action action : actions) {
-            if ("comment".equals(action.action)) {
+            if ("comment".equals(action.getAction())) {
                 containsComment = true;
             }
         }
