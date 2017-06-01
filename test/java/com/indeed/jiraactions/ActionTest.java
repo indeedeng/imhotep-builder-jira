@@ -37,9 +37,13 @@ public class ActionTest {
     public void initialize() {
         author = new User();
         author.displayName = "Author";
+        author.name = "author";
+
+        final Action defaultAction = ImmutableProxy.createProxy(Action.class);
 
         // Set default values
         prevAction = ImmutableAction.builder()
+                .from(defaultAction)
                 .action("create")
                 .timestamp(prevActionTimestamp)
                 .prevstatus("")
