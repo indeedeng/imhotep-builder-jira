@@ -1,4 +1,4 @@
-package com.indeed.jiraactions;
+package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

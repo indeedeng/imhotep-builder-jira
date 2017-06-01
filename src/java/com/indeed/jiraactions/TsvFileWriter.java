@@ -50,11 +50,6 @@ public class TsvFileWriter {
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
-    private String reformatDate(final String date) {
-        final DateTime dateTime = JiraActionsUtil.parseDateTime(date);
-        return dateTime.toString(FILENAME_DATE_TIME_PATTERN);
-    }
-
     private String reformatDate(final DateTime date) {
         return date.toString(FILENAME_DATE_TIME_PATTERN);
     }
@@ -95,68 +90,68 @@ public class TsvFileWriter {
         }
 
         for (final Action action : actions) {
-            final WriterData writerData = writerDataMap.get(action.timestamp.toDateMidnight());
+            final WriterData writerData = writerDataMap.get(action.getTimestamp().toDateMidnight());
             final BufferedWriter bw = writerData.getBufferedWriter();
             writerData.setWritten(true);
-            bw.write(action.action);
+            bw.write(action.getAction());
             bw.write("\t");
-            bw.write(action.actor);
+            bw.write(action.getActor());
             bw.write("\t");
-            bw.write(action.actorusername);
+            bw.write(action.getActorusername());
             bw.write("\t");
-            bw.write(action.assignee);
+            bw.write(action.getAssignee());
             bw.write("\t");
-            bw.write(action.assigneeusername);
+            bw.write(action.getAssigneeusername());
             bw.write("\t");
-            bw.write(action.category);
+            bw.write(action.getCategory());
             bw.write("\t");
-            bw.write(action.components);
+            bw.write(action.getComponents());
             bw.write("\t");
-            bw.write(action.dueDate);
+            bw.write(action.getDueDate());
             bw.write("\t");
-            bw.write(action.fieldschanged);
+            bw.write(action.getFieldschanged());
             bw.write("\t");
-            bw.write(action.fixversions.replace(Character.toString('\t'), "<tab>"));
+            bw.write(action.getFixversions().replace(Character.toString('\t'), "<tab>"));
             bw.write("\t");
-            bw.write(String.valueOf(action.issueage));
+            bw.write(String.valueOf(action.getIssueage()));
             bw.write("\t");
-            bw.write(action.issuekey);
+            bw.write(action.getIssuekey());
             bw.write("\t");
-            bw.write(action.issuetype);
+            bw.write(action.getIssuetype());
             bw.write("\t");
-            bw.write(action.labels);
+            bw.write(action.getLabels());
             bw.write("\t");
-            bw.write(action.project);
+            bw.write(action.getProject());
             bw.write("\t");
-            bw.write(action.projectkey);
+            bw.write(action.getProjectkey());
             bw.write("\t");
-            bw.write(action.prevstatus);
+            bw.write(action.getPrevstatus());
             bw.write("\t");
-            bw.write(action.reporter);
+            bw.write(action.getReporter());
             bw.write("\t");
-            bw.write(action.reporterusername);
+            bw.write(action.getReporterusername());
             bw.write("\t");
-            bw.write(action.resolution);
+            bw.write(action.getResolution());
             bw.write("\t");
-            bw.write(action.status);
+            bw.write(action.getStatus());
             bw.write("\t");
-            bw.write(action.summary.replace(Character.toString('\t'), "<tab>"));
+            bw.write(action.getSummary().replace(Character.toString('\t'), "<tab>"));
             bw.write("\t");
-            bw.write(String.valueOf(action.timeinstate));
+            bw.write(String.valueOf(action.getTimeinstate()));
             bw.write("\t");
-            bw.write(String.valueOf(action.timesinceaction));
+            bw.write(String.valueOf(action.getTimesinceaction()));
             bw.write("\t");
-            bw.write(JiraActionsUtil.getUnixTimestamp(action.timestamp));
+            bw.write(JiraActionsUtil.getUnixTimestamp(action.getTimestamp()));
 
             if(!config.isIgnoreCustomFields()) {
                 bw.write("\t");
-                bw.write(action.verifier);
+                bw.write(action.getVerifier());
                 bw.write("\t");
-                bw.write(action.verifierusername);
+                bw.write(action.getVerifierusername());
                 bw.write("\t");
-                bw.write(action.issueSizeEstimate);
+                bw.write(action.getIssueSizeEstimate());
                 bw.write("\t");
-                bw.write(action.directCause);
+                bw.write(action.getDirectCause());
             }
             bw.newLine();
         }
