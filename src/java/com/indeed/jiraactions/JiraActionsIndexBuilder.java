@@ -1,7 +1,10 @@
 package com.indeed.jiraactions;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.indeed.jiraactions.api.ApiUserLookupService;
 import com.indeed.jiraactions.api.response.issue.Issue;
+import com.indeed.jiraactions.api.IssueAPIParser;
+import com.indeed.jiraactions.api.IssuesAPICaller;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
@@ -25,6 +28,9 @@ public class JiraActionsIndexBuilder {
         try {
             final long start_total = System.currentTimeMillis();
             final long end_total;
+
+            final ApiUserLookupService userLookupService = new ApiUserLookupService(config);
+            final ActionFactory actionFactory = new ActionFactory(userLookupService);
 
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config);
             {
@@ -73,7 +79,7 @@ public class JiraActionsIndexBuilder {
                     try {
                         // Build Action objects from parsed API response Object.
                         process_start = System.currentTimeMillis();
-                        final ActionsBuilder actionsBuilder = new ActionsBuilder(issue, startDate, endDate);
+                        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
                         final List<Action> actions = actionsBuilder.buildActions();
                         process_end = System.currentTimeMillis();
                         processTime += process_end - process_start;
@@ -90,6 +96,8 @@ public class JiraActionsIndexBuilder {
                 end = System.currentTimeMillis();
                 log.trace(String.format("%d ms to get actions from a set of issues.", end - start));
             }
+
+            log.debug(String.format("Had to look up %d users.", userLookupService.numLookups()));
 
             start = System.currentTimeMillis();
             // Create and Upload a TSV file.

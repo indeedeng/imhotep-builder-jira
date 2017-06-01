@@ -1,29 +1,22 @@
-package com.indeed.jiraactions;
+package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.codec.binary.Base64;
+import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
 
 /**
  * @author soono
  */
-public class IssuesAPICaller {
+public class IssuesAPICaller extends ApiCaller {
     private static final Logger log = Logger.getLogger(IssuesAPICaller.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final JiraActionsIndexBuilderConfig config;
+    private static final String API_PATH = "/rest/api/2/search";
+
     private final String urlBase;
-    private final String authentication;
 
     // For Pagination
     private final int maxPerPage; // Max number of issues per page
@@ -35,12 +28,11 @@ public class IssuesAPICaller {
     private int backoff = 10_000;
 
     public IssuesAPICaller(final JiraActionsIndexBuilderConfig config) throws UnsupportedEncodingException {
-        this.config = config;
+        super(config);
         this.maxPerPage = config.getJiraBatchSize();
         this.batchSize = config.getJiraBatchSize();
 
         this.urlBase = getIssuesUrlBase();
-        this.authentication = getBasicAuth();
     }
 
     public JsonNode getIssuesNodeWithBackoff() throws InterruptedException {
@@ -79,15 +71,6 @@ public class IssuesAPICaller {
         return apiRes.get("issues");
     }
 
-    private JsonNode getJsonNode(final String url) throws IOException {
-        final HttpsURLConnection urlConnection = getURLConnection(url);
-        final InputStream in = urlConnection.getInputStream();
-        final BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        final String apiRes = br.readLine();
-        br.close();
-        return objectMapper.readTree(apiRes);
-    }
-
     public int setNumTotal() throws IOException {
         final JsonNode apiRes = getJsonNode(getBasicInfoURL());
         final JsonNode totalNode = apiRes.path("total");
@@ -109,21 +92,8 @@ public class IssuesAPICaller {
         start += batchSize;
     }
 
-    private HttpsURLConnection getURLConnection(final String urlString) throws IOException {
-        final URL url = new URL(urlString);
-        final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Authorization", authentication);
-        return urlConnection;
-    }
-
-    private String getBasicAuth() {
-        final String userPass = config.getJiraUsername() + ":" + config.getJiraPassword();
-        final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
-        return basicAuth;
-    }
-
     private String getIssuesUrlBase() throws UnsupportedEncodingException {
-        return config.getJiraBaseURL() + "?" +
+        return config.getJiraBaseURL() + API_PATH + "?" +
                 getJQLParam() +
                 "&" +
                 getFieldsParam() +
@@ -145,7 +115,7 @@ public class IssuesAPICaller {
     }
 
     private String getBasicInfoURL() throws UnsupportedEncodingException {
-        final String url = config.getJiraBaseURL() + "?" +
+        final String url = config.getJiraBaseURL() + API_PATH + "?" +
                 getJQLParam() +
                 "&maxResults=0";
         return url;
