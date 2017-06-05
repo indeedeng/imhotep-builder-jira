@@ -13,7 +13,7 @@ public class User {
     static {
         INVALID_USER = new User();
         INVALID_USER.displayName = "No User";
-        INVALID_USER.name = "No User";
+        INVALID_USER.name = "";
         INVALID_USER.key = "";
     }
     public String displayName;
