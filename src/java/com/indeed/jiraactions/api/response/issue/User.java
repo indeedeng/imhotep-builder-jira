@@ -14,7 +14,9 @@ public class User {
         INVALID_USER = new User();
         INVALID_USER.displayName = "No User";
         INVALID_USER.name = "No User";
+        INVALID_USER.key = "";
     }
     public String displayName;
     public String name;
+    public String key;
 }
