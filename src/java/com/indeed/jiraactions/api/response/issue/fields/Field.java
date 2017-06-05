@@ -60,6 +60,7 @@ public class Field {
     public String getStringValue(final String attribute) throws Exception {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
+            case "assigneekey": return assignee == null ? "" : assignee.key;
             case "assigneeusername": return assignee == null ? "" : assignee.name;
             case "creator": return creator == null ? "" : creator.displayName;
             case "issuetype": return issuetype == null ? "" : issuetype.name;
@@ -70,7 +71,8 @@ public class Field {
             case "resolution": return resolution == null? "" : resolution.name;
             case "status": return status == null? "" : status.name;
             case "summary": return summary;
-            case "verifier": return verifier == null? "" : verifier.displayName;
+            case "verifier": return verifier == null ? "" : verifier.displayName;
+            case "verifierkey": return verifier == null ? "" : verifier.key;
             case "verifierusername": return verifier == null? "" : verifier.name;
             case "category": {
                 final ProjectCategory category = project == null
