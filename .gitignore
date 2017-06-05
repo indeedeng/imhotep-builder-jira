@@ -11,3 +11,4 @@ clippy-lib/
 jirapassword.properties
 .ant-targets-build.xml
 *.orig
+*.swp
