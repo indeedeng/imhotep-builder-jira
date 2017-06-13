@@ -23,11 +23,15 @@ public class Issue {
     }
 
     public String initialValue(final String field, final boolean acceptCustom) throws Exception {
+        return initialValue(field, field, acceptCustom);
+    }
+
+    public String initialValue(final String field, final String fallbackField, final boolean acceptCustom) throws Exception {
         final Item history = initialItem(field, acceptCustom);
         if(history != null) {
             return history.fromString == null ? "" : history.fromString;
         } else {
-            return this.fields.getStringValue(field);
+            return this.fields.getStringValue(fallbackField);
         }
     }
 
@@ -48,9 +52,6 @@ public class Issue {
 
     @Nullable
     private Item initialItem(final String field, final boolean acceptCustom) throws Exception {
-        if (this.changelog.historyItemExist(field, acceptCustom)) {
-            return this.changelog.getFirstHistoryItem(field, acceptCustom);
-        }
-        return null;
+        return this.changelog.getFirstHistoryItem(field, acceptCustom);
     }
 }

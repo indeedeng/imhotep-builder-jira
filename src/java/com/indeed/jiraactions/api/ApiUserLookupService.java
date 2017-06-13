@@ -12,7 +12,9 @@ import org.apache.log4j.Logger;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -25,6 +27,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
     private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String baseUrl;
+    private long userLookupTime;
 
     public ApiUserLookupService(final JiraActionsIndexBuilderConfig config) {
         super(config);
@@ -49,8 +52,12 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
         return users.size();
     }
 
-    private String getApiUrlForUser(final String key) {
-        return baseUrl + "?key=" + URLEncoder.encode(key);
+    private String getApiUrlForUser(final String key) throws UnsupportedEncodingException {
+        return baseUrl + "?key=" + URLEncoder.encode(key, "UTF-8");
+    }
+
+    public long getUserLookupTotalTime() {
+        return userLookupTime;
     }
 
     private User lookupUser(final String key) throws IOException {
@@ -61,8 +68,9 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
         final User user = objectMapper.treeToValue(json, User.class);
 
         final long end = System.currentTimeMillis();
+        userLookupTime += (end - start);
         log.trace(String.format("Took %d milliseconds to look up user.%s", (end - start),
-                key.equals(user.name) ? "" : " They had a different username than key."));
+                Objects.equals(key, user.name) ? "" : " They had a different username than key."));
         return user;
     }
 }
