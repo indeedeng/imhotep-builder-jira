@@ -80,10 +80,6 @@ public class Field {
     }
 
     public String getMultiValue(final String attribute, final String fieldName, final String separator) throws IOException {
-        if(!otherProperties.containsKey(attribute)) {
-            throw new IOException("Can't find attribute " + attribute);
-        }
-
         final JsonNode node = otherProperties.get(attribute);
         if(node == null) {
             return "";
