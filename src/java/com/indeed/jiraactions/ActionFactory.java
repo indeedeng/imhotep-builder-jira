@@ -7,6 +7,7 @@ import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author soono on 8/31/16.
@@ -47,8 +48,9 @@ public class ActionFactory {
                 .dueDate(issue.initialValue("duedate"))
                 .components(issue.initialValue("components"))
                 .labels(issue.initialValue("labels"))
-                .issueSizeEstimate(issue.initialValue("issuesizeestimate"))
+                .issueSizeEstimate(issue.initialValue("t-shirt-size-estimate", "issuesizeestimate", true))
                 .directCause(issue.initialValue("directcause"))
+                .sprints(issue.initialValue("sprint", true))
                 .build();
     }
 
@@ -79,10 +81,11 @@ public class ActionFactory {
                 .category(history.itemExist("category") ? history.getItemLastValue("category") : prevAction.getCategory())
                 .fixversions(history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.getFixversions())
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate") : prevAction.getDueDate())
-                .components(history.itemExist("components") ? history.getItemLastValue("copmonents") : prevAction.getComponents())
+                .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
-                .issueSizeEstimate(history.itemExist("issuesizeestimate", true) ? history.getItemLastValue("issuesizeestimate", true) : prevAction.getIssueSizeEstimate())
-                .directCause(history.itemExist("directcause", true) ? history.getItemLastValue("directcause", true) : prevAction.getDirectCause())
+                .issueSizeEstimate(history.itemExist("t-shirt-size-estimate", true) ? history.getItemLastValue("t-shirt-size-estimate", true) : prevAction.getIssueSizeEstimate())
+                .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause())
+                .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
                 .build();
     }
 
@@ -109,7 +112,7 @@ public class ActionFactory {
     }
 
     private long timeInState(final Action prevAction, final DateTime changeTimestamp) {
-        if(!prevAction.getPrevstatus().equals(prevAction.getStatus())) {
+        if(!Objects.equals(prevAction.getPrevstatus(), prevAction.getStatus())) {
             return getTimeDiff(prevAction.getTimestamp(), changeTimestamp);
         }
 

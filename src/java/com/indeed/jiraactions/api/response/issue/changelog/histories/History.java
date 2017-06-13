@@ -9,6 +9,7 @@ import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -42,7 +43,7 @@ public class History {
 
     public boolean itemExist(final String field, final boolean acceptCustom) {
         for (final Item item : items) {
-            if (item.field.equals(field) && (acceptCustom || !item.customField)) {
+            if (Objects.equals(item.field, field) && (acceptCustom || !item.customField)) {
                 return true;
             }
         }
@@ -52,7 +53,7 @@ public class History {
     @Nullable
     public Item getItem(final String field, final boolean acceptCustom) {
         for (final Item item : items) {
-            if (item.field.equals(field) && (acceptCustom || !item.customField)) {
+            if (Objects.equals(item.field, field) && (acceptCustom || !item.customField)) {
                 return item;
             }
         }
@@ -71,6 +72,24 @@ public class History {
         }
 
         return item.toString;
+    }
+
+    // Of the form "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"
+    @SuppressWarnings("SameParameterValue")
+    public String getItemLastValueFlattened(final String field, final boolean acceptCustom) {
+        final Item item = getItem(field, acceptCustom);
+        if(item == null || item.toString == null) {
+            return "";
+        }
+
+        final int start = item.toString.indexOf("Parent values: ") + "Parent values: ".length();
+        if(start < 0) {
+            return item.toString;
+        }
+
+        return item.toString.substring(start)
+                .replaceAll("\\(\\d+\\)", "")
+                .replaceAll("Level \\d values: ", " - ");
     }
 
     public String getItemLastValueKey(final String field) {

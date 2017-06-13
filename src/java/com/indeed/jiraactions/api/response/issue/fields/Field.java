@@ -1,20 +1,35 @@
 package com.indeed.jiraactions.api.response.issue.fields;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import com.indeed.jiraactions.JiraActionsUtil;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
-/**
- * @author soono
- */
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
 @SuppressWarnings("CanBeFinal")
 public class Field {
+    private static final Map<String, String> CUSTOM_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
+            .put("sprint", "customfield_11490").build();
+    private static final Map<String, String> ATTRIBUTE_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
+            .put("sprint", "N/A").build();
+    private static final Map<String, String> SEPARATORS = ImmutableMap.<String, String>builder()
+            .put("sprint", "|").build();
+
+    private static final Logger log = Logger.getLogger(Field.class);
+
     public User assignee;
     public CommentCollection comment;
     public DateTime created;
@@ -32,6 +47,7 @@ public class Field {
     public String[] labels;
     public IssueSizeEstimate issuesizeestimate;
     public DirectCause directcause;
+    public Map<String, JsonNode> otherProperties = new HashMap<>();
 
     @SuppressWarnings("unused")
     @JsonProperty("created")
@@ -55,6 +71,39 @@ public class Field {
     @JsonProperty("customfield_17490")
     public void setDirectCause(final DirectCause directCause) {
         this.directcause = directCause;
+    }
+
+    @SuppressWarnings("unused")
+    @JsonAnySetter
+    public void setOtherProperty(final String key, final JsonNode value) {
+        otherProperties.put(key, value);
+    }
+
+    public String getMultiValue(final String attribute, final String fieldName, final String separator) throws IOException {
+        if(!otherProperties.containsKey(attribute)) {
+            throw new IOException("Can't find attribute " + attribute);
+        }
+
+        final JsonNode node = otherProperties.get(attribute);
+        if(node == null) {
+            return "";
+        }
+
+        final List<String> temp = new ArrayList<String>(node.size() > 0 ? node.size() : 1);
+        // I can't believe I have to do this
+        if(Objects.equals("customfield_11490", attribute)) {
+            for (final Iterator<JsonNode> it = node.elements(); it.hasNext(); ) {
+                final JsonNode child = it.next();
+                final String text = child.asText();
+                final int start = text.indexOf("name=") + 5;
+                final int end = text.indexOf(",", start);
+                final String name = text.substring(start, end);
+                temp.add(name);
+            }
+        } else {
+            node.findValuesAsText(fieldName, temp);
+        }
+        return Joiner.on(separator).join(temp);
     }
 
     public String getStringValue(final String attribute) throws Exception {
@@ -88,6 +137,11 @@ public class Field {
             case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
             case "issuesizeestimate": return issuesizeestimate == null ? "" : issuesizeestimate.value;
             case "directcause": return directcause == null ? "" : directcause.value;
+        }
+        if(CUSTOM_FIELD_MAPPINGS.containsKey(attribute)) {
+            if(SEPARATORS.containsKey(attribute)) {
+                return getMultiValue(CUSTOM_FIELD_MAPPINGS.get(attribute), ATTRIBUTE_FIELD_MAPPINGS.get(attribute), SEPARATORS.get(attribute));
+            }
         }
         throw new Exception("Wrong Input name");
     }

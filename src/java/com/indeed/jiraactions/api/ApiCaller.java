@@ -26,10 +26,18 @@ public abstract class ApiCaller {
 
     protected JsonNode getJsonNode(final String url) throws IOException {
         final HttpsURLConnection urlConnection = getURLConnection(url);
-        final InputStream in = urlConnection.getInputStream();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+        BufferedReader br = null;
+        try {
+            final InputStream in = urlConnection.getInputStream();
+            br = new BufferedReader(new InputStreamReader(in));
             final String apiRes = br.readLine();
             return objectMapper.readTree(apiRes);
+        } catch(final IOException e) {
+            throw new IOException("Failed on URL " + url, e);
+        } finally {
+            if(br != null) {
+                br.close();
+            }
         }
     }
 
