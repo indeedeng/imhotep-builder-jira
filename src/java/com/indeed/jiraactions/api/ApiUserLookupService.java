@@ -12,7 +12,9 @@ import org.apache.log4j.Logger;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -49,8 +51,8 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
         return users.size();
     }
 
-    private String getApiUrlForUser(final String key) {
-        return baseUrl + "?key=" + URLEncoder.encode(key);
+    private String getApiUrlForUser(final String key) throws UnsupportedEncodingException {
+        return baseUrl + "?key=" + URLEncoder.encode(key, "UTF-8");
     }
 
     private User lookupUser(final String key) throws IOException {
@@ -62,7 +64,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
 
         final long end = System.currentTimeMillis();
         log.trace(String.format("Took %d milliseconds to look up user.%s", (end - start),
-                key.equals(user.name) ? "" : " They had a different username than key."));
+                Objects.equals(key, user.name) ? "" : " They had a different username than key."));
         return user;
     }
 }

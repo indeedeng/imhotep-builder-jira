@@ -34,4 +34,5 @@ interface Action {
     String getLabels();
     String getIssueSizeEstimate();
     String getDirectCause();
+    String getSprints();
 }
