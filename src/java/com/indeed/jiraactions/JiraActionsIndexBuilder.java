@@ -108,8 +108,11 @@ public class JiraActionsIndexBuilder {
 
             end_total = System.currentTimeMillis();
 
+            final long apiUserTime = userLookupService.getUserLookupTotalTime();
+
             log.info(String.format("%d ms for the whole process.", end_total - start_total));
-            log.info(String.format("apiTime: %dms, processTime: %dms, fileTime: %dms", apiTime, processTime, fileTime));
+            log.info(String.format("apiTime: %dms, processTime: %dms, fileTime: %dms, userLookupTime: %dms",
+                    apiTime-apiUserTime, processTime, fileTime, apiUserTime));
             log.warn(String.format("Potentially missed %d issues!", issuesAPICaller.getNumPotentiallySkipped()));
         } catch (final Exception e) {
             log.error("Threw an exception trying to run the index builder", e);

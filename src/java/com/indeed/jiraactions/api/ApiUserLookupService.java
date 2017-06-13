@@ -27,6 +27,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
     private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String baseUrl;
+    private long userLookupTime;
 
     public ApiUserLookupService(final JiraActionsIndexBuilderConfig config) {
         super(config);
@@ -55,6 +56,10 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
         return baseUrl + "?key=" + URLEncoder.encode(key, "UTF-8");
     }
 
+    public long getUserLookupTotalTime() {
+        return userLookupTime;
+    }
+
     private User lookupUser(final String key) throws IOException {
         final long start = System.currentTimeMillis();
 
@@ -63,6 +68,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
         final User user = objectMapper.treeToValue(json, User.class);
 
         final long end = System.currentTimeMillis();
+        userLookupTime += (end - start);
         log.trace(String.format("Took %d milliseconds to look up user.%s", (end - start),
                 Objects.equals(key, user.name) ? "" : " They had a different username than key."));
         return user;
