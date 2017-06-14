@@ -49,7 +49,7 @@ public class ActionFactory {
                 .components(issue.initialValue("components"))
                 .labels(issue.initialValue("labels"))
                 .issueSizeEstimate(issue.initialValue("t-shirt-size-estimate", "issuesizeestimate", true))
-                .directCause(issue.initialValue("directcause"))
+                .directCause(issue.initialValue("direct-cause", "directcause", true))
                 .sprints(issue.initialValue("sprint", true))
                 .build();
     }
