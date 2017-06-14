@@ -132,7 +132,7 @@ public class Field {
             case "components": return components == null ? "" : Joiner.on("|").join(components);
             case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
             case "issuesizeestimate": return issuesizeestimate == null ? "" : issuesizeestimate.value;
-            case "directcause": return directcause == null ? "" : directcause.value;
+            case "directcause": return directcause == null ? "" : directcause.toString();
         }
         if(CUSTOM_FIELD_MAPPINGS.containsKey(attribute)) {
             if(SEPARATORS.containsKey(attribute)) {

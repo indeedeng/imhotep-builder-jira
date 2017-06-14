@@ -10,9 +10,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class DirectCause {
     public String value;
+    public DirectCause child;
 
     @Override
     public String toString() {
-        return value;
+        return value + (child == null ? "" : " - " + child.toString());
     }
 }
