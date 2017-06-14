@@ -1,5 +1,6 @@
 package com.indeed.jiraactions;
 
+import com.google.common.base.Joiner;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -68,16 +69,12 @@ public class TsvFileWriter {
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
         // Write header
-        for (final String header : FILE_HEADER) {
-            bw.write(header);
-            bw.write("\t");
-        }
+        final StringBuilder headers = new StringBuilder(Joiner.on("\t").join(FILE_HEADER));
         if(!config.isIgnoreCustomFields()) {
-            for(final String header : CUSTOM_HEADERS) {
-                bw.write(header);
-                bw.write("\t");
-            }
+            headers.append("\t")
+                    .append(Joiner.on("\t").join(CUSTOM_HEADERS));
         }
+        bw.write(headers.toString());
         bw.newLine();
         bw.flush();
 
