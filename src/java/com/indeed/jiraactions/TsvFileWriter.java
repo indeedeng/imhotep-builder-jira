@@ -33,8 +33,8 @@ public class TsvFileWriter {
 
     private static final String[] FILE_HEADER = {
         "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "duedate",
-            "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "project", "projectkey",
-            "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
+            "duedatetime", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "project",
+            "projectkey", "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
             "timesinceaction", "time"
     };
 
@@ -105,6 +105,8 @@ public class TsvFileWriter {
             bw.write(action.getComponents());
             bw.write("\t");
             bw.write(action.getDueDate());
+            bw.write("\t");
+            bw.write(JiraActionsUtil.getUnixTimestamp(action.getDueDateTime()));
             bw.write("\t");
             bw.write(action.getFieldschanged());
             bw.write("\t");
