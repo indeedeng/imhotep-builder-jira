@@ -20,6 +20,8 @@ public class ActionFactory {
     }
 
     public Action create(final Issue issue) throws Exception {
+        final String dueDate = issue.initialValue("duedate");
+
         return ImmutableAction.builder()
                 .action("create")
                 .actor(issue.fields.creator == null ? User.INVALID_USER.displayName : issue.fields.creator.displayName)
@@ -80,7 +82,7 @@ public class ActionFactory {
                 .verifierusername(history.itemExist("verifier", true) ? userLookupService.getUser(history.getItemLastValueKey("verifier", true)).name : prevAction.getVerifierusername())
                 .category(history.itemExist("category") ? history.getItemLastValue("category") : prevAction.getCategory())
                 .fixversions(history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.getFixversions())
-                .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate") : prevAction.getDueDate())
+                .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate").replace(" 00:00:00.0", "") : prevAction.getDueDate())
                 .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .issueSizeEstimate(history.itemExist("t-shirt-size-estimate", true) ? history.getItemLastValue("t-shirt-size-estimate", true) :
