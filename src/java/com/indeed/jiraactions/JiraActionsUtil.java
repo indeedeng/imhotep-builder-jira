@@ -5,13 +5,17 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 
-public class JiraActionsUtil {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public abstract class JiraActionsUtil {
     private JiraActionsUtil() { /* No */ }
 
-    private static final DateTimeZone ZONE = DateTimeZone.forOffsetHours(-6);
+    public static final DateTimeZone ZONE = DateTimeZone.forOffsetHours(-6);
 
     // copied from imhotep-builders
     @SuppressWarnings("Duplicates")
+    @Nonnull
     public static DateTime parseDateTime(final String arg) {
         try {
             return new DateTime(arg.trim().replace(" ", "T"), ZONE);
@@ -49,7 +53,11 @@ public class JiraActionsUtil {
         throw new IllegalArgumentException("could not parse date: " + arg);
     }
 
-    public static String getUnixTimestamp(final DateTime date) {
+    @Nonnull
+    public static String getUnixTimestamp(@Nullable final DateTime date) {
+        if(date == null) {
+            return "";
+        }
         final long unixTime = date.getMillis()/1000;
         return String.valueOf(unixTime);
     }
