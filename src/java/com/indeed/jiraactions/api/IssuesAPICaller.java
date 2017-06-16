@@ -140,8 +140,6 @@ public class IssuesAPICaller extends ApiCaller {
             query.append(" AND project NOT IN (").append(config.getExcludedJiraProject()).append(")");
         }
 
-        query.append(" AND issuekey=BIREQ-4417");
-
         return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
     }
 
