@@ -79,7 +79,7 @@ public class Field {
         otherProperties.put(key, value);
     }
 
-    public String getMultiValue(final String attribute, final String fieldName, final String separator) throws IOException {
+    public String getMultiValue(final String attribute, final String fieldName, final String separator) {
         final JsonNode node = otherProperties.get(attribute);
         if(node == null) {
             return "";
@@ -102,7 +102,7 @@ public class Field {
         return Joiner.on(separator).join(temp);
     }
 
-    public String getStringValue(final String attribute) throws Exception {
+    public String getStringValue(final String attribute) throws IOException {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
             case "assigneekey": return assignee == null ? "" : assignee.key;
@@ -139,6 +139,6 @@ public class Field {
                 return getMultiValue(CUSTOM_FIELD_MAPPINGS.get(attribute), ATTRIBUTE_FIELD_MAPPINGS.get(attribute), SEPARATORS.get(attribute));
             }
         }
-        throw new Exception("Wrong Input name");
+        throw new IOException("Wrong Input name");
     }
 }

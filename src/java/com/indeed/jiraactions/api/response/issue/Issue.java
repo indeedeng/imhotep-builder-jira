@@ -6,6 +6,7 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 
 /**
  * @author soono
@@ -22,11 +23,11 @@ public class Issue {
         return initialValue(field, false);
     }
 
-    public String initialValue(final String field, final boolean acceptCustom) throws Exception {
+    public String initialValue(final String field, final boolean acceptCustom) throws IOException {
         return initialValue(field, field, acceptCustom);
     }
 
-    public String initialValue(final String field, final String fallbackField, final boolean acceptCustom) throws Exception {
+    public String initialValue(final String field, final String fallbackField, final boolean acceptCustom) throws IOException {
         final Item history = initialItem(field, acceptCustom);
         if(history != null) {
             return history.fromString == null ? "" : history.fromString;
@@ -35,12 +36,21 @@ public class Issue {
         }
     }
 
+    public String initialValue(final String fallbackField, final boolean acceptCustom, final String... fields) throws IOException {
+        final Item history = initialItem(acceptCustom, fields);
+        if(history != null) {
+            return history.fromString == null ? "" : history.fromString;
+        } else {
+            return this.fields.getStringValue(fallbackField);
+        }
+    }
 
-    public String initialValueKey(final String field, final String fallbackField) throws Exception {
+
+    public String initialValueKey(final String field, final String fallbackField) throws IOException {
         return initialValueKey(field, fallbackField, false);
     }
     // This name sucks
-    public String initialValueKey(final String field, final String fallbackField, final boolean acceptCustom) throws Exception {
+    public String initialValueKey(final String field, final String fallbackField, final boolean acceptCustom) throws IOException {
         final Item history = initialItem(field, acceptCustom);
         if(history != null) {
             return history.from == null ? "" : history.from;
@@ -51,7 +61,12 @@ public class Issue {
 
 
     @Nullable
-    private Item initialItem(final String field, final boolean acceptCustom) throws Exception {
+    private Item initialItem(final String field, final boolean acceptCustom) {
         return this.changelog.getFirstHistoryItem(field, acceptCustom);
+    }
+
+    @Nullable
+    private Item initialItem(final boolean acceptCustom, final String... fields) {
+        return this.changelog.getFirstHistoryItem(acceptCustom, fields);
     }
 }
