@@ -26,6 +26,19 @@ public class ChangeLog {
     }
 
     @Nullable
+    public Item getFirstHistoryItem(final boolean acceptCustom, final String... fields) {
+        for (final History history : histories) {
+            for(final String field : fields) {
+                final Item item = history.getItem(field, acceptCustom);
+                if(item != null) {
+                    return item;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
     public Item getFirstHistoryItem(final String field, final boolean acceptCustom) {
         // Return the first history item about the field.
         // If there is no history item about the field, return null.

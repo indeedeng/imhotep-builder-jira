@@ -48,7 +48,7 @@ public class ActionFactory {
                 .dueDate(issue.initialValue("duedate"))
                 .components(issue.initialValue("components"))
                 .labels(issue.initialValue("labels"))
-                .issueSizeEstimate(issue.initialValue("t-shirt-size-estimate", "issuesizeestimate", true))
+                .issueSizeEstimate(issue.initialValue("issuesizeestimate", true, "t-shirt-size-estimate", "issue-size-estimate"))
                 .directCause(issue.initialValue("direct-cause", "directcause", true))
                 .sprints(issue.initialValue("sprint", true))
                 .build();
@@ -83,7 +83,9 @@ public class ActionFactory {
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate") : prevAction.getDueDate())
                 .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
-                .issueSizeEstimate(history.itemExist("t-shirt-size-estimate", true) ? history.getItemLastValue("t-shirt-size-estimate", true) : prevAction.getIssueSizeEstimate())
+                .issueSizeEstimate(history.itemExist("t-shirt-size-estimate", true) ? history.getItemLastValue("t-shirt-size-estimate", true) :
+                        (history.itemExist("issue-size-estimate", true) ? history.getItemLastValue("issue-size-estimate", true) :
+                        prevAction.getIssueSizeEstimate()))
                 .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause())
                 .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
                 .build();
