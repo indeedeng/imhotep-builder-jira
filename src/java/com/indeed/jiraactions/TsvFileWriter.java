@@ -33,7 +33,7 @@ public class TsvFileWriter {
 
     private static final String[] FILE_HEADER = {
         "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "duedate",
-            "duedatetime", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "project",
+            "int duedate_time", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "project",
             "projectkey", "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
             "timesinceaction", "time"
     };
