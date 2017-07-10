@@ -10,64 +10,37 @@ import javax.annotation.Nullable;
 @Value.Immutable
 public interface Action {
     String getAction();
-
     String getActor();
-
     String getActorusername();
-
     String getAssignee();
-
     String getAssigneeusername();
-
     String getFieldschanged();
-
     long getIssueage();
-
     String getIssuekey();
-
     String getIssuetype();
-
     String getProject();
-
     String getProjectkey();
-
     String getPrevstatus();
-
     String getReporter();
-
     String getReporterusername();
-
     String getResolution();
-
     String getStatus();
-
     String getSummary();
-
     long getTimeinstate();
-
     long getTimesinceaction();
-
     DateTime getTimestamp();
-
     String getVerifier();
-
     String getVerifierusername();
-
     String getCategory();
-
     String getFixversions();
-
     String getDueDate();
-
     String getComponents();
-
     String getLabels();
-
     String getIssueSizeEstimate();
-
     String getDirectCause();
-
     String getSprints();
+    String getSysadCategories1();
+    String getSysadCategories2();
 
     @Nullable
     @VisibleForTesting

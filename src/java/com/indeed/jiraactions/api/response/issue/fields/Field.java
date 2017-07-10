@@ -21,10 +21,20 @@ import java.util.Objects;
 
 @SuppressWarnings("CanBeFinal")
 public class Field {
+    public enum FieldLevel {
+        PARENT,
+        CHILD,
+        NONE
+    }
+
     private static final Map<String, String> CUSTOM_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
-            .put("sprint", "customfield_11490").build();
+            .put("sprint", "customfield_11490")
+            .put("SYSAD-categories", "customfield_17591")
+            .build();
     private static final Map<String, String> ATTRIBUTE_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
-            .put("sprint", "N/A").build();
+            .put("sprint", "") // We do something weird and different here
+            .put("SYSAD-categories", "") // We do something weird and different here
+            .build();
     private static final Map<String, String> SEPARATORS = ImmutableMap.<String, String>builder()
             .put("sprint", "|").build();
 
@@ -79,6 +89,30 @@ public class Field {
         otherProperties.put(key, value);
     }
 
+    public String getSingleValue(final String attribute, final String fieldName, final FieldLevel fieldLevel) {
+        final JsonNode node = otherProperties.get(attribute);
+        if(node == null) {
+            return "";
+        }
+
+        if(Objects.equals("customfield_17591", attribute)) {
+            switch (fieldLevel) {
+                case PARENT:
+                    return node.get("value").textValue();
+                case CHILD:
+                    if(node.get("child") == null) {
+                        return "";
+                    } else {
+                        return node.get("child").get("value").textValue();
+                    }
+                default:
+                    log.warn("Unknown FieldLevel " + fieldLevel + " parsing customfield_17591");
+            }
+        }
+
+        return "";
+    }
+
     public String getMultiValue(final String attribute, final String fieldName, final String separator) {
         final JsonNode node = otherProperties.get(attribute);
         if(node == null) {
@@ -103,6 +137,9 @@ public class Field {
     }
 
     public String getStringValue(final String attribute) throws IOException {
+        return getStringValue(attribute, FieldLevel.NONE);
+    }
+    public String getStringValue(final String attribute, final FieldLevel fieldLevel) throws IOException {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
             case "assigneekey": return assignee == null ? "" : assignee.key;
@@ -137,6 +174,8 @@ public class Field {
         if(CUSTOM_FIELD_MAPPINGS.containsKey(attribute)) {
             if(SEPARATORS.containsKey(attribute)) {
                 return getMultiValue(CUSTOM_FIELD_MAPPINGS.get(attribute), ATTRIBUTE_FIELD_MAPPINGS.get(attribute), SEPARATORS.get(attribute));
+            } else {
+                return getSingleValue(CUSTOM_FIELD_MAPPINGS.get(attribute), ATTRIBUTE_FIELD_MAPPINGS.get(attribute), fieldLevel);
             }
         }
         throw new IOException("Wrong Input name");
