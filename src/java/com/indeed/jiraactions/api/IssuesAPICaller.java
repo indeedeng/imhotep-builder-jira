@@ -140,6 +140,8 @@ public class IssuesAPICaller extends ApiCaller {
             query.append(" AND project NOT IN (").append(config.getExcludedJiraProject()).append(")");
         }
 
+        query.append(" AND issuekey IN (SYSAD-34428, SYSAD-34496, SYSAD-34490)");
+
         return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
     }
 

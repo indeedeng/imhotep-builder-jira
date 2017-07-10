@@ -39,7 +39,8 @@ public class TsvFileWriter {
     };
 
     private static final String[] CUSTOM_HEADERS = {
-            "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause", "sprints*|"
+            "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause", "sprints*|", "sysad_category1",
+            "sysad_category2"
     };
 
 
@@ -89,7 +90,7 @@ public class TsvFileWriter {
         for (final Action action : actions) {
             final WriterData writerData = writerDataMap.get(action.getTimestamp().toDateMidnight());
             final BufferedWriter bw = writerData.getBufferedWriter();
-            writerData.setWritten(true);
+            writerData.setWritten();
             bw.write(action.getAction());
             bw.write("\t");
             bw.write(action.getActor());
@@ -153,6 +154,10 @@ public class TsvFileWriter {
                 bw.write(action.getDirectCause());
                 bw.write("\t");
                 bw.write(action.getSprints());
+                bw.write("\t");
+                bw.write(action.getSysadCategories1());
+                bw.write("\t");
+                bw.write(action.getSysadCategories2());
             }
             bw.newLine();
         }
@@ -227,8 +232,8 @@ public class TsvFileWriter {
             return written;
         }
 
-        public void setWritten(final boolean written) {
-            this.written = written;
+        public void setWritten() {
+            this.written = true;
         }
     }
 }

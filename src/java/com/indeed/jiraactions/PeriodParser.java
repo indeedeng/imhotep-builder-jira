@@ -44,6 +44,7 @@ public class PeriodParser {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static int tryParseInt(final String val, final int def) {
         int retVal;
         try {
