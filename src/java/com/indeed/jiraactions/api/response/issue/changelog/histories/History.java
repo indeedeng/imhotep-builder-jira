@@ -74,6 +74,40 @@ public class History {
         return item.toString;
     }
 
+    @SuppressWarnings("SameParameterValue")
+    public String getItemLastValueParent(final String field, final boolean acceptCustom) {
+        final Item item = getItem(field, acceptCustom);
+        if(item == null || item.toString == null) {
+            return "";
+        }
+
+        final int start = item.toString.indexOf("Parent values: ") + "Parent values: ".length();
+        if(start < 0) {
+            return item.toString;
+        }
+
+        final int end = item.toString.indexOf("(");
+
+        return item.toString.substring(start, end);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    public String getItemLastValueChild(final String field, final boolean acceptCustom) {
+        final Item item = getItem(field, acceptCustom);
+        if(item == null || item.toString == null) {
+            return "";
+        }
+
+        final int start = item.toString.indexOf("Level 1 values: ") + "Level 1 values: ".length();
+        if(start < 0) {
+            return item.toString;
+        }
+
+        final int end = item.toString.lastIndexOf("(");
+
+        return item.toString.substring(start, end);
+    }
+
     // Of the form "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"
     @SuppressWarnings("SameParameterValue")
     public String getItemLastValueFlattened(final String field, final boolean acceptCustom) {
