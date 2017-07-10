@@ -3,6 +3,7 @@ package com.indeed.jiraactions;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
+import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import org.joda.time.DateTime;
 
@@ -20,8 +21,6 @@ public class ActionFactory {
     }
 
     public Action create(final Issue issue) throws Exception {
-        final String dueDate = issue.initialValue("duedate");
-
         return ImmutableAction.builder()
                 .action("create")
                 .actor(issue.fields.creator == null ? User.INVALID_USER.displayName : issue.fields.creator.displayName)
@@ -53,6 +52,8 @@ public class ActionFactory {
                 .issueSizeEstimate(issue.initialValue("issuesizeestimate", true, "t-shirt-size-estimate", "issue-size-estimate"))
                 .directCause(issue.initialValue("direct-cause", "directcause", true))
                 .sprints(issue.initialValue("sprint", true))
+                .sysadCategories1(issue.initialValue("sysad-categories", true, Field.FieldLevel.PARENT))
+                .sysadCategories2(issue.initialValue("sysad-categories", true, Field.FieldLevel.CHILD))
                 .build();
     }
 
@@ -89,6 +90,8 @@ public class ActionFactory {
                         (history.itemExist("issue-size-estimate", true) ? history.getItemLastValue("issue-size-estimate", true) :
                         prevAction.getIssueSizeEstimate()))
                 .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause())
+                .sysadCategories1(history.itemExist("sysad-categories", true) ? history.getItemLastValueParent("sysad-categories", true) : prevAction.getSysadCategories1())
+                .sysadCategories2(history.itemExist("sysad-categories", true) ? history.getItemLastValueChild("sysad-categories", true) : prevAction.getSysadCategories2())
                 .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
                 .build();
     }
