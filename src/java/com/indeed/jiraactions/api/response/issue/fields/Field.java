@@ -29,11 +29,11 @@ public class Field {
 
     private static final Map<String, String> CUSTOM_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
             .put("sprint", "customfield_11490")
-            .put("SYSAD-categories", "customfield_17591")
+            .put("sysad-categories", "customfield_17591")
             .build();
     private static final Map<String, String> ATTRIBUTE_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
             .put("sprint", "") // We do something weird and different here
-            .put("SYSAD-categories", "") // We do something weird and different here
+            .put("sysad-categories", "") // We do something weird and different here
             .build();
     private static final Map<String, String> SEPARATORS = ImmutableMap.<String, String>builder()
             .put("sprint", "|").build();
@@ -178,6 +178,6 @@ public class Field {
                 return getSingleValue(CUSTOM_FIELD_MAPPINGS.get(attribute), ATTRIBUTE_FIELD_MAPPINGS.get(attribute), fieldLevel);
             }
         }
-        throw new IOException("Wrong Input name");
+        throw new IOException("Wrong input name " + attribute);
     }
 }
