@@ -30,10 +30,12 @@ public class Field {
     private static final Map<String, String> CUSTOM_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
             .put("sprint", "customfield_11490")
             .put("sysad-categories", "customfield_17591")
+            .put("story-points", "customfield_12090")
             .build();
     private static final Map<String, String> ATTRIBUTE_FIELD_MAPPINGS = ImmutableMap.<String, String>builder()
             .put("sprint", "") // We do something weird and different here
             .put("sysad-categories", "") // We do something weird and different here
+            .put("story-points", "")
             .build();
     private static final Map<String, String> SEPARATORS = ImmutableMap.<String, String>builder()
             .put("sprint", "|").build();
@@ -110,7 +112,7 @@ public class Field {
             }
         }
 
-        return "";
+        return node.asText();
     }
 
     public String getMultiValue(final String attribute, final String fieldName, final String separator) {

@@ -40,11 +40,11 @@ public class TsvFileWriter {
 
     private static final String[] CUSTOM_HEADERS = {
             "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause", "sprints*|", "sysad_category1",
-            "sysad_category2"
+            "sysad_category2", "millistorypoints"
     };
 
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) throws IOException {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
@@ -66,6 +66,7 @@ public class TsvFileWriter {
     private void createFileAndWriteHeaders(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getIndexName(), reformatDate(day));
         final File file = new File(filename);
+        file.deleteOnExit();
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
@@ -158,6 +159,8 @@ public class TsvFileWriter {
                 bw.write(action.getSysadCategories1());
                 bw.write("\t");
                 bw.write(action.getSysadCategories2());
+                bw.write("\t");
+                bw.write(action.getMilliStoryPoints());
             }
             bw.newLine();
         }

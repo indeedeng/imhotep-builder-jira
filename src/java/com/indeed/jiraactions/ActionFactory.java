@@ -1,12 +1,17 @@
 package com.indeed.jiraactions;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -14,6 +19,8 @@ import java.util.Objects;
  * @author soono on 8/31/16.
  */
 public class ActionFactory {
+    private static final Logger log = Logger.getLogger(ActionFactory.class);
+
     private final UserLookupService userLookupService;
 
     public ActionFactory(final UserLookupService userLookupService) {
@@ -54,6 +61,7 @@ public class ActionFactory {
                 .sprints(issue.initialValue("sprint", true))
                 .sysadCategories1(issue.initialValue("sysad-categories", true, Field.FieldLevel.PARENT))
                 .sysadCategories2(issue.initialValue("sysad-categories", true, Field.FieldLevel.CHILD))
+                .milliStoryPoints(numericStringToMilliNumericString(issue.initialValue("story-points", true)))
                 .build();
     }
 
@@ -90,9 +98,10 @@ public class ActionFactory {
                         (history.itemExist("issue-size-estimate", true) ? history.getItemLastValue("issue-size-estimate", true) :
                         prevAction.getIssueSizeEstimate()))
                 .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause())
+                .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
                 .sysadCategories1(history.itemExist("sysad-categories", true) ? history.getItemLastValueParent("sysad-categories", true) : prevAction.getSysadCategories1())
                 .sysadCategories2(history.itemExist("sysad-categories", true) ? history.getItemLastValueChild("sysad-categories", true) : prevAction.getSysadCategories2())
-                .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
+                .milliStoryPoints(history.itemExist("story-points", true) ? numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints())
                 .build();
     }
 
@@ -128,5 +137,20 @@ public class ActionFactory {
 
     private long getTimeDiff(final DateTime before, final DateTime after) {
         return (after.getMillis() - before.getMillis()) / 1000;
+    }
+
+    @Nonnull
+    @VisibleForTesting
+    protected static String numericStringToMilliNumericString(@Nullable final String input) {
+        if(StringUtils.isEmpty(input)) {
+            return "";
+        }
+        try {
+            final double result = Double.parseDouble(input);
+            return String.format("%.0f", result*1000);
+        } catch(final NumberFormatException e) {
+            log.warn(e);
+            return "";
+        }
     }
 }

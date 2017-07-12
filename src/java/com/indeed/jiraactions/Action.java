@@ -41,6 +41,7 @@ public interface Action {
     String getSprints();
     String getSysadCategories1();
     String getSysadCategories2();
+    String getMilliStoryPoints();
 
     @Nullable
     @VisibleForTesting
