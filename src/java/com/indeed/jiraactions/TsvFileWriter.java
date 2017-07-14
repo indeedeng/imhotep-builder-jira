@@ -40,7 +40,7 @@ public class TsvFileWriter {
 
     private static final String[] CUSTOM_HEADERS = {
             "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause", "sprints*|", "sysad_category1",
-            "sysad_category2", "int millistorypoints"
+            "sysad_category2", "millistorypoints"
     };
 
 
