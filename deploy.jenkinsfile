@@ -23,6 +23,8 @@ bootstrap(script) {
     config.productGroup = "jobsearch"
     // This should be true to build in Docker, which is recommended
     config.buildInDocker = true
+    // Don't send "Your changes in delivery--jiraactions triggered a Pipeline build" e-mails
+    config.sendEmailsToCommitAuthors = false
 
     // A list of URLs of your current version in QA and stage
     config.currentVersionUrlList = []
