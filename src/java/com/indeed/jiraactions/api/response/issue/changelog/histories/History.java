@@ -102,7 +102,7 @@ public class History {
         final String target = "Level 1 values: ";
         final int start = item.toString.indexOf(target) + target.length();
         if(start < target.length()) {
-            return item.toString;
+            return "";
         }
 
         final int end = item.toString.lastIndexOf("(");
