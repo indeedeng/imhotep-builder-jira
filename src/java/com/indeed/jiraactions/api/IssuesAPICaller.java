@@ -50,7 +50,7 @@ public class IssuesAPICaller extends ApiCaller {
                 log.error(String.format("On try %d/5, caught IOException getting %d issues, after %d milliseconds.",
                         tries, batchSize, end - start));
 
-                if(tries >= 5) {
+                if(tries >= 10) {
                     log.error("Tried too many times to get issues and failed, aborting.", e);
                     throw new RuntimeException(e);
                 }
