@@ -118,8 +118,9 @@ public class History {
             return "";
         }
 
-        final int start = item.toString.indexOf("Parent values: ") + "Parent values: ".length();
-        if(start < 0) {
+        final String target = "Parent values: ";
+        final int start = item.toString.indexOf(target) + target.length();
+        if(start < target.length()) {
             return item.toString;
         }
 
