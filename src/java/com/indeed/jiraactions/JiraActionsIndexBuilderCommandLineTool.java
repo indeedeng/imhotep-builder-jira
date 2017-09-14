@@ -5,6 +5,9 @@ import com.indeed.common.base.IndeedSystemProperty;
 import com.indeed.common.cli.CommandLineTool;
 import com.indeed.common.cli.CommandLineUtil;
 import com.indeed.common.dbutil.CronToolStatusUpdater;
+import com.indeed.common.util.StringUtils;
+import com.indeed.jiraactions.api.CustomFieldDefinition;
+import com.indeed.jiraactions.api.customfields.CustomFieldParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -15,6 +18,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 
 /**
  * @author soono
@@ -88,12 +92,20 @@ public class JiraActionsIndexBuilderCommandLineTool implements CommandLineTool {
         final int jiraBatchSize;
         final CommandLineParser parser = new GnuParser();
         final CommandLine commandLineArgs;
+        final CustomFieldDefinition[] customFieldDefinitions;
         try {
             commandLineArgs = parser.parse(options, cmdLineUtil.getArgs());
             startDate = commandLineArgs.getOptionValue("start");
             endDate = commandLineArgs.getOptionValue("end");
             jiraBatchSize = Integer.parseInt(commandLineArgs.getOptionValue("jiraBatchSize"));
-        } catch (final ParseException e) {
+
+            final String customFieldsPath = config.getString("customfieldsfile");
+            if(StringUtils.isEmpty(customFieldsPath)) {
+                customFieldDefinitions = new CustomFieldDefinition[0];
+            } else {
+                customFieldDefinitions = CustomFieldParser.parseCustomFields(this.getClass().getClassLoader().getResourceAsStream(customFieldsPath));
+            }
+        } catch (final ParseException|IOException e) {
             log.error("Threw an exception trying to run the index builder", e);
             System.exit(-1);
             return; // For some reason this makes some errors go away, even though it never gets hit
@@ -101,7 +113,8 @@ public class JiraActionsIndexBuilderCommandLineTool implements CommandLineTool {
 
         final JiraActionsIndexBuilderConfig indexBuilderConfig = new JiraActionsIndexBuilderConfig(jiraUsername,
                 jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, excludedJiraProject, iuploadUrl,
-                iuploadUsername, iuploadPassword, startDate, endDate, jiraBatchSize, indexName, ignoreCustomFields);
+                iuploadUsername, iuploadPassword, startDate, endDate, jiraBatchSize, indexName, ignoreCustomFields,
+                customFieldDefinitions);
         indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);
     }
 
