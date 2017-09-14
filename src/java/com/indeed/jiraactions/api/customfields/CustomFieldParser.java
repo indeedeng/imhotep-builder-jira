@@ -2,13 +2,16 @@ package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.api.CustomFieldDefinition;
+import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import org.apache.log4j.Logger;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.InputStream;
 
+@ParametersAreNonnullByDefault
+@ReturnValuesAreNonnullByDefault
 public abstract class CustomFieldParser {
     private CustomFieldParser() { /* No */ }
     private static final Logger log = Logger.getLogger(CustomFieldParser.class);
@@ -19,8 +22,7 @@ public abstract class CustomFieldParser {
         return mapper.readValue(filename, CustomFieldDefinition[].class);
     }
 
-    @VisibleForTesting
-    static CustomFieldDefinition[] parseCustomFields(final InputStream in) throws IOException {
+    public static CustomFieldDefinition[] parseCustomFields(final InputStream in) throws IOException {
         return mapper.readValue(in, CustomFieldDefinition[].class);
     }
 }

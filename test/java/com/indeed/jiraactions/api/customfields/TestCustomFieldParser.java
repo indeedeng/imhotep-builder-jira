@@ -6,6 +6,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,7 +27,47 @@ public class TestCustomFieldParser {
             "    \"multivaluefieldconfiguration\": \"separate\",\n" +
             "    \"transformation\": \"none\"\n" +
             "  }";
-    
+
+    private static final String TEST_NAME = "  {\n" +
+            "    \"name\": \"Test Name\",\n" +
+            "    \"customfieldid\": \"customfield_17591\",\n" +
+            "    \"imhotepfieldname\": \"protest_name\"\n" +
+            "  }";
+
+    @Test
+    public void testProductionConfigs() throws IOException {
+        final File directory = new File("src/resources/customfields");
+        Assert.assertTrue(directory.exists());
+
+        final File[] configs = directory.listFiles();
+        Assert.assertNotNull(configs);
+        Assert.assertTrue(configs.length > 0);
+
+        for(final File config : configs) {
+            final InputStream in = new FileInputStream(config);
+            final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+
+            Assert.assertNotNull(definitions);
+            Assert.assertTrue(definitions.length > 0);
+        }
+    }
+
+    @Test
+    public void testOmittingEnums() throws IOException {
+        final InputStream in = createInputStreamFromDefinitions(TEST_NAME);
+        final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+
+        Assert.assertNotNull(definitions);
+        Assert.assertEquals(1, definitions.length);
+        Assert.assertEquals(
+                ImmutableCustomFieldDefinition.builder()
+                        .name("Test Name")
+                        .customFieldId("customfield_17591")
+                        .imhotepFieldName("protest_name")
+                        .build(),
+                definitions[0]);
+    }
+
     @Test
     public void testTransformationMultiplyByThousand() throws IOException {
         final InputStream in = createInputStreamFromDefinitions(STORY_POINTS);
