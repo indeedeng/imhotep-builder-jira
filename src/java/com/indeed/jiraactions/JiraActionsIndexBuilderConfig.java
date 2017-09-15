@@ -1,6 +1,6 @@
 package com.indeed.jiraactions;
 
-import com.indeed.jiraactions.api.CustomFieldDefinition;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 
 public class JiraActionsIndexBuilderConfig {
     private final String jiraUsername;

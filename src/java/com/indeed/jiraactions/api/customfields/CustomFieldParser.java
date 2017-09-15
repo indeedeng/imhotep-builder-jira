@@ -2,7 +2,6 @@ package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.indeed.jiraactions.api.CustomFieldDefinition;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import org.apache.log4j.Logger;
 

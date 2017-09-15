@@ -1,7 +1,5 @@
 package  com.indeed.jiraactions.api.customfields;
 
-import com.indeed.jiraactions.api.CustomFieldDefinition;
-import com.indeed.jiraactions.api.ImmutableCustomFieldDefinition;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 
 public class TestCustomFieldParser {
     private static final String STORY_POINTS =   "  {\n" +
@@ -56,6 +55,7 @@ public class TestCustomFieldParser {
     public void testOmittingEnums() throws IOException {
         final InputStream in = createInputStreamFromDefinitions(TEST_NAME);
         final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+        final StringWriter writer = new StringWriter();
 
         Assert.assertNotNull(definitions);
         Assert.assertEquals(1, definitions.length);
@@ -66,12 +66,17 @@ public class TestCustomFieldParser {
                         .imhotepFieldName("protest_name")
                         .build(),
                 definitions[0]);
+
+        definitions[0].writeHeader(writer);
+
+        Assert.assertEquals("protest_name", writer.getBuffer().toString());
     }
 
     @Test
     public void testTransformationMultiplyByThousand() throws IOException {
         final InputStream in = createInputStreamFromDefinitions(STORY_POINTS);
         final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+        final StringWriter writer = new StringWriter();
 
         Assert.assertNotNull(definitions);
         Assert.assertEquals(1, definitions.length);
@@ -84,12 +89,17 @@ public class TestCustomFieldParser {
                         .transformation(CustomFieldDefinition.Transformation.MULTIPLY_BY_THOUSAND)
                         .build(),
                 definitions[0]);
+
+        definitions[0].writeHeader(writer);
+
+        Assert.assertEquals("millistorypoints", writer.getBuffer().toString());
     }
 
     @Test
     public void testMultiValueSeparate() throws IOException {
         final InputStream in = createInputStreamFromDefinitions(SYSAD_CATEGORIES);
         final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+        final StringWriter writer = new StringWriter();
 
         Assert.assertNotNull(definitions);
         Assert.assertEquals(1, definitions.length);
@@ -102,6 +112,10 @@ public class TestCustomFieldParser {
                 .transformation(CustomFieldDefinition.Transformation.NONE)
                 .build(),
                 definitions[0]);
+
+        definitions[0].writeHeader(writer);
+
+        Assert.assertEquals("sysad_category1\tsysad_category2", writer.getBuffer().toString());
     }
 
     private InputStream createInputStreamFromDefinitions(final String... elements) {

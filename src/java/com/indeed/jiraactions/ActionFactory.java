@@ -1,17 +1,14 @@
 package com.indeed.jiraactions;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -61,7 +58,7 @@ public class ActionFactory {
                 .sprints(issue.initialValue("sprint", true))
                 .sysadCategories1(issue.initialValue("sysad-categories", true, Field.FieldLevel.PARENT))
                 .sysadCategories2(issue.initialValue("sysad-categories", true, Field.FieldLevel.CHILD))
-                .milliStoryPoints(numericStringToMilliNumericString(issue.initialValue("story-points", true)))
+                .milliStoryPoints(CustomFieldValue.numericStringToMilliNumericString(issue.initialValue("story-points", true)))
                 .build();
     }
 
@@ -101,7 +98,7 @@ public class ActionFactory {
                 .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
                 .sysadCategories1(history.itemExist("sysad-categories", true) ? history.getItemLastValueParent("sysad-categories", true) : prevAction.getSysadCategories1())
                 .sysadCategories2(history.itemExist("sysad-categories", true) ? history.getItemLastValueChild("sysad-categories", true) : prevAction.getSysadCategories2())
-                .milliStoryPoints(history.itemExist("story-points", true) ? numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints())
+                .milliStoryPoints(history.itemExist("story-points", true) ? CustomFieldValue.numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints())
                 .build();
     }
 
@@ -139,18 +136,4 @@ public class ActionFactory {
         return (after.getMillis() - before.getMillis()) / 1000;
     }
 
-    @Nonnull
-    @VisibleForTesting
-    protected static String numericStringToMilliNumericString(@Nullable final String input) {
-        if(StringUtils.isEmpty(input)) {
-            return "";
-        }
-        try {
-            final double result = Double.parseDouble(input);
-            return String.format("%.0f", result*1000);
-        } catch(final NumberFormatException e) {
-            log.warn(e);
-            return "";
-        }
-    }
 }
