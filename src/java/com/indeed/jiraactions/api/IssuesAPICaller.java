@@ -2,6 +2,7 @@ package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 

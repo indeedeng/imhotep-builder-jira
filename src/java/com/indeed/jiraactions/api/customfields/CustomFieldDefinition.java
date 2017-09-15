@@ -1,4 +1,4 @@
-package com.indeed.jiraactions.api;
+package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
+
+import java.io.IOException;
+import java.io.Writer;
 
 @Value.Immutable
 @JsonSerialize(as = ImmutableCustomFieldDefinition.class)
@@ -71,4 +74,11 @@ public interface CustomFieldDefinition {
         return Transformation.NONE;
     }
 
+    default void writeHeader(final Writer writer) throws IOException {
+        if(MultiValueFieldConfiguration.SEPARATE.equals(getMultiValueFieldConfiguration())) {
+            writer.write(String.format("%s\t%s", getImhotepFieldName()+"1", getImhotepFieldName()+"2"));
+        } else {
+            writer.write(getImhotepFieldName());
+        }
+    }
 }
