@@ -1,5 +1,7 @@
 package com.indeed.jiraactions.api.customfields;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.annotations.VisibleForTesting;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
 import org.apache.commons.lang.StringUtils;
@@ -21,47 +23,80 @@ public class CustomFieldValue {
 
     private final CustomFieldDefinition definition;
     private final String value;
+    private final String childValue;
 
-
-    public CustomFieldValue(final CustomFieldDefinition definition, final String value) {
-        this.definition = definition;
-        this.value = value;
+    CustomFieldValue(final CustomFieldDefinition definition, final String value) {
+        this(definition, value, "");
     }
 
+    @VisibleForTesting
+    CustomFieldValue(final CustomFieldDefinition definition, final String value, final String childValue) {
+        this.definition = definition;
+        this.value = value;
+        this.childValue = childValue;
+    }
+
+    /**
+     * When you're reading the value from the changelog (the Items) instead of the Fields section of the API response.
+     * Used for the initial value when it has changed, or when a field has changed throughout the lifetime of an issue.
+     * @param value The "to" or "from" value. A keyed representation.
+     * @param valueString The "toString" or "fromString" value. A more verbose representation.
+     */
+    @SuppressWarnings("unused") // Will be used later for more custom things like usernames and links
+    public static CustomFieldValue customFieldValueFromChangelog(final CustomFieldDefinition definition,
+                                                                 final String value, final String valueString) {
+        if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
+            return new CustomFieldValue(definition, valueString, "");
+        }
+
+        // Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)
+        final Matcher matcher = multivaluePattern.matcher(valueString);
+        final String parent;
+        final String child;
+        if(matcher.find()) {
+            parent = matcher.group(1);
+            child = matcher.group(3);
+        } else {
+            Loggers.error(log, "Unable to parse multi-valued field %s with value %s", definition.getName(), value);
+            parent = "";
+            child = "";
+        }
+        return new CustomFieldValue(definition, parent, child);
+    }
+
+    public static CustomFieldValue customFieldFromInitialFields(final CustomFieldDefinition definition,
+                                                                final JsonNode json) {
+
+        if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
+            final String value = json.asText();
+            return new CustomFieldValue(definition, value);
+        } else {
+            final String value = json.get("value").textValue();
+            final JsonNode child = json.get("child");
+            if(child == null) {
+                return new CustomFieldValue(definition, value);
+            } else {
+                final String childValue = child.get("value").textValue();
+                return new CustomFieldValue(definition, value, childValue);
+            }
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions")
     public void writeValue(final Writer writer) throws IOException {
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
             writer.write(sanitize(getTransformedValue(value)));
         } else {
-            // Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)
-            final Matcher matcher = multivaluePattern.matcher(value);
-            final String parent;
-            final String child;
-            if(matcher.find()) {
-                parent = sanitize(getTransformedValue(matcher.group(1)));
-                child = sanitize(getTransformedValue(matcher.group(3)));
-            } else {
-                parent = null;
-                child = null;
-            }
-
             if (CustomFieldDefinition.MultiValueFieldConfiguration.EXPANDED.equals(definition.getMultiValueFieldConfiguration())) {
-                if(parent != null && child != null) {
-                    writer.write(String.format("%s - %s", parent, child));
-                } else if(parent != null) {
-                    writer.write(parent);
+                if(StringUtils.isNotEmpty(value) && StringUtils.isNotEmpty(childValue)) {
+                    writer.write(String.format("%s - %s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue))));
+                } else if(StringUtils.isNotEmpty(value)) {
+                    writer.write(sanitize(getTransformedValue(value)));
                 } else {
-                    Loggers.error(log, "Unable to parse multi-valued field %s with value %s", definition.getName(), value);
                     writer.write("");
                 }
-            } else if (CustomFieldDefinition.MultiValueFieldConfiguration.SEPARATE.equals(definition.getMultiValueFieldConfiguration())) {
-                if(parent != null && child != null) {
-                    writer.write(String.format("%s\t%s", parent, child));
-                } else if(parent != null) {
-                    writer.write(String.format("%s\t", parent));
-                } else {
-                    Loggers.error(log, "Unable to parse multi-valued field %s with value %s", definition.getName(), value);
-                    writer.write("\t");
-                }
+            } else if(CustomFieldDefinition.MultiValueFieldConfiguration.SEPARATE.equals(definition.getMultiValueFieldConfiguration())) {
+                writer.write(String.format("%s\t%s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue))));
             } else {
                 Loggers.error(log, "Unknown multi-field definition %s trying to process field %s",
                         definition.getMultiValueFieldConfiguration(), definition.getName());

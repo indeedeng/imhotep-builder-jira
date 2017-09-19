@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
-public class TestCustomFieldParser {
+public class TestCustomFieldDefinitionParser {
     private static final String STORY_POINTS =   "  {\n" +
             "    \"name\": \"Story Points\",\n" +
             "    \"customfieldid\": \"customfield_12090\",\n" +
@@ -44,7 +44,7 @@ public class TestCustomFieldParser {
 
         for(final File config : configs) {
             final InputStream in = new FileInputStream(config);
-            final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+            final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(in);
 
             Assert.assertNotNull(definitions);
             Assert.assertTrue(definitions.length > 0);
@@ -54,7 +54,7 @@ public class TestCustomFieldParser {
     @Test
     public void testOmittingEnums() throws IOException {
         final InputStream in = createInputStreamFromDefinitions(TEST_NAME);
-        final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+        final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(in);
         final StringWriter writer = new StringWriter();
 
         Assert.assertNotNull(definitions);
@@ -75,7 +75,7 @@ public class TestCustomFieldParser {
     @Test
     public void testTransformationMultiplyByThousand() throws IOException {
         final InputStream in = createInputStreamFromDefinitions(STORY_POINTS);
-        final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+        final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(in);
         final StringWriter writer = new StringWriter();
 
         Assert.assertNotNull(definitions);
@@ -98,7 +98,7 @@ public class TestCustomFieldParser {
     @Test
     public void testMultiValueSeparate() throws IOException {
         final InputStream in = createInputStreamFromDefinitions(SYSAD_CATEGORIES);
-        final CustomFieldDefinition[] definitions = CustomFieldParser.parseCustomFields(in);
+        final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(in);
         final StringWriter writer = new StringWriter();
 
         Assert.assertNotNull(definitions);

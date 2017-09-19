@@ -30,7 +30,7 @@ public class JiraActionsIndexBuilder {
             final long end_total;
 
             final ApiUserLookupService userLookupService = new ApiUserLookupService(config);
-            final ActionFactory actionFactory = new ActionFactory(userLookupService);
+            final ActionFactory actionFactory = new ActionFactory(userLookupService, config);
 
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config);
             {

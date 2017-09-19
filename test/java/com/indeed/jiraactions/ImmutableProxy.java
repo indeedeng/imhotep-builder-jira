@@ -6,6 +6,8 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author kbinswanger
@@ -53,6 +55,8 @@ public class ImmutableProxy<T> implements InvocationHandler {
             return "";
         } else if(returnType.equals(DateTime.class)) {
             return DateTime.now();
+        } else if(returnType.equals(List.class)) {
+            return Collections.emptyList();
         }
         return null;
     }

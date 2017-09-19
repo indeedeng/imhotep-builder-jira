@@ -19,13 +19,16 @@ public class ActionFactory {
     private static final Logger log = Logger.getLogger(ActionFactory.class);
 
     private final UserLookupService userLookupService;
+    private final JiraActionsIndexBuilderConfig config;
 
-    public ActionFactory(final UserLookupService userLookupService) {
+    public ActionFactory(final UserLookupService userLookupService,
+                         final JiraActionsIndexBuilderConfig config) {
         this.userLookupService = userLookupService;
+        this.config = config;
     }
 
     public Action create(final Issue issue) throws Exception {
-        return ImmutableAction.builder()
+        final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
                 .actor(issue.fields.creator == null ? User.INVALID_USER.displayName : issue.fields.creator.displayName)
                 .actorusername(issue.fields.creator == null ? User.INVALID_USER.name : issue.fields.creator.name)
@@ -58,8 +61,11 @@ public class ActionFactory {
                 .sprints(issue.initialValue("sprint", true))
                 .sysadCategories1(issue.initialValue("sysad-categories", true, Field.FieldLevel.PARENT))
                 .sysadCategories2(issue.initialValue("sysad-categories", true, Field.FieldLevel.CHILD))
-                .milliStoryPoints(CustomFieldValue.numericStringToMilliNumericString(issue.initialValue("story-points", true)))
-                .build();
+                .milliStoryPoints(CustomFieldValue.numericStringToMilliNumericString(issue.initialValue("story-points", true)));
+
+
+
+        return builder.build();
     }
 
     public Action update(final Action prevAction, final History history) throws IOException {

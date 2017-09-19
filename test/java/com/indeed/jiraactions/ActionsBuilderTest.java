@@ -1,5 +1,6 @@
 package com.indeed.jiraactions;
 
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.ChangeLog;
@@ -9,6 +10,7 @@ import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
 import com.indeed.test.junit.Check;
+import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,10 +31,16 @@ public class ActionsBuilderTest {
     private static final DateTime startDate = JiraActionsUtil.parseDateTime("2016-08-01 00:00:00");
     private static final DateTime endDate = JiraActionsUtil.parseDateTime("2016-08-07 00:00:00");
     private final UserLookupService userLookupService = new FriendlyUserLookupService();
-    private final ActionFactory actionFactory = new ActionFactory(userLookupService);
+    private ActionFactory actionFactory;
 
     @Before
     public void initialize() throws ParseException {
+        final JiraActionsIndexBuilderConfig config = EasyMock.createNiceMock(JiraActionsIndexBuilderConfig.class);
+        EasyMock.expect(config.getCustomFields()).andReturn(new CustomFieldDefinition[0]).anyTimes();
+        EasyMock.replay(config);
+
+        actionFactory = new ActionFactory(userLookupService, config);
+
         issue = new Issue();
         issue.fields = new Field();
 
