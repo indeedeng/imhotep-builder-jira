@@ -35,6 +35,12 @@ public class TestCustomFieldValue {
             .transformation(CustomFieldDefinition.Transformation.NONE)
             .build();
 
+    private static final CustomFieldDefinition protestCountries = ImmutableCustomFieldDefinition.builder()
+            .name("Test Countries")
+            .customFieldId("customfield_15290")
+            .imhotepFieldName("protext_countries*")
+            .build();
+
     @Test
     public void testNoModifications() throws IOException {
         final CustomFieldDefinition definition = ImmutableCustomFieldDefinition.builder()
@@ -72,6 +78,18 @@ public class TestCustomFieldValue {
         field.writeValue(writer);
 
         Assert.assertEquals("8000", writer.getBuffer().toString());
+    }
+
+    @Test
+    public void testMultiValuedFromInitial() throws IOException {
+        final String text = "[\"fixit\",\"jobsearch-library-update\",\"jsgrowth\"]";
+        final JsonNode node = OBJECT_MAPPER.readTree(text);
+        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(protestCountries, node);
+
+        final StringWriter writer = new StringWriter();
+        field.writeValue(writer);
+
+        Assert.assertEquals("fixit jobsearch-library-update jsgrowth", writer.getBuffer().toString());
     }
 
     @Test
