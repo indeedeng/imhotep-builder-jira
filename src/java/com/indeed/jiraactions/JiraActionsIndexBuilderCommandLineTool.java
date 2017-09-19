@@ -7,7 +7,7 @@ import com.indeed.common.cli.CommandLineUtil;
 import com.indeed.common.dbutil.CronToolStatusUpdater;
 import com.indeed.common.util.StringUtils;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
-import com.indeed.jiraactions.api.customfields.CustomFieldParser;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinitionParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -103,7 +103,7 @@ public class JiraActionsIndexBuilderCommandLineTool implements CommandLineTool {
             if(StringUtils.isEmpty(customFieldsPath)) {
                 customFieldDefinitions = new CustomFieldDefinition[0];
             } else {
-                customFieldDefinitions = CustomFieldParser.parseCustomFields(this.getClass().getClassLoader().getResourceAsStream(customFieldsPath));
+                customFieldDefinitions = CustomFieldDefinitionParser.parseCustomFields(this.getClass().getClassLoader().getResourceAsStream(customFieldsPath));
             }
         } catch (final ParseException|IOException e) {
             log.error("Threw an exception trying to run the index builder", e);

@@ -11,15 +11,11 @@ import java.io.InputStream;
 
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
-public abstract class CustomFieldParser {
-    private CustomFieldParser() { /* No */ }
-    private static final Logger log = Logger.getLogger(CustomFieldParser.class);
+public abstract class CustomFieldDefinitionParser {
+    private CustomFieldDefinitionParser() { /* No */ }
+    private static final Logger log = Logger.getLogger(CustomFieldDefinitionParser.class);
     private final static ObjectMapper mapper = new ObjectMapper()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-
-    public static CustomFieldDefinition[] parseCustomFields(final String filename) throws IOException {
-        return mapper.readValue(filename, CustomFieldDefinition[].class);
-    }
 
     public static CustomFieldDefinition[] parseCustomFields(final InputStream in) throws IOException {
         return mapper.readValue(in, CustomFieldDefinition[].class);
