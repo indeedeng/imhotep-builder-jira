@@ -43,7 +43,7 @@ public abstract class CustomFieldApiParser {
                 Loggers.error(log,"No previous value for %s found for issue %s.", definition.getName(), prevAction.getIssuekey());
                 return CustomFieldValue.emptyCustomField(definition);
             } else {
-                return prevValue.get();
+                return CustomFieldValue.copyOf(prevValue.get());
             }
         } else {
             return CustomFieldValue.customFieldValueFromChangelog(definition, item.to, item.toString);

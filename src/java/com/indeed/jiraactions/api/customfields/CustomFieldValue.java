@@ -1,6 +1,7 @@
 package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.annotations.VisibleForTesting;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
@@ -12,8 +13,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
@@ -67,7 +70,7 @@ public class CustomFieldValue {
     public static CustomFieldValue customFieldFromInitialFields(final CustomFieldDefinition definition,
                                                                 final JsonNode json) {
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
-            final String value = json.asText();
+            final String value = getValueFromNode(definition, json);
             return new CustomFieldValue(definition, value);
         } else {
             final String value = json.get("value").textValue();
@@ -78,6 +81,21 @@ public class CustomFieldValue {
                 final String childValue = child.get("value").textValue();
                 return new CustomFieldValue(definition, value, childValue);
             }
+        }
+    }
+
+    @SuppressWarnings("unused") // Will eventually be used for different separators
+    private static String getValueFromNode(final CustomFieldDefinition definition, final JsonNode node) {
+        if(JsonNodeType.ARRAY.equals(node.getNodeType())) {
+            final Iterator<JsonNode> children = node.elements();
+            if(children == null) {
+                return "";
+            }
+            final Iterable<JsonNode> iterable = () -> children;
+            final Iterable<String> values = () -> StreamSupport.stream(iterable.spliterator(), false).map(JsonNode::asText).iterator();
+            return String.join(" ", values);
+        } else {
+            return node.asText();
         }
     }
 
