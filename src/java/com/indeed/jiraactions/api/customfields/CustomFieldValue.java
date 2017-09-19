@@ -66,7 +66,6 @@ public class CustomFieldValue {
 
     public static CustomFieldValue customFieldFromInitialFields(final CustomFieldDefinition definition,
                                                                 final JsonNode json) {
-
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
             final String value = json.asText();
             return new CustomFieldValue(definition, value);
@@ -80,6 +79,18 @@ public class CustomFieldValue {
                 return new CustomFieldValue(definition, value, childValue);
             }
         }
+    }
+
+    public static CustomFieldValue emptyCustomField(final CustomFieldDefinition definition) {
+        return new CustomFieldValue(definition, "", "");
+    }
+
+    public static CustomFieldValue copyOf(final CustomFieldValue value) {
+        return new CustomFieldValue(value.definition, value.value, value.childValue);
+    }
+
+    public CustomFieldDefinition getDefinition() {
+        return definition;
     }
 
     @SuppressWarnings("ConstantConditions")
