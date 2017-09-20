@@ -44,7 +44,7 @@ public class TsvFileWriter {
     };
 
 
-    TsvFileWriter(final JiraActionsIndexBuilderConfig config) throws IOException {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) throws IOException {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
@@ -56,7 +56,7 @@ public class TsvFileWriter {
         return date.toString(FILENAME_DATE_TIME_PATTERN);
     }
 
-    void createFileAndWriteHeaders() throws IOException {
+    public void createFileAndWriteHeaders() throws IOException {
         final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
         for(DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
             createFileAndWriteHeaders(date);
@@ -88,7 +88,7 @@ public class TsvFileWriter {
         writerDataMap.put(day.toDateMidnight(), new WriterData(file, bw));
     }
 
-    void writeActions(final List<Action> actions) throws IOException, ParseException {
+    public void writeActions(final List<Action> actions) throws IOException, ParseException {
         if(actions.isEmpty()) {
             return;
         }
@@ -191,7 +191,7 @@ public class TsvFileWriter {
     }
 
     private static final int NUM_RETRIES = 5;
-    void uploadTsvFile() throws IOException {
+    public void uploadTsvFile() throws IOException {
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
         log.info("Uploading to " + iuploadUrl);
@@ -233,25 +233,25 @@ public class TsvFileWriter {
         private final BufferedWriter bw;
         private boolean written;
 
-        WriterData(final File file, final BufferedWriter bw) {
+        private WriterData(final File file, final BufferedWriter bw) {
             this.file = file;
             this.bw = bw;
             this.written = false;
         }
 
-        File getFile() {
+        private File getFile() {
             return file;
         }
 
-        BufferedWriter getBufferedWriter() {
+        private BufferedWriter getBufferedWriter() {
             return bw;
         }
 
-        boolean isWritten() {
+        private boolean isWritten() {
             return written;
         }
 
-        void setWritten() {
+        private void setWritten() {
             this.written = true;
         }
     }
