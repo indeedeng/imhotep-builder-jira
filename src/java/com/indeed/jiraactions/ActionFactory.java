@@ -14,9 +14,6 @@ import org.joda.time.DateTime;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * @author soono on 8/31/16.
- */
 public class ActionFactory {
     private static final Logger log = Logger.getLogger(ActionFactory.class);
 
@@ -66,7 +63,7 @@ public class ActionFactory {
                 .milliStoryPoints(CustomFieldValue.numericStringToMilliNumericString(issue.initialValue("story-points", true)));
 
             for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
-                builder.addCustomFieldValues(CustomFieldApiParser.parseInitialValue(customFieldDefinition, issue));
+                builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseInitialValue(customFieldDefinition, issue));
             }
 
         return builder.build();
@@ -111,7 +108,7 @@ public class ActionFactory {
                 .milliStoryPoints(history.itemExist("story-points", true) ? CustomFieldValue.numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints());
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
-            builder.addCustomFieldValues(CustomFieldApiParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
+            builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
         }
 
         return builder.build();
