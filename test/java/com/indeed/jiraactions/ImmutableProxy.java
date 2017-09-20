@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author kbinswanger
@@ -57,6 +58,8 @@ public class ImmutableProxy<T> implements InvocationHandler {
             return DateTime.now();
         } else if(returnType.equals(List.class)) {
             return Collections.emptyList();
+        } else if(returnType.equals(Map.class)) {
+            return Collections.emptyMap();
         }
         return null;
     }

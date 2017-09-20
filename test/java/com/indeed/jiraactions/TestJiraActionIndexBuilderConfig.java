@@ -26,6 +26,7 @@ public class TestJiraActionIndexBuilderConfig {
                 .add("jiraBatchSize")
                 .add("indexName")
                 .add("ignoreCustomFields")
+                .add("customFields")
                 .build();
 
         JavaBeanAsserter.assertConstructorMatchesProperties(JiraActionsIndexBuilderConfig.class, args);

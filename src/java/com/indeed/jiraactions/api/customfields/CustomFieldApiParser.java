@@ -11,7 +11,6 @@ import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Optional;
 
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
@@ -38,12 +37,12 @@ public abstract class CustomFieldApiParser {
         final String label = getItemLabel(definition.getName());
         final Item item = history.getItem(label, true);
         if(item == null) {
-            final Optional<CustomFieldValue> prevValue = prevAction.getCustomFieldValues().stream().filter(x -> definition.equals(x.getDefinition())).findFirst();
-            if(!prevValue.isPresent()) {
+            final CustomFieldValue prevValue = prevAction.getCustomFieldValues().get(definition);
+            if(prevValue == null) {
                 Loggers.error(log,"No previous value for %s found for issue %s.", definition.getName(), prevAction.getIssuekey());
                 return CustomFieldValue.emptyCustomField(definition);
             } else {
-                return CustomFieldValue.copyOf(prevValue.get());
+                return CustomFieldValue.copyOf(prevValue);
             }
         } else {
             return CustomFieldValue.customFieldValueFromChangelog(definition, item.to, item.toString);
