@@ -73,12 +73,12 @@ public class CustomFieldValue {
             final String value = getValueFromNode(definition, json);
             return new CustomFieldValue(definition, value);
         } else {
-            final String value = json.get("value").textValue();
+            final String value = getValueFromNode(definition, json);
             final JsonNode child = json.get("child");
             if(child == null) {
                 return new CustomFieldValue(definition, value);
             } else {
-                final String childValue = child.get("value").textValue();
+                final String childValue = getValueFromNode(definition, child);
                 return new CustomFieldValue(definition, value, childValue);
             }
         }
@@ -92,9 +92,12 @@ public class CustomFieldValue {
                 return "";
             }
             final Iterable<JsonNode> iterable = () -> children;
-            final Iterable<String> values = () -> StreamSupport.stream(iterable.spliterator(), false).map(JsonNode::asText).iterator();
+            final Iterable<String> values = () -> StreamSupport.stream(iterable.spliterator(), false).map(x -> getValueFromNode(definition, x)).iterator();
             return String.join(" ", values);
         } else {
+            if(node.has("value")) {
+                return node.get("value").asText();
+            }
             return node.asText();
         }
     }
