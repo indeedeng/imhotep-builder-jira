@@ -1,11 +1,14 @@
 package com.indeed.jiraactions;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 @Value.Immutable
 public interface Action {
@@ -42,6 +45,7 @@ public interface Action {
     String getSysadCategories1();
     String getSysadCategories2();
     String getMilliStoryPoints();
+    Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
 
     @Nullable
     @VisibleForTesting

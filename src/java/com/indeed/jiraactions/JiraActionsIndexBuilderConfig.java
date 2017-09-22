@@ -1,5 +1,7 @@
 package com.indeed.jiraactions;
 
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+
 public class JiraActionsIndexBuilderConfig {
     private final String jiraUsername;
     private final String jiraPassword;
@@ -23,12 +25,15 @@ public class JiraActionsIndexBuilderConfig {
 
     private final boolean ignoreCustomFields;
 
+    private final CustomFieldDefinition[] customFields;
+
     public JiraActionsIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
                                          final String jiraFields, final String jiraExpand, final String jiraProject,
                                          final String excludedJiraProject, final String iuploadUrl,
                                          final String iuploadUsername, final String iuploadPassword,
                                          final String startDate, final String endDate, final int jiraBatchSize,
-                                         final String indexName, final boolean ignoreCustomFields) {
+                                         final String indexName, final boolean ignoreCustomFields,
+                                         final CustomFieldDefinition[] customFields) {
         this.jiraUsername = jiraUsername;
         this.jiraPassword = jiraPassword;
         this.jiraBaseURL = jiraUrl;
@@ -44,6 +49,7 @@ public class JiraActionsIndexBuilderConfig {
         this.jiraBatchSize = jiraBatchSize;
         this.indexName = indexName;
         this.ignoreCustomFields = ignoreCustomFields;
+        this.customFields = customFields;
     }
 
     public String getJiraUsername() {
@@ -104,5 +110,9 @@ public class JiraActionsIndexBuilderConfig {
 
     public boolean isIgnoreCustomFields() {
         return ignoreCustomFields;
+    }
+
+    public CustomFieldDefinition[] getCustomFields() {
+        return customFields;
     }
 }

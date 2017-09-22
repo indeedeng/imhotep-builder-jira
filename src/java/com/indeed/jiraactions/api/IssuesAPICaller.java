@@ -2,12 +2,15 @@ package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * @author soono
@@ -144,7 +147,13 @@ public class IssuesAPICaller extends ApiCaller {
     }
 
     private String getFieldsParam() {
-        return String.format("fields=%s", config.getJiraFields());
+        if(config.getCustomFields() == null || config.getCustomFields().length == 0) {
+            return String.format("fields=%s", config.getJiraFields());
+        } else {
+            return "fields=" +
+                    String.join(",", config.getJiraFields(),
+                    String.join(",", Arrays.stream(config.getCustomFields()).map(CustomFieldDefinition::getCustomFieldId).collect(Collectors.toList())));
+        }
     }
 
     private String getExpandParam() {

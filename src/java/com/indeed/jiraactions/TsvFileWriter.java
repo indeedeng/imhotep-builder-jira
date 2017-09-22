@@ -1,6 +1,9 @@
 package com.indeed.jiraactions;
 
 import com.google.common.base.Joiner;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+import com.indeed.jiraactions.api.customfields.CustomFieldValue;
+import com.indeed.util.logging.Loggers;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -22,9 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 
-/**
- * @author soono, kbinswanger
- */
 public class TsvFileWriter {
     private static final Logger log = Logger.getLogger(TsvFileWriter.class);
 
@@ -77,6 +77,11 @@ public class TsvFileWriter {
                     .append(Joiner.on("\t").join(CUSTOM_HEADERS));
         }
         bw.write(headers.toString());
+
+        for(final CustomFieldDefinition customField : config.getCustomFields()) {
+            bw.write("\t");
+            customField.writeHeader(bw);
+        }
         bw.newLine();
         bw.flush();
 
@@ -162,6 +167,17 @@ public class TsvFileWriter {
                 bw.write("\t");
                 bw.write(action.getMilliStoryPoints());
             }
+
+            for(final CustomFieldDefinition customField : config.getCustomFields()) {
+                bw.write("\t");
+                final CustomFieldValue value = action.getCustomFieldValues().get(customField);
+                if(value == null) {
+                    Loggers.error(log, "No value found for custom field %s for issue %s", customField.getImhotepFieldName(), action.getIssuekey());
+                    CustomFieldValue.emptyCustomField(customField).writeValue(bw);
+                } else {
+                    value.writeValue(bw);
+                }
+            }
             bw.newLine();
         }
 
@@ -217,25 +233,25 @@ public class TsvFileWriter {
         private final BufferedWriter bw;
         private boolean written;
 
-        public WriterData(final File file, final BufferedWriter bw) {
+        private WriterData(final File file, final BufferedWriter bw) {
             this.file = file;
             this.bw = bw;
             this.written = false;
         }
 
-        public File getFile() {
+        private File getFile() {
             return file;
         }
 
-        public BufferedWriter getBufferedWriter() {
+        private BufferedWriter getBufferedWriter() {
             return bw;
         }
 
-        public boolean isWritten() {
+        private boolean isWritten() {
             return written;
         }
 
-        public void setWritten() {
+        private void setWritten() {
             this.written = true;
         }
     }

@@ -11,6 +11,7 @@ import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollectio
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,9 +139,15 @@ public class Field {
         return Joiner.on(separator).join(temp);
     }
 
+    @Nullable
+    public JsonNode getCustomField(final String attribute) {
+        return otherProperties.get(attribute);
+    }
+
     public String getStringValue(final String attribute) throws IOException {
         return getStringValue(attribute, FieldLevel.NONE);
     }
+
     public String getStringValue(final String attribute, final FieldLevel fieldLevel) throws IOException {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
