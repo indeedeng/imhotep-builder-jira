@@ -38,7 +38,8 @@ public class TestCustomFieldValue {
     private static final CustomFieldDefinition protestCountries = ImmutableCustomFieldDefinition.builder()
             .name("Test Countries")
             .customFieldId("customfield_15290")
-            .imhotepFieldName("protext_countries*")
+            .imhotepFieldName("protest_countries*|")
+            .separator("|")
             .build();
 
     @Test
@@ -51,93 +52,78 @@ public class TestCustomFieldValue {
         final String value = "TestNoTransformationsValue";
         final CustomFieldValue field = new CustomFieldValue(definition, value);
 
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals(value, writer.getBuffer().toString());
+        assertEquals(field, value);
     }
 
     @Test
     public void testMultiplyByThousand() throws IOException {
-        final String value = "1.1";
-        final CustomFieldValue field = new CustomFieldValue(storyPoints, value);
-
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("1100", writer.getBuffer().toString());
+        testFromInitial(storyPoints, "1.1", "1100");
     }
 
     @Test
-    public void testNotExpandedFromInitial() throws IOException {
-        final String text = "8.0";
-        final JsonNode node = OBJECT_MAPPER.readTree(text);
-        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(storyPoints, node);
-
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("8000", writer.getBuffer().toString());
+    public void testTextFromInitial() throws IOException {
+        testFromInitial(storyPoints, "8.0", "8000");
     }
 
     @Test
-    public void testMultiValuedFromInitial() throws IOException {
-        final String text = "[\"fixit\",\"jobsearch-library-update\",\"jsgrowth\"]";
-        final JsonNode node = OBJECT_MAPPER.readTree(text);
-        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(protestCountries, node);
+    public void testValueFromInitial() throws IOException {
+        testFromInitial(protestCountries, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/12062\",\"value\":\"User\",\"id\":\"12062\"}", "User");
+    }
 
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
+    @Test
+    public void testSingleValueArrayOfValuesFromInitial() throws IOException {
+        testFromInitial(protestCountries, "[{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16473\",\"value\":\"en only\",\"id\":\"16473\"}]", "en only");
+    }
 
-        Assert.assertEquals("fixit jobsearch-library-update jsgrowth", writer.getBuffer().toString());
+    @Test
+    public void testArrayOfValuesFromInitialWithoutSeparator() throws IOException {
+        final CustomFieldDefinition madeup = ImmutableCustomFieldDefinition.builder()
+                .name("Fake Test Countries")
+                .customFieldId("customfield_15290")
+                .imhotepFieldName("fake_protest_countries*")
+                .build();
+
+        testFromInitial(madeup, "[{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16473\",\"value\":\"en_only\",\"id\":\"16473\"},{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16475\",\"value\":\"worldwide\",\"id\":\"16475\"}]",
+                "en_only worldwide");
+    }
+
+    @Test
+    public void testArrayOfValuesFromInitialWithSeparator() throws IOException {
+        testFromInitial(protestCountries, "[{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16473\",\"value\":\"en only\",\"id\":\"16473\"},{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16475\",\"value\":\"worldwide\",\"id\":\"16475\"}]",
+                "en only|worldwide");
+    }
+
+    @Test
+    public void testArrayOfTextFromInitial() throws IOException {
+        final CustomFieldDefinition madeup = ImmutableCustomFieldDefinition.builder()
+                .name("Labels")
+                .customFieldId("customfield_00000")
+                .imhotepFieldName("labels*")
+                .build();
+
+        testFromInitial(madeup, "[\"fixit\",\"jobsearch-library-update\",\"jsgrowth\"]", "fixit jobsearch-library-update jsgrowth");
     }
 
     @Test
     public void testExpandedWithChildFromInitial() throws IOException {
-        final String text = "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\",\"child\":{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20669\",\"value\":\"App Config\",\"id\":\"20669\"}}";
-        final JsonNode node = OBJECT_MAPPER.readTree(text);
-        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(directCause, node);
-
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("Misconfiguration - App Config", writer.getBuffer().toString());
+        testFromInitial(directCause, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\",\"child\":{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20669\",\"value\":\"App Config\",\"id\":\"20669\"}}",
+                "Misconfiguration - App Config");
     }
 
     @Test
     public void testExpandedNoChildFromInitial() throws IOException {
-        final String text = "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\"}";
-        final JsonNode node = OBJECT_MAPPER.readTree(text);
-        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(directCause, node);
-
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("Misconfiguration", writer.getBuffer().toString());
+        testFromInitial(directCause, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\"}", "Misconfiguration");
     }
 
     @Test
     public void testSeparateWithChildFromInitial() throws IOException {
-        final String text = "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20781\",\"value\":\"Config\",\"id\":\"20781\",\"child\":{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20814\",\"value\":\"Other\",\"id\":\"20814\"}}";
-        final JsonNode node = OBJECT_MAPPER.readTree(text);
-        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(sysadCategories, node);
-
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("Config\tOther", writer.getBuffer().toString());
+        testFromInitial(sysadCategories, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20781\",\"value\":\"Config\",\"id\":\"20781\",\"child\":{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20814\",\"value\":\"Other\",\"id\":\"20814\"}}",
+                "Config\tOther");
     }
 
     @Test
     public void testSeparateWithoutChildFromInitial() throws IOException {
-        final String text = "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20787\",\"value\":\"DNS\",\"id\":\"20787\"}";
-        final JsonNode node = OBJECT_MAPPER.readTree(text);
-        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(sysadCategories, node);
-
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("DNS\t", writer.getBuffer().toString());
+        testFromInitial(sysadCategories, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20787\",\"value\":\"DNS\",\"id\":\"20787\"}", "DNS\t");
     }
 
     @Test
@@ -145,10 +131,7 @@ public class TestCustomFieldValue {
         final String value = "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)";
         final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(directCause, "", value);
 
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("Escaped bug - Latent Code Issue", writer.getBuffer().toString());
+        assertEquals(field, "Escaped bug - Latent Code Issue");
     }
 
     @Test
@@ -156,10 +139,7 @@ public class TestCustomFieldValue {
         final String value = "Parent values: Escaped bug(20664)";
         final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(directCause, "", value);
 
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("Escaped bug", writer.getBuffer().toString());
+        assertEquals(field, "Escaped bug");
     }
 
     @Test
@@ -167,10 +147,7 @@ public class TestCustomFieldValue {
         final String value = "Parent values: Misconfiguration(20661)Level 1 values: App Config(20669)";
         final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(sysadCategories, "", value);
 
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("Misconfiguration\tApp Config", writer.getBuffer().toString());
+        assertEquals(field, "Misconfiguration\tApp Config");
     }
 
     @Test
@@ -178,11 +155,9 @@ public class TestCustomFieldValue {
         final String value = "Parent values: Misconfiguration(20661)";
         final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(sysadCategories, "", value);
 
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
         // This tab is important because we need the empty space for the field that isn't present
-        Assert.assertEquals("Misconfiguration\t", writer.getBuffer().toString());
+
+        assertEquals(field, "Misconfiguration\t");
     }
 
     @Test
@@ -197,10 +172,7 @@ public class TestCustomFieldValue {
         final String value = "Parent values: 99(32767)Level 1 values: .5(86753)";
         final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(definition, "", value);
 
-        final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
-
-        Assert.assertEquals("99000\t500", writer.getBuffer().toString());
+        assertEquals(field, "99000\t500");
     }
 
     @Test
@@ -215,9 +187,20 @@ public class TestCustomFieldValue {
         final String value = "Parent values: 9.9(32767)Level 1 values: .5(86753)";
         final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(definition, "", value);
 
+        assertEquals(field, "9900 - 500");
+    }
+
+    private void testFromInitial(final CustomFieldDefinition definition, final String input, final String expected) throws IOException {
+        final JsonNode node = OBJECT_MAPPER.readTree(input);
+        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(definition, node);
+
+        assertEquals(field, expected);
+    }
+
+    private void assertEquals(final CustomFieldValue field, final String expected) throws IOException {
         final StringWriter writer = new StringWriter();
         field.writeValue(writer);
 
-        Assert.assertEquals("9900 - 500", writer.getBuffer().toString());
+        Assert.assertEquals(expected, writer.getBuffer().toString());
     }
 }

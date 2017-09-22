@@ -33,6 +33,13 @@ public class TestCustomFieldDefinitionParser {
             "    \"imhotepfieldname\": \"protest_name\"\n" +
             "  }";
 
+    private static final String TEST_COUNTRIES = "  {\n" +
+            "    \"name\": \"Test Countries\",\n" +
+            "    \"customfieldid\": \"customfield_15290\",\n" +
+            "    \"imhotepfieldname\": \"protest_countries*|\",\n" +
+            "    \"separator\": \"|\"\n" +
+            "  }";
+
     @Test
     public void testProductionConfigs() throws IOException {
         final File directory = new File("src/resources/customfields");
@@ -105,17 +112,39 @@ public class TestCustomFieldDefinitionParser {
         Assert.assertEquals(1, definitions.length);
         Assert.assertEquals(
                 ImmutableCustomFieldDefinition.builder()
-                .name("Sysad Categories")
-                .customFieldId("customfield_17591")
-                .imhotepFieldName("sysad_category")
-                .multiValueFieldConfiguration(CustomFieldDefinition.MultiValueFieldConfiguration.SEPARATE)
-                .transformation(CustomFieldDefinition.Transformation.NONE)
-                .build(),
+                    .name("Sysad Categories")
+                    .customFieldId("customfield_17591")
+                    .imhotepFieldName("sysad_category")
+                    .multiValueFieldConfiguration(CustomFieldDefinition.MultiValueFieldConfiguration.SEPARATE)
+                    .transformation(CustomFieldDefinition.Transformation.NONE)
+                    .build(),
                 definitions[0]);
 
         definitions[0].writeHeader(writer);
 
         Assert.assertEquals("sysad_category1\tsysad_category2", writer.getBuffer().toString());
+    }
+
+    @Test
+    public void testSeparator() throws IOException {
+        final InputStream in = createInputStreamFromDefinitions(TEST_COUNTRIES);
+        final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(in);
+        final StringWriter writer = new StringWriter();
+
+        Assert.assertNotNull(definitions);
+        Assert.assertEquals(1, definitions.length);
+        Assert.assertEquals(
+                ImmutableCustomFieldDefinition.builder()
+                    .name("Test Countries")
+                    .customFieldId("customfield_15290")
+                    .imhotepFieldName("protest_countries*|")
+                    .separator("|")
+                    .build(),
+                definitions[0]);
+
+        definitions[0].writeHeader(writer);
+
+        Assert.assertEquals("protest_countries*|", writer.getBuffer().toString());
     }
 
     private InputStream createInputStreamFromDefinitions(final String... elements) {
