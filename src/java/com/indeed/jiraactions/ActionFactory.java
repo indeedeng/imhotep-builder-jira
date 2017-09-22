@@ -1,34 +1,33 @@
 package com.indeed.jiraactions;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * @author soono on 8/31/16.
- */
 public class ActionFactory {
     private static final Logger log = Logger.getLogger(ActionFactory.class);
 
     private final UserLookupService userLookupService;
+    private final JiraActionsIndexBuilderConfig config;
 
-    public ActionFactory(final UserLookupService userLookupService) {
+    public ActionFactory(final UserLookupService userLookupService,
+                         final JiraActionsIndexBuilderConfig config) {
         this.userLookupService = userLookupService;
+        this.config = config;
     }
 
     public Action create(final Issue issue) throws Exception {
-        return ImmutableAction.builder()
+        final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
                 .actor(issue.fields.creator == null ? User.INVALID_USER.displayName : issue.fields.creator.displayName)
                 .actorusername(issue.fields.creator == null ? User.INVALID_USER.name : issue.fields.creator.name)
@@ -61,12 +60,17 @@ public class ActionFactory {
                 .sprints(issue.initialValue("sprint", true))
                 .sysadCategories1(issue.initialValue("sysad-categories", true, Field.FieldLevel.PARENT))
                 .sysadCategories2(issue.initialValue("sysad-categories", true, Field.FieldLevel.CHILD))
-                .milliStoryPoints(numericStringToMilliNumericString(issue.initialValue("story-points", true)))
-                .build();
+                .milliStoryPoints(CustomFieldValue.numericStringToMilliNumericString(issue.initialValue("story-points", true)));
+
+            for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
+                builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseInitialValue(customFieldDefinition, issue));
+            }
+
+        return builder.build();
     }
 
     public Action update(final Action prevAction, final History history) throws IOException {
-        return ImmutableAction.builder()
+        final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("update")
                 .actor(history.author == null ? User.INVALID_USER.displayName : history.author.displayName)
                 .actorusername(history.author == null ? User.INVALID_USER.name : history.author.name)
@@ -101,8 +105,13 @@ public class ActionFactory {
                 .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
                 .sysadCategories1(history.itemExist("sysad-categories", true) ? history.getItemLastValueParent("sysad-categories", true) : prevAction.getSysadCategories1())
                 .sysadCategories2(history.itemExist("sysad-categories", true) ? history.getItemLastValueChild("sysad-categories", true) : prevAction.getSysadCategories2())
-                .milliStoryPoints(history.itemExist("story-points", true) ? numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints())
-                .build();
+                .milliStoryPoints(history.itemExist("story-points", true) ? CustomFieldValue.numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints());
+
+        for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
+            builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
+        }
+
+        return builder.build();
     }
 
     public Action comment(final Action prevAction, final Comment comment) {
@@ -139,18 +148,4 @@ public class ActionFactory {
         return (after.getMillis() - before.getMillis()) / 1000;
     }
 
-    @Nonnull
-    @VisibleForTesting
-    protected static String numericStringToMilliNumericString(@Nullable final String input) {
-        if(StringUtils.isEmpty(input)) {
-            return "";
-        }
-        try {
-            final double result = Double.parseDouble(input);
-            return String.format("%.0f", result*1000);
-        } catch(final NumberFormatException e) {
-            log.warn(e);
-            return "";
-        }
-    }
 }

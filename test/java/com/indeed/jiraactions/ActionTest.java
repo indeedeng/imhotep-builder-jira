@@ -1,10 +1,12 @@
 package com.indeed.jiraactions;
 
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.test.junit.Check;
+import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +33,16 @@ public class ActionTest {
     private static final long timeDiffWithPrevAction = 10;
 
     private final UserLookupService userLookupService = new FriendlyUserLookupService();
-    private final ActionFactory actionFactory = new ActionFactory(userLookupService);
+    private ActionFactory actionFactory;
 
     @Before
     public void initialize() {
+        final JiraActionsIndexBuilderConfig config = EasyMock.createNiceMock(JiraActionsIndexBuilderConfig.class);
+        EasyMock.expect(config.getCustomFields()).andReturn(new CustomFieldDefinition[0]).anyTimes();
+        EasyMock.replay(config);
+
+        actionFactory = new ActionFactory(userLookupService, config);
+
         author = new User();
         author.displayName = "Author";
         author.name = "author";
