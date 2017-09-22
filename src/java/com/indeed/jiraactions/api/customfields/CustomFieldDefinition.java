@@ -65,6 +65,11 @@ public interface CustomFieldDefinition {
     String getImhotepFieldName();
 
     @Value.Default
+    default String getSeparator() {
+        return " ";
+    }
+
+    @Value.Default
     default MultiValueFieldConfiguration getMultiValueFieldConfiguration() {
         return MultiValueFieldConfiguration.NONE;
     }

@@ -84,7 +84,6 @@ public class CustomFieldValue {
         }
     }
 
-    @SuppressWarnings("unused") // Will eventually be used for different separators
     private static String getValueFromNode(final CustomFieldDefinition definition, final JsonNode node) {
         if(JsonNodeType.ARRAY.equals(node.getNodeType())) {
             final Iterator<JsonNode> children = node.elements();
@@ -93,7 +92,7 @@ public class CustomFieldValue {
             }
             final Iterable<JsonNode> iterable = () -> children;
             final Iterable<String> values = () -> StreamSupport.stream(iterable.spliterator(), false).map(x -> getValueFromNode(definition, x)).iterator();
-            return String.join(" ", values);
+            return String.join(definition.getSeparator(), values);
         } else {
             if(node.has("value")) {
                 return node.get("value").asText();
