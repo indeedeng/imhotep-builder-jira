@@ -41,10 +41,6 @@ public interface Action {
     String getLabels();
     String getIssueSizeEstimate();
     String getDirectCause();
-    String getSprints();
-    String getSysadCategories1();
-    String getSysadCategories2();
-    String getMilliStoryPoints();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
 
     @Nullable

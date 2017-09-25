@@ -190,6 +190,16 @@ public class TestCustomFieldValue {
         assertEquals(field, "9900 - 500");
     }
 
+    @Test
+    public void testNumericStringToMilliNumericString() {
+        Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString(null));
+        Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString(""));
+        Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString("5 cows"));
+
+        Assert.assertEquals("5000", CustomFieldValue.numericStringToMilliNumericString("5"));
+        Assert.assertEquals("230", CustomFieldValue.numericStringToMilliNumericString(".23"));
+    }
+
     private void testFromInitial(final CustomFieldDefinition definition, final String input, final String expected) throws IOException {
         final JsonNode node = OBJECT_MAPPER.readTree(input);
         final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(definition, node);
