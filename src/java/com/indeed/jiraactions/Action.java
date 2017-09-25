@@ -40,7 +40,6 @@ public interface Action {
     String getComponents();
     String getLabels();
     String getIssueSizeEstimate();
-    String getDirectCause();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
 
     @Nullable

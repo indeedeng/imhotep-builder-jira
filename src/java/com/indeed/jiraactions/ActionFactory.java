@@ -53,8 +53,7 @@ public class ActionFactory {
                 .dueDate(issue.initialValue("duedate"))
                 .components(issue.initialValue("components"))
                 .labels(issue.initialValue("labels"))
-                .issueSizeEstimate(issue.initialValue("issuesizeestimate", true, "t-shirt-size-estimate", "issue-size-estimate"))
-                .directCause(issue.initialValue("direct-cause", "directcause", true));
+                .issueSizeEstimate(issue.initialValue("issuesizeestimate", true, "t-shirt-size-estimate", "issue-size-estimate"));
 
             for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
                 builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseInitialValue(customFieldDefinition, issue));
@@ -94,8 +93,7 @@ public class ActionFactory {
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .issueSizeEstimate(history.itemExist("t-shirt-size-estimate", true) ? history.getItemLastValue("t-shirt-size-estimate", true) :
                         (history.itemExist("issue-size-estimate", true) ? history.getItemLastValue("issue-size-estimate", true) :
-                        prevAction.getIssueSizeEstimate()))
-                .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause());
+                        prevAction.getIssueSizeEstimate()));
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
