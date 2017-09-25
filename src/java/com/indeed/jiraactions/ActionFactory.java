@@ -2,11 +2,9 @@ package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
-import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
-import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -56,11 +54,7 @@ public class ActionFactory {
                 .components(issue.initialValue("components"))
                 .labels(issue.initialValue("labels"))
                 .issueSizeEstimate(issue.initialValue("issuesizeestimate", true, "t-shirt-size-estimate", "issue-size-estimate"))
-                .directCause(issue.initialValue("direct-cause", "directcause", true))
-                .sprints(issue.initialValue("sprint", true))
-                .sysadCategories1(issue.initialValue("sysad-categories", true, Field.FieldLevel.PARENT))
-                .sysadCategories2(issue.initialValue("sysad-categories", true, Field.FieldLevel.CHILD))
-                .milliStoryPoints(CustomFieldValue.numericStringToMilliNumericString(issue.initialValue("story-points", true)));
+                .directCause(issue.initialValue("direct-cause", "directcause", true));
 
             for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
                 builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseInitialValue(customFieldDefinition, issue));
@@ -101,11 +95,7 @@ public class ActionFactory {
                 .issueSizeEstimate(history.itemExist("t-shirt-size-estimate", true) ? history.getItemLastValue("t-shirt-size-estimate", true) :
                         (history.itemExist("issue-size-estimate", true) ? history.getItemLastValue("issue-size-estimate", true) :
                         prevAction.getIssueSizeEstimate()))
-                .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause())
-                .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
-                .sysadCategories1(history.itemExist("sysad-categories", true) ? history.getItemLastValueParent("sysad-categories", true) : prevAction.getSysadCategories1())
-                .sysadCategories2(history.itemExist("sysad-categories", true) ? history.getItemLastValueChild("sysad-categories", true) : prevAction.getSysadCategories2())
-                .milliStoryPoints(history.itemExist("story-points", true) ? CustomFieldValue.numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints());
+                .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause());
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseNonInitialValue(customFieldDefinition, prevAction, history));

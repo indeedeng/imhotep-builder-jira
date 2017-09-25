@@ -39,8 +39,7 @@ public class TsvFileWriter {
     };
 
     private static final String[] CUSTOM_HEADERS = {
-            "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause", "sprints*|", "sysad_category1",
-            "sysad_category2", "millistorypoints"
+            "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause"
     };
 
 
@@ -158,14 +157,6 @@ public class TsvFileWriter {
                 bw.write(action.getIssueSizeEstimate());
                 bw.write("\t");
                 bw.write(action.getDirectCause());
-                bw.write("\t");
-                bw.write(action.getSprints());
-                bw.write("\t");
-                bw.write(action.getSysadCategories1());
-                bw.write("\t");
-                bw.write(action.getSysadCategories2());
-                bw.write("\t");
-                bw.write(action.getMilliStoryPoints());
             }
 
             for(final CustomFieldDefinition customField : config.getCustomFields()) {
