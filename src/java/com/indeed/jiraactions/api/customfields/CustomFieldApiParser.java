@@ -71,7 +71,11 @@ public class CustomFieldApiParser {
     CustomFieldValue customFieldValueFromChangelog(final CustomFieldDefinition definition,
                                                    final String value, final String valueString) {
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
-            return new CustomFieldValue(definition, valueString, "");
+            if (StringUtils.isNotEmpty(definition.getSeparator())) {
+                return new CustomFieldValue(definition, valueString.replace(", ", definition.getSeparator()), "");
+            } else {
+                return new CustomFieldValue(definition, valueString, "");
+            }
         } else if(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME.equals(definition.getMultiValueFieldConfiguration())) {
             final User user = userLookupService.getUser(value);
             return new CustomFieldValue(definition, valueString, user.name);
@@ -121,13 +125,20 @@ public class CustomFieldApiParser {
 
     private static String getValueFromNode(final CustomFieldDefinition definition, final JsonNode node) {
         if(JsonNodeType.ARRAY.equals(node.getNodeType())) {
+            final String separator;
+            if(StringUtils.isEmpty(definition.getSeparator())) {
+                Loggers.error(log, "No specified separator for array node %s for field %s", node.toString(), definition.getName());
+                separator = " ";
+            } else {
+                separator = definition.getSeparator();
+            }
             final Iterator<JsonNode> children = node.elements();
             if(children == null) {
                 return "";
             }
             final Iterable<JsonNode> iterable = () -> children;
             final Iterable<String> values = () -> StreamSupport.stream(iterable.spliterator(), false).map(x -> getValueFromNode(definition, x)).iterator();
-            return String.join(definition.getSeparator(), values);
+            return String.join(separator, values);
         } else {
             if(node.has("value")) {
                 return node.get("value").asText();

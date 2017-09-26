@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -65,10 +66,8 @@ public interface CustomFieldDefinition {
     String getCustomFieldId();
     String getImhotepFieldName();
 
-    @Value.Default
-    default String getSeparator() {
-        return " ";
-    }
+    @Nullable
+    String getSeparator();
 
     @Value.Default
     default String getAlternateName() {

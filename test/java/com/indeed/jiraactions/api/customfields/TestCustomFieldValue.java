@@ -226,6 +226,14 @@ public class TestCustomFieldValue {
     }
 
     @Test
+    public void testMultiValueFIeldFromChangelog() throws IOException {
+        final String value = "2016-11-02 Money, 2016-11-09 Money, 2016-11-16 Money, 2016-11-23 Money, 2016-11-30 Money, 2016-12-07 Money, 2016-12-14 Money";
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(sprint, "", value);
+
+        assertEquals(field, "2016-11-02 Money|2016-11-09 Money|2016-11-16 Money|2016-11-23 Money|2016-11-30 Money|2016-12-07 Money|2016-12-14 Money");
+    }
+
+    @Test
     public void testNumericStringToMilliNumericString() {
         Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString(null));
         Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString(""));
