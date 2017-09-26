@@ -1,4 +1,4 @@
-package  com.indeed.jiraactions.api.customfields;
+package com.indeed.jiraactions.api.customfields;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
