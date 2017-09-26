@@ -17,13 +17,11 @@ import java.util.Set;
  */
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-
 public class History {
     public User author;
     public DateTime created;
     public Item[] items;
 
-    @SuppressWarnings("unused")
     @JsonProperty("created")
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);
@@ -84,42 +82,6 @@ public class History {
         }
 
         return item.toString;
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    public String getItemLastValueParent(final String field, final boolean acceptCustom) {
-        final Item item = getItem(field, acceptCustom);
-        if(item == null || item.toString == null) {
-            return "";
-        }
-
-        final String target = "Parent values: ";
-        final int start = item.toString.indexOf(target) + target.length();
-        if(start < target.length()) {
-            return item.toString;
-        }
-
-        final int end = item.toString.indexOf("(");
-
-        return item.toString.substring(start, end);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    public String getItemLastValueChild(final String field, final boolean acceptCustom) {
-        final Item item = getItem(field, acceptCustom);
-        if(item == null || item.toString == null) {
-            return "";
-        }
-
-        final String target = "Level 1 values: ";
-        final int start = item.toString.indexOf(target) + target.length();
-        if(start < target.length()) {
-            return "";
-        }
-
-        final int end = item.toString.lastIndexOf("(");
-
-        return item.toString.substring(start, end);
     }
 
     // Of the form "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"

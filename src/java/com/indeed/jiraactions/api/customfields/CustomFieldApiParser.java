@@ -68,9 +68,8 @@ public class CustomFieldApiParser {
      * @param value The "to" or "from" value. A keyed representation.
      * @param valueString The "toString" or "fromString" value. A more verbose representation.
      */
-    @SuppressWarnings("unused") // Will be used later for more custom things like usernames and links
     CustomFieldValue customFieldValueFromChangelog(final CustomFieldDefinition definition,
-                                                                 final String value, final String valueString) {
+                                                   final String value, final String valueString) {
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
             return new CustomFieldValue(definition, valueString, "");
         } else if(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME.equals(definition.getMultiValueFieldConfiguration())) {
