@@ -84,25 +84,6 @@ public class History {
         return item.toString;
     }
 
-    // Of the form "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"
-    @SuppressWarnings("SameParameterValue")
-    public String getItemLastValueFlattened(final String field, final boolean acceptCustom) {
-        final Item item = getItem(field, acceptCustom);
-        if(item == null || item.toString == null) {
-            return "";
-        }
-
-        final String target = "Parent values: ";
-        final int start = item.toString.indexOf(target) + target.length();
-        if(start < target.length()) {
-            return item.toString;
-        }
-
-        return item.toString.substring(start)
-                .replaceAll("\\(\\d+\\)", "")
-                .replaceAll("Level \\d values: ", " - ");
-    }
-
     public String getItemLastValueKey(final String field) {
         return getItemLastValueKey(field, false);
     }

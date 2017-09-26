@@ -28,15 +28,11 @@ public class Issue {
     }
 
     public String initialValue(final String field, final String fallbackField, final boolean acceptCustom) throws IOException {
-        return initialValue(field, fallbackField, acceptCustom, Field.FieldLevel.NONE);
-    }
-
-    public String initialValue(final String field, final String fallbackField, final boolean acceptCustom, final Field.FieldLevel fieldLevel) throws IOException {
         final Item history = initialItem(field, acceptCustom);
         if(history != null) {
             return history.fromString == null ? "" : history.fromString;
         } else {
-            return this.fields.getStringValue(fallbackField, fieldLevel);
+            return this.fields.getStringValue(fallbackField);
         }
     }
 
