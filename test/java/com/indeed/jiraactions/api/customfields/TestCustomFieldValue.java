@@ -186,8 +186,13 @@ public class TestCustomFieldValue {
         final CustomFieldValue field = apiParser.customFieldValueFromChangelog(sysadCategories, "", value);
 
         // This tab is important because we need the empty space for the field that isn't present
-
         assertEquals(field, "Misconfiguration\t");
+    }
+
+    @Test
+    public void testUserLookupFromChangelog() throws IOException {
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(verifier, "aaldridge", "Andreas Aldridge");
+        assertEquals(field, "Andreas Aldridge\taaldridge");
     }
 
     @Test
