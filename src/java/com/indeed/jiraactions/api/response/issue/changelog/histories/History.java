@@ -61,6 +61,18 @@ public class History {
         return null;
     }
 
+    @Nullable
+    public Item getItem(final boolean acceptCustom, final String... fields) {
+        for(final Item item : items) {
+            for(final String field : fields) {
+                if (Objects.equals(item.field, field) && (acceptCustom || !item.customField)) {
+                    return item;
+                }
+            }
+        }
+        return null;
+    }
+
     public String getItemLastValue(final String field) {
         return getItemLastValue(field, false);
     }

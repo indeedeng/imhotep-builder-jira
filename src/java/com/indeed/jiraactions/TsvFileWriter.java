@@ -38,12 +38,7 @@ public class TsvFileWriter {
             "timesinceaction", "time"
     };
 
-    private static final String[] CUSTOM_HEADERS = {
-            "verifier", "verifierusername", "issuesizeestimate"
-    };
-
-
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) throws IOException {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
@@ -70,12 +65,7 @@ public class TsvFileWriter {
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
         // Write header
-        final StringBuilder headers = new StringBuilder(Joiner.on("\t").join(FILE_HEADER));
-        if(!config.isIgnoreCustomFields()) {
-            headers.append("\t")
-                    .append(Joiner.on("\t").join(CUSTOM_HEADERS));
-        }
-        bw.write(headers.toString());
+        bw.write(Joiner.on("\t").join(FILE_HEADER));
 
         for(final CustomFieldDefinition customField : config.getCustomFields()) {
             bw.write("\t");
@@ -147,15 +137,6 @@ public class TsvFileWriter {
             bw.write(String.valueOf(action.getTimesinceaction()));
             bw.write("\t");
             bw.write(JiraActionsUtil.getUnixTimestamp(action.getTimestamp()));
-
-            if(!config.isIgnoreCustomFields()) {
-                bw.write("\t");
-                bw.write(action.getVerifier());
-                bw.write("\t");
-                bw.write(action.getVerifierusername());
-                bw.write("\t");
-                bw.write(action.getIssueSizeEstimate());
-            }
 
             for(final CustomFieldDefinition customField : config.getCustomFields()) {
                 bw.write("\t");
