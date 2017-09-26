@@ -42,6 +42,13 @@ public class TestCustomFieldValue {
             .separator("|")
             .build();
 
+    private static final CustomFieldDefinition sprint = ImmutableCustomFieldDefinition.builder()
+            .name("Sprint")
+            .customFieldId("customfield_11490")
+            .imhotepFieldName("sprints*|")
+            .separator("|")
+            .build();
+
     @Test
     public void testNoModifications() throws IOException {
         final CustomFieldDefinition definition = ImmutableCustomFieldDefinition.builder()
@@ -124,6 +131,12 @@ public class TestCustomFieldValue {
     @Test
     public void testSeparateWithoutChildFromInitial() throws IOException {
         testFromInitial(sysadCategories, "{\"self\":\"https://bugs.indeed.com/rest/api/2/customFieldOption/20787\",\"value\":\"DNS\",\"id\":\"20787\"}", "DNS\t");
+    }
+
+    @Test
+    public void testGreenhopperObjectFromInitial() throws IOException {
+        testFromInitial(sprint, "[\"com.atlassian.greenhopper.service.sprint.Sprint@8b01a9a[id=811,rapidViewId=1712,state=CLOSED,name=WP Sprint 2,startDate=2017-08-07T14:30:48.610-05:00,endDate=2017-08-21T14:30:00.000-05:00,completeDate=2017-08-21T13:34:01.341-05:00,sequence=811]\",\"com.atlassian.greenhopper.service.sprint.Sprint@8a8d1d7[id=842,rapidViewId=1712,state=CLOSED,name=Sprint R: 8/21-9/1,startDate=2017-08-21T14:05:47.318-05:00,endDate=2017-09-04T14:05:00.000-05:00,completeDate=2017-09-05T10:06:40.253-05:00,sequence=842]\"]",
+                "WP Sprint 2|Sprint R: 8/21-9/1");
     }
 
     @Test

@@ -52,6 +52,10 @@ public class CustomFieldValue {
             return new CustomFieldValue(definition, valueString, "");
         }
 
+        if(StringUtils.isEmpty(valueString)) {
+            return new CustomFieldValue(definition, "", "");
+        }
+
         // Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)
         final Matcher matcher = multivaluePattern.matcher(valueString);
         final String parent;
@@ -97,7 +101,18 @@ public class CustomFieldValue {
             if(node.has("value")) {
                 return node.get("value").asText();
             }
-            return node.asText();
+            final String text = node.asText();
+            if(text.startsWith("com.atlassian.greenhopper.service")) { // This is a hack since we don't have the source code or JAR for greenhopper
+                final int index = text.indexOf("name=");
+                if(index < 0) {
+                    return text;
+                }
+                final int start = index + "name=".length();
+                final int end = text.indexOf(",", start);
+                return text.substring(start, end >= start ? end : text.length());
+            } else {
+                return text;
+            }
         }
     }
 
