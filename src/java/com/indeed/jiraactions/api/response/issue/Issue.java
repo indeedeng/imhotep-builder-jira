@@ -76,7 +76,7 @@ public class Issue {
     }
 
     @Nullable
-    private Item initialItem(final boolean acceptCustom, final String... fields) {
+    public Item initialItem(final boolean acceptCustom, final String... fields) {
         return this.changelog.getFirstHistoryItem(acceptCustom, fields);
     }
 }

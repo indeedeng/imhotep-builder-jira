@@ -1,5 +1,6 @@
 package com.indeed.jiraactions;
 
+import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
@@ -39,7 +40,7 @@ public class ActionsBuilderTest {
         EasyMock.expect(config.getCustomFields()).andReturn(new CustomFieldDefinition[0]).anyTimes();
         EasyMock.replay(config);
 
-        actionFactory = new ActionFactory(userLookupService, config);
+        actionFactory = new ActionFactory(userLookupService, new CustomFieldApiParser(userLookupService), config);
 
         issue = new Issue();
         issue.fields = new Field();

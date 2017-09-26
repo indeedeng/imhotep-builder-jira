@@ -32,14 +32,11 @@ public interface Action {
     long getTimeinstate();
     long getTimesinceaction();
     DateTime getTimestamp();
-    String getVerifier();
-    String getVerifierusername();
     String getCategory();
     String getFixversions();
     String getDueDate();
     String getComponents();
     String getLabels();
-    String getIssueSizeEstimate();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
 
     @Nullable

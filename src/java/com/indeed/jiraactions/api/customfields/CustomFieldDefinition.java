@@ -20,6 +20,7 @@ public interface CustomFieldDefinition {
     enum MultiValueFieldConfiguration {
         SEPARATE("separate"),
         EXPANDED("expanded"),
+        USERNAME("username"), // This is kind of a kludge because it doesn't fit the other types of multi-values, but it keeps the model clean
         NONE("none");
 
         private final String key;
@@ -70,6 +71,11 @@ public interface CustomFieldDefinition {
     }
 
     @Value.Default
+    default String getAlternateName() {
+        return "";
+    }
+
+    @Value.Default
     default MultiValueFieldConfiguration getMultiValueFieldConfiguration() {
         return MultiValueFieldConfiguration.NONE;
     }
@@ -80,10 +86,17 @@ public interface CustomFieldDefinition {
     }
 
     default void writeHeader(final Writer writer) throws IOException {
-        if(MultiValueFieldConfiguration.SEPARATE.equals(getMultiValueFieldConfiguration())) {
-            writer.write(String.format("%s\t%s", getImhotepFieldName()+"1", getImhotepFieldName()+"2"));
-        } else {
-            writer.write(getImhotepFieldName());
+        switch(getMultiValueFieldConfiguration()) {
+            case SEPARATE:
+                writer.write(String.format("%s\t%s", getImhotepFieldName()+"1", getImhotepFieldName()+"2"));
+                break;
+            case USERNAME:
+                writer.write(String.format("%s\t%s", getImhotepFieldName(), getImhotepFieldName()+"username"));
+                break;
+            case EXPANDED:
+            default:
+                writer.write(getImhotepFieldName());
+                break;
         }
     }
 }

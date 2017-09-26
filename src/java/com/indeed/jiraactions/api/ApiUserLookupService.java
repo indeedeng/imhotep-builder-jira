@@ -35,7 +35,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
     }
 
     @Override
-    public User getUser(@Nullable final String key) throws IOException {
+    public User getUser(@Nullable final String key) {
         if(StringUtils.isEmpty(key)) {
             return User.INVALID_USER;
         }
@@ -69,7 +69,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
     }
 
     @Nullable
-    private User lookupUser(final String key) throws IOException {
+    private User lookupUser(final String key) {
         final long start = System.currentTimeMillis();
 
         try {
