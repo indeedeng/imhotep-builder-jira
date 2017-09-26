@@ -16,15 +16,6 @@ import javax.annotation.Nullable;
 public class ChangeLog {
     public History[] histories;
 
-    public boolean historyItemExist(final String field, final boolean acceptCustom) {
-        for (final History history : histories) {
-            if (history.itemExist(field, acceptCustom)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Nullable
     public Item getFirstHistoryItem(final boolean acceptCustom, final String... fields) {
         for (final History history : histories) {

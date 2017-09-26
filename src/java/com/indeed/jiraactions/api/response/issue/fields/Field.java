@@ -62,25 +62,21 @@ public class Field {
     public DirectCause directcause;
     public Map<String, JsonNode> otherProperties = new HashMap<>();
 
-    @SuppressWarnings("unused")
     @JsonProperty("created")
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);
     }
 
-    @SuppressWarnings("unused")
     @JsonProperty("customfield_10003")
     public void setVerifier(final User verifier) {
         this.verifier = verifier;
     }
 
-    @SuppressWarnings("unused")
     @JsonProperty("customfield_17090")
     public void setIssueSizeEstimate(final IssueSizeEstimate estimate) {
         this.issuesizeestimate = estimate;
     }
 
-    @SuppressWarnings("unused")
     @JsonProperty("customfield_17490")
     public void setDirectCause(final DirectCause directCause) {
         this.directcause = directCause;
