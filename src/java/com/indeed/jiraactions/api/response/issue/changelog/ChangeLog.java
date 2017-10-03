@@ -29,21 +29,6 @@ public class ChangeLog {
         return null;
     }
 
-    @Nullable
-    public Item getFirstHistoryItem(final String field, final boolean acceptCustom) {
-        // Return the first history item about the field.
-        // If there is no history item about the field, return null.
-
-        // Sort history items in time order.
-        for (final History history : histories) {
-            final Item item = history.getItem(field, acceptCustom);
-            if(item != null) {
-                return item;
-            }
-        }
-        return null;
-    }
-
     public void sortHistories() {
         // It seems JIRA API's response is already sorted, but
         // just in case, use this method to make sure.
