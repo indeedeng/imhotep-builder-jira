@@ -80,6 +80,7 @@ public class JiraActionsIndexBuilder {
                  */
             boolean reFoundTheBeginning = false;
             while(!reFoundTheBeginning) {
+                boolean firstIssue = true;
                 while (issuesAPICaller.currentPageExist()) {
                     start = System.currentTimeMillis();
                     final JsonNode issuesNode = issuesAPICaller.getIssuesNodeWithBackoff();
@@ -117,10 +118,12 @@ public class JiraActionsIndexBuilder {
 
                             if(issue.key.equals(seenIssues.keySet().iterator().next()) // We see the first issue
                                     && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
-                                    && actions.size() == 0) { // There is nothing new since the last time we saw it
+                                    && actions.size() == 0 // There is nothing new since the last time we saw it
+                                    && firstIssue) { // We are at the very beginning of a pass
                                 reFoundTheBeginning = true;
                                 break;
                             }
+                            firstIssue = false;
                         } catch (final Exception e) {
                             log.error(String.format("Error parsing actions for issue %s.", issue.key), e);
                         }
