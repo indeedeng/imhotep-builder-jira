@@ -26,13 +26,12 @@ public class IssuesAPICaller extends ApiCaller {
     private int batchSize;
     private int start = 0; // Current Page
     private int numTotal = -1; // Total number of issues remaining
-    private int origTotal;
 
     private int backoff = 10_000;
 
     public IssuesAPICaller(final JiraActionsIndexBuilderConfig config) throws UnsupportedEncodingException {
         super(config);
-        this.maxPerPage = config.getJiraBatchSize();
+        this.maxPerPage = config.getJiraBatchSize()*2;
         this.batchSize = config.getJiraBatchSize();
 
         this.urlBase = getIssuesUrlBase();
@@ -79,7 +78,6 @@ public class IssuesAPICaller extends ApiCaller {
         final JsonNode totalNode = apiRes.path("total");
         final int total = totalNode.intValue();
         this.numTotal = total;
-        this.origTotal = total;
         return numTotal;
     }
 
@@ -87,12 +85,12 @@ public class IssuesAPICaller extends ApiCaller {
         return start < numTotal;
     }
 
-    public int getNumPotentiallySkipped() {
-        return numTotal - origTotal;
-    }
-
     private void setNextPage() {
         start += batchSize;
+    }
+
+    public void reset() {
+        start = 0;
     }
 
     private String getIssuesUrlBase() throws UnsupportedEncodingException {
@@ -105,9 +103,9 @@ public class IssuesAPICaller extends ApiCaller {
     }
 
     private String getIssuesURL() {
-        final String url = urlBase +
-                "&" + getStartAtParam() +
-                "&" + getMaxResults();
+        final String url = urlBase
+                + "&" + getMaxResults()
+                + "&" + getStartAtParam();
 
         if(log.isDebugEnabled()) {
             log.debug(String.format("Trying URL: %s", url));
@@ -142,6 +140,8 @@ public class IssuesAPICaller extends ApiCaller {
         if(!StringUtils.isEmpty(config.getExcludedJiraProject())) {
             query.append(" AND project NOT IN (").append(config.getExcludedJiraProject()).append(")");
         }
+
+        query.append(" ORDER BY updatedDate DESC, issuekey DESC"); // seems like updatedDate isn't quite repeatable
 
         return "jql=" + URLEncoder.encode(query.toString(), "UTF-8");
     }
