@@ -41,7 +41,7 @@ public class JiraActionsIndexBuilder {
                 final long start = System.currentTimeMillis();
                 final int total = issuesAPICaller.setNumTotal();
                 final long end = System.currentTimeMillis();
-                log.info(String.format("%d ms, found %d total issues.", end - start, total));
+                log.debug(String.format("%d ms, found %d total issues.", end - start, total));
             }
 
             long apiTime = 0;
@@ -77,10 +77,19 @@ public class JiraActionsIndexBuilder {
                  * Every time we process an issue, we remove it from our seenIssues map and re-add it (putting it at the
                  * end). Consequently, we know we can stop when we see the first issue in our seenIssues map *and* it
                  * has no new actions.
+                 *
+                 * There are three scenarios:
+                 * 1) We are just processing all the issues. Continue through to the end.
+                 * 2) We are doing a second pass, but we had to read through a bunch of issues until we get to the old beginning.
+                 *    Then we should bail out and start at the beginning again to just pick up what's new during this pass.
+                 * 3) We find something we've already seen at the very beginning of our list. We're done.
                  */
             boolean reFoundTheBeginning = false;
-            while(!reFoundTheBeginning) {
-                boolean firstIssue = true;
+            boolean firstIssue = true;
+            boolean firstPass = true;
+            while(!reFoundTheBeginning || !firstIssue) {
+                reFoundTheBeginning = false;
+                firstIssue = true;
                 while (issuesAPICaller.currentPageExist()) {
                     start = System.currentTimeMillis();
                     final JsonNode issuesNode = issuesAPICaller.getIssuesNodeWithBackoff();
@@ -116,10 +125,9 @@ public class JiraActionsIndexBuilder {
                             final long file_end = System.currentTimeMillis();
                             fileTime += file_end - file_start;
 
-                            if(issue.key.equals(seenIssues.keySet().iterator().next()) // We see the first issue
+                            if(!firstPass // Don't bail out the first time through
                                     && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
-                                    && actions.size() == 0 // There is nothing new since the last time we saw it
-                                    && firstIssue) { // We are at the very beginning of a pass
+                                    && actions.size() == 0) { // There is nothing new since the last time we saw it
                                 reFoundTheBeginning = true;
                                 break;
                             }
@@ -137,6 +145,7 @@ public class JiraActionsIndexBuilder {
                     }
                 }
                 issuesAPICaller.reset();
+                firstPass = false;
                 log.info("Starting over to pick up lost issues.");
             }
 
