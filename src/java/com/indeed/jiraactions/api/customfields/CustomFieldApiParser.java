@@ -47,7 +47,7 @@ public class CustomFieldApiParser {
     }
 
     public CustomFieldValue parseNonInitialValue(final CustomFieldDefinition definition, final Action prevAction,
-                                                        final History history) {
+                                                 final History history) {
         final Item item = history.getItem(true, getItemLabels(definition));
         if(item != null) {
             return customFieldValueFromChangelog(definition, item.to, item.toString);
@@ -107,7 +107,7 @@ public class CustomFieldApiParser {
             final String value = getValueFromNode(definition, json);
             return new CustomFieldValue(definition, value);
         } else if(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME.equals(definition.getMultiValueFieldConfiguration())) {
-            final String username = getValueFromNode(definition, json.get("name"));
+            final String username = getValueFromNode(definition, json.get("key"));
             final String displayName = getValueFromNode(definition, json.get("displayName"));
             final User user = userLookupService.getUser(username);
             return new CustomFieldValue(definition, displayName, user.name);
