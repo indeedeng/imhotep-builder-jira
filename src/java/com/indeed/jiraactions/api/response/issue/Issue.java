@@ -20,34 +20,11 @@ public class Issue {
     public ChangeLog changelog;
 
     public String initialValue(final String field) throws Exception {
-        return initialValue(field, false);
+        return initialValue(field, field);
     }
 
-    public String initialValue(final String field, final boolean acceptCustom) throws IOException {
-        return initialValue(field, field, acceptCustom);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    public String initialValue(final String field, final boolean acceptCustom, final Field.FieldLevel fieldLevel) throws IOException {
-        return initialValue(field, field, acceptCustom, fieldLevel);
-    }
-
-    public String initialValue(final String field, final String fallbackField, final boolean acceptCustom) throws IOException {
-        return initialValue(field, fallbackField, acceptCustom, Field.FieldLevel.NONE);
-    }
-
-    public String initialValue(final String field, final String fallbackField, final boolean acceptCustom, final Field.FieldLevel fieldLevel) throws IOException {
-        final Item history = initialItem(field, acceptCustom);
-        if(history != null) {
-            return history.fromString == null ? "" : history.fromString;
-        } else {
-            return this.fields.getStringValue(fallbackField, fieldLevel);
-        }
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    public String initialValue(final String fallbackField, final boolean acceptCustom, final String... fields) throws IOException {
-        final Item history = initialItem(acceptCustom, fields);
+    public String initialValue(final String field, final String fallbackField) throws IOException {
+        final Item history = initialItem(false, field);
         if(history != null) {
             return history.fromString == null ? "" : history.fromString;
         } else {
@@ -55,13 +32,9 @@ public class Issue {
         }
     }
 
-
-    public String initialValueKey(final String field, final String fallbackField) throws IOException {
-        return initialValueKey(field, fallbackField, false);
-    }
     // This name sucks
-    public String initialValueKey(final String field, final String fallbackField, final boolean acceptCustom) throws IOException {
-        final Item history = initialItem(field, acceptCustom);
+    public String initialValueKey(final String field, final String fallbackField) throws IOException {
+        final Item history = initialItem(false, field);
         if(history != null) {
             return history.from == null ? "" : history.from;
         } else {
@@ -69,14 +42,8 @@ public class Issue {
         }
     }
 
-
     @Nullable
-    public Item initialItem(final String field, final boolean acceptCustom) {
-        return this.changelog.getFirstHistoryItem(field, acceptCustom);
-    }
-
-    @Nullable
-    private Item initialItem(final boolean acceptCustom, final String... fields) {
+    public Item initialItem(final boolean acceptCustom, final String... fields) {
         return this.changelog.getFirstHistoryItem(acceptCustom, fields);
     }
 }

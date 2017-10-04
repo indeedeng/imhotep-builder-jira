@@ -1,5 +1,6 @@
 package com.indeed.jiraactions;
 
+import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
@@ -9,9 +10,9 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
-import com.indeed.test.junit.Check;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,11 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @author soono
- * @author kbinswanger
- */
-@Ignore
 public class ActionsBuilderTest {
     private Issue issue;
     private static final DateTime startDate = JiraActionsUtil.parseDateTime("2016-08-01 00:00:00");
@@ -39,9 +35,10 @@ public class ActionsBuilderTest {
         EasyMock.expect(config.getCustomFields()).andReturn(new CustomFieldDefinition[0]).anyTimes();
         EasyMock.replay(config);
 
-        actionFactory = new ActionFactory(userLookupService, config);
+        actionFactory = new ActionFactory(userLookupService, new CustomFieldApiParser(userLookupService), config);
 
         issue = new Issue();
+        issue.key = "ABC-123";
         issue.fields = new Field();
 
         final User issueCreator = new User();
@@ -58,8 +55,10 @@ public class ActionsBuilderTest {
         issue.fields.comment = comment;
         final Comment[] comments = {};
         issue.fields.comment.comments = comments;
-    }
 
+        issue.fields.summary = "Summary";
+    }
+    
     @Test
     public void testBuildActions_newIssueHasCreateAction() throws Exception {
         final DateTime issueDate = startDate.plusDays(1);
@@ -68,7 +67,7 @@ public class ActionsBuilderTest {
         final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
-        Check.checkTrue("create".equals(actions.get(0).getAction()));
+        Assert.assertTrue("create".equals(actions.get(0).getAction()));
     }
 
     @Test
@@ -82,7 +81,7 @@ public class ActionsBuilderTest {
         final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
-        Check.checkFalse("create".equals(actions.get(0).getAction()));
+        Assert.assertFalse("create".equals(actions.get(0).getAction()));
     }
 
     @Test
@@ -102,7 +101,7 @@ public class ActionsBuilderTest {
                 containsUpdate = true;
             }
         }
-        Check.checkTrue(containsUpdate);
+        Assert.assertTrue(containsUpdate);
     }
 
     @Test
@@ -125,7 +124,7 @@ public class ActionsBuilderTest {
                 containsUpdate = true;
             }
         }
-        Check.checkFalse(containsUpdate);
+        Assert.assertFalse(containsUpdate);
     }
 
     @Test
@@ -145,7 +144,7 @@ public class ActionsBuilderTest {
                 containsComment = true;
             }
         }
-        Check.checkTrue(containsComment);
+        Assert.assertTrue(containsComment);
     }
 
     @Test
@@ -168,7 +167,7 @@ public class ActionsBuilderTest {
                 containsComment = true;
             }
         }
-        Check.checkFalse(containsComment);
+        Assert.assertFalse(containsComment);
     }
 
     private void createHistory(final DateTime created) {
@@ -179,6 +178,8 @@ public class ActionsBuilderTest {
 
         final User historyAuthor = new User();
         history.author = historyAuthor;
+        history.author.displayName = "AuthorDisplayName";
+        history.author.name = "name";
 
         if(issue.changelog.histories == null) {
             issue.changelog.histories = new History[0];
@@ -196,6 +197,8 @@ public class ActionsBuilderTest {
 
         final User commentAuthor = new User();
         comment.author = commentAuthor;
+        comment.author.displayName = "commentDisplayName";
+        comment.author.name = "commentName";
 
         if(issue.fields.comment.comments == null) {
             issue.fields.comment.comments = new Comment[0];

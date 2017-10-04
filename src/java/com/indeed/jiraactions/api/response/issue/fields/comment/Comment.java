@@ -23,7 +23,6 @@ public class Comment {
         return author != null;
     }
 
-    @SuppressWarnings("unused")
     @JsonProperty("created")
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);

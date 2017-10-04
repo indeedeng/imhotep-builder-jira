@@ -19,7 +19,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,13 +37,7 @@ public class TsvFileWriter {
             "timesinceaction", "time"
     };
 
-    private static final String[] CUSTOM_HEADERS = {
-            "verifier", "verifierusername", "issuesizeestimate", "evnt_directcause", "sprints*|", "sysad_category1",
-            "sysad_category2", "millistorypoints"
-    };
-
-
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) throws IOException {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
@@ -71,12 +64,7 @@ public class TsvFileWriter {
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
         // Write header
-        final StringBuilder headers = new StringBuilder(Joiner.on("\t").join(FILE_HEADER));
-        if(!config.isIgnoreCustomFields()) {
-            headers.append("\t")
-                    .append(Joiner.on("\t").join(CUSTOM_HEADERS));
-        }
-        bw.write(headers.toString());
+        bw.write(Joiner.on("\t").join(FILE_HEADER));
 
         for(final CustomFieldDefinition customField : config.getCustomFields()) {
             bw.write("\t");
@@ -88,7 +76,7 @@ public class TsvFileWriter {
         writerDataMap.put(day.toDateMidnight(), new WriterData(file, bw));
     }
 
-    public void writeActions(final List<Action> actions) throws IOException, ParseException {
+    public void writeActions(final List<Action> actions) throws IOException {
         if(actions.isEmpty()) {
             return;
         }
@@ -149,25 +137,6 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(JiraActionsUtil.getUnixTimestamp(action.getTimestamp()));
 
-            if(!config.isIgnoreCustomFields()) {
-                bw.write("\t");
-                bw.write(action.getVerifier());
-                bw.write("\t");
-                bw.write(action.getVerifierusername());
-                bw.write("\t");
-                bw.write(action.getIssueSizeEstimate());
-                bw.write("\t");
-                bw.write(action.getDirectCause());
-                bw.write("\t");
-                bw.write(action.getSprints());
-                bw.write("\t");
-                bw.write(action.getSysadCategories1());
-                bw.write("\t");
-                bw.write(action.getSysadCategories2());
-                bw.write("\t");
-                bw.write(action.getMilliStoryPoints());
-            }
-
             for(final CustomFieldDefinition customField : config.getCustomFields()) {
                 bw.write("\t");
                 final CustomFieldValue value = action.getCustomFieldValues().get(customField);
@@ -191,7 +160,7 @@ public class TsvFileWriter {
     }
 
     private static final int NUM_RETRIES = 5;
-    public void uploadTsvFile() throws IOException {
+    public void uploadTsvFile() {
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
         log.info("Uploading to " + iuploadUrl);
@@ -228,7 +197,7 @@ public class TsvFileWriter {
         });
     }
 
-    private class WriterData {
+    private static class WriterData {
         private final File file;
         private final BufferedWriter bw;
         private boolean written;

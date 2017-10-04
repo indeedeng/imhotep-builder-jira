@@ -1,12 +1,12 @@
 package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -20,6 +20,7 @@ public interface CustomFieldDefinition {
     enum MultiValueFieldConfiguration {
         SEPARATE("separate"),
         EXPANDED("expanded"),
+        USERNAME("username"), // This is kind of a kludge because it doesn't fit the other types of multi-values, but it keeps the model clean
         NONE("none");
 
         private final String key;
@@ -31,11 +32,6 @@ public interface CustomFieldDefinition {
         @JsonCreator
         public static MultiValueFieldConfiguration fromString(final String key) {
             return StringUtils.isEmpty(key) ? NONE : MultiValueFieldConfiguration.valueOf(key.toUpperCase());
-        }
-
-        @JsonValue
-        public String getKey() {
-            return key;
         }
     }
 
@@ -53,20 +49,18 @@ public interface CustomFieldDefinition {
         public static Transformation fromString(final String key) {
             return StringUtils.isEmpty(key) ? NONE : Transformation.valueOf(key.toUpperCase());
         }
-
-        @JsonValue
-        public String getKey() {
-            return key;
-        }
     }
 
     String getName();
     String getCustomFieldId();
     String getImhotepFieldName();
 
+    @Nullable
+    String getSeparator();
+
     @Value.Default
-    default String getSeparator() {
-        return " ";
+    default String getAlternateName() {
+        return "";
     }
 
     @Value.Default
@@ -80,10 +74,17 @@ public interface CustomFieldDefinition {
     }
 
     default void writeHeader(final Writer writer) throws IOException {
-        if(MultiValueFieldConfiguration.SEPARATE.equals(getMultiValueFieldConfiguration())) {
-            writer.write(String.format("%s\t%s", getImhotepFieldName()+"1", getImhotepFieldName()+"2"));
-        } else {
-            writer.write(getImhotepFieldName());
+        switch(getMultiValueFieldConfiguration()) {
+            case SEPARATE:
+                writer.write(String.format("%s\t%s", getImhotepFieldName()+"1", getImhotepFieldName()+"2"));
+                break;
+            case USERNAME:
+                writer.write(String.format("%s\t%s", getImhotepFieldName(), getImhotepFieldName()+"username"));
+                break;
+            case EXPANDED:
+            default:
+                writer.write(getImhotepFieldName());
+                break;
         }
     }
 }

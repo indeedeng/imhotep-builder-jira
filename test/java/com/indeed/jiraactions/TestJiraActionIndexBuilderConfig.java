@@ -25,7 +25,6 @@ public class TestJiraActionIndexBuilderConfig {
                 .add("endDate")
                 .add("jiraBatchSize")
                 .add("indexName")
-                .add("ignoreCustomFields")
                 .add("customFields")
                 .build();
 
