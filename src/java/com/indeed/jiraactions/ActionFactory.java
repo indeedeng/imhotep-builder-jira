@@ -6,14 +6,12 @@ import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.Objects;
 
 public class ActionFactory {
-    private static final Logger log = Logger.getLogger(ActionFactory.class);
 
     private final UserLookupService userLookupService;
     private final CustomFieldApiParser customFieldParser;

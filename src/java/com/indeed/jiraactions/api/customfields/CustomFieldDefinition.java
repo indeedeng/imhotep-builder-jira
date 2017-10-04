@@ -1,7 +1,6 @@
 package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang.StringUtils;
@@ -34,11 +33,6 @@ public interface CustomFieldDefinition {
         public static MultiValueFieldConfiguration fromString(final String key) {
             return StringUtils.isEmpty(key) ? NONE : MultiValueFieldConfiguration.valueOf(key.toUpperCase());
         }
-
-        @JsonValue
-        public String getKey() {
-            return key;
-        }
     }
 
     enum Transformation {
@@ -54,11 +48,6 @@ public interface CustomFieldDefinition {
         @JsonCreator
         public static Transformation fromString(final String key) {
             return StringUtils.isEmpty(key) ? NONE : Transformation.valueOf(key.toUpperCase());
-        }
-
-        @JsonValue
-        public String getKey() {
-            return key;
         }
     }
 

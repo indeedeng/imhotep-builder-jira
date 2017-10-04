@@ -19,7 +19,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +76,7 @@ public class TsvFileWriter {
         writerDataMap.put(day.toDateMidnight(), new WriterData(file, bw));
     }
 
-    public void writeActions(final List<Action> actions) throws IOException, ParseException {
+    public void writeActions(final List<Action> actions) throws IOException {
         if(actions.isEmpty()) {
             return;
         }
@@ -161,7 +160,7 @@ public class TsvFileWriter {
     }
 
     private static final int NUM_RETRIES = 5;
-    public void uploadTsvFile() throws IOException {
+    public void uploadTsvFile() {
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
         log.info("Uploading to " + iuploadUrl);
@@ -198,7 +197,7 @@ public class TsvFileWriter {
         });
     }
 
-    private class WriterData {
+    private static class WriterData {
         private final File file;
         private final BufferedWriter bw;
         private boolean written;

@@ -3,7 +3,6 @@ package com.indeed.jiraactions;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
  * @author soono
  */
 public class ActionsBuilder {
-    private static final Logger log = Logger.getLogger(ActionsBuilder.class);
 
     private final Issue issue;
     private final DateTime startDate;
@@ -84,7 +82,7 @@ public class ActionsBuilder {
     }
 
     private boolean isCreatedDuringRange(final DateTime createdDate) {
-        return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) == 1;
+        return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) >= 0;
     }
 
     private boolean commentIsAfter(final Comment comment, final Action action) {

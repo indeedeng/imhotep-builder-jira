@@ -23,8 +23,6 @@ public class JiraActionsIndexBuilderConfig {
 
     private final int jiraBatchSize;
 
-    private final boolean ignoreCustomFields;
-
     private final CustomFieldDefinition[] customFields;
 
     public JiraActionsIndexBuilderConfig(final String jiraUsername, final String jiraPassword, final String jiraUrl,
@@ -32,7 +30,7 @@ public class JiraActionsIndexBuilderConfig {
                                          final String excludedJiraProject, final String iuploadUrl,
                                          final String iuploadUsername, final String iuploadPassword,
                                          final String startDate, final String endDate, final int jiraBatchSize,
-                                         final String indexName, final boolean ignoreCustomFields,
+                                         final String indexName,
                                          final CustomFieldDefinition[] customFields) {
         this.jiraUsername = jiraUsername;
         this.jiraPassword = jiraPassword;
@@ -48,7 +46,6 @@ public class JiraActionsIndexBuilderConfig {
         this.endDate = endDate;
         this.jiraBatchSize = jiraBatchSize;
         this.indexName = indexName;
-        this.ignoreCustomFields = ignoreCustomFields;
         this.customFields = customFields;
     }
 
@@ -106,10 +103,6 @@ public class JiraActionsIndexBuilderConfig {
 
     public String getIndexName() {
         return indexName;
-    }
-
-    public boolean isIgnoreCustomFields() {
-        return ignoreCustomFields;
     }
 
     public CustomFieldDefinition[] getCustomFields() {

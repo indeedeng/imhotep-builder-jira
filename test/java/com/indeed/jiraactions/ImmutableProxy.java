@@ -62,7 +62,7 @@ public class ImmutableProxy<T> implements InvocationHandler {
         } else if (returnType.equals(float.class)) {
             return (float)0;
         } else if(returnType.equals(int.class)) {
-            return (int)0;
+            return 0;
         } else if(returnType.equals(Boolean.class) || returnType.equals(boolean.class)) {
             return false;
         } else if(returnType.equals(String.class)) {
@@ -74,6 +74,7 @@ public class ImmutableProxy<T> implements InvocationHandler {
         } else if(returnType.equals(Map.class)) {
             return Collections.emptyMap();
         }
+        //noinspection ConstantConditions
         return null;
     }
 }
