@@ -2,6 +2,7 @@ package com.indeed.jiraactions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.indeed.jiraactions.api.ApiUserLookupService;
+import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.IssueAPIParser;
 import com.indeed.jiraactions.api.IssuesAPICaller;
@@ -30,7 +31,8 @@ public class JiraActionsIndexBuilder {
             final long end_total;
 
             final ApiUserLookupService userLookupService = new ApiUserLookupService(config);
-            final ActionFactory actionFactory = new ActionFactory(userLookupService, config);
+            final CustomFieldApiParser customFieldApiParser = new CustomFieldApiParser(userLookupService);
+            final ActionFactory actionFactory = new ActionFactory(userLookupService, customFieldApiParser, config);
 
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config);
             {

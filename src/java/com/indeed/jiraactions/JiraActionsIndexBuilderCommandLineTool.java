@@ -63,7 +63,6 @@ public class JiraActionsIndexBuilderCommandLineTool implements CommandLineTool {
         final String iuploadUsername = config.getString("jira.username.indexer");
         final String iuploadPassword = config.getString("jira.password.indexer");
         final String indexName = config.getString("indexname");
-        final boolean ignoreCustomFields = config.getBoolean("ignorecustomfields");
 
         @SuppressWarnings("AccessStaticViaInstance")
         final Options options = new Options().addOption((OptionBuilder
@@ -113,7 +112,7 @@ public class JiraActionsIndexBuilderCommandLineTool implements CommandLineTool {
 
         final JiraActionsIndexBuilderConfig indexBuilderConfig = new JiraActionsIndexBuilderConfig(jiraUsername,
                 jiraPassword, jiraBaseUrl, jiraFields, jiraExpand, jiraProject, excludedJiraProject, iuploadUrl,
-                iuploadUsername, iuploadPassword, startDate, endDate, jiraBatchSize, indexName, ignoreCustomFields,
+                iuploadUsername, iuploadPassword, startDate, endDate, jiraBatchSize, indexName,
                 customFieldDefinitions);
         indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);
     }

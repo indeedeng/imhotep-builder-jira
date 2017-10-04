@@ -2,27 +2,26 @@ package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
-import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
-import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.Objects;
 
 public class ActionFactory {
-    private static final Logger log = Logger.getLogger(ActionFactory.class);
 
     private final UserLookupService userLookupService;
+    private final CustomFieldApiParser customFieldParser;
     private final JiraActionsIndexBuilderConfig config;
 
     public ActionFactory(final UserLookupService userLookupService,
+                         final CustomFieldApiParser customFieldApiParser,
                          final JiraActionsIndexBuilderConfig config) {
         this.userLookupService = userLookupService;
+        this.customFieldParser = customFieldApiParser;
         this.config = config;
     }
 
@@ -48,22 +47,14 @@ public class ActionFactory {
                 .timeinstate(0)
                 .timesinceaction(0)
                 .timestamp(issue.fields.created)
-                .verifier(issue.initialValue("verifier", true))
-                .verifierusername(userLookupService.getUser(issue.initialValueKey("verifier", "verifierkey", true)).name)
                 .category(issue.initialValue("category"))
                 .fixversions(issue.initialValue("fixversions"))
                 .dueDate(issue.initialValue("duedate"))
                 .components(issue.initialValue("components"))
-                .labels(issue.initialValue("labels"))
-                .issueSizeEstimate(issue.initialValue("issuesizeestimate", true, "t-shirt-size-estimate", "issue-size-estimate"))
-                .directCause(issue.initialValue("direct-cause", "directcause", true))
-                .sprints(issue.initialValue("sprint", true))
-                .sysadCategories1(issue.initialValue("sysad-categories", true, Field.FieldLevel.PARENT))
-                .sysadCategories2(issue.initialValue("sysad-categories", true, Field.FieldLevel.CHILD))
-                .milliStoryPoints(CustomFieldValue.numericStringToMilliNumericString(issue.initialValue("story-points", true)));
+                .labels(issue.initialValue("labels"));
 
             for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
-                builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseInitialValue(customFieldDefinition, issue));
+                builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseInitialValue(customFieldDefinition, issue));
             }
 
         return builder.build();
@@ -91,24 +82,14 @@ public class ActionFactory {
                 .timeinstate(timeInState(prevAction, history))
                 .timesinceaction(getTimeDiff(prevAction.getTimestamp(), history.created))
                 .timestamp(history.created)
-                .verifier(history.itemExist("verifier", true) ? history.getItemLastValue("verifier", true) : prevAction.getVerifier())
-                .verifierusername(history.itemExist("verifier", true) ? userLookupService.getUser(history.getItemLastValueKey("verifier", true)).name : prevAction.getVerifierusername())
                 .category(history.itemExist("category") ? history.getItemLastValue("category") : prevAction.getCategory())
                 .fixversions(history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.getFixversions())
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate").replace(" 00:00:00.0", "") : prevAction.getDueDate())
                 .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
-                .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
-                .issueSizeEstimate(history.itemExist("t-shirt-size-estimate", true) ? history.getItemLastValue("t-shirt-size-estimate", true) :
-                        (history.itemExist("issue-size-estimate", true) ? history.getItemLastValue("issue-size-estimate", true) :
-                        prevAction.getIssueSizeEstimate()))
-                .directCause(history.itemExist("direct-cause", true) ? history.getItemLastValueFlattened("direct-cause", true) : prevAction.getDirectCause())
-                .sprints(history.itemExist("sprint", true) ? history.getItemLastValue("sprint", true).replaceAll(", ", "|") : prevAction.getSprints())
-                .sysadCategories1(history.itemExist("sysad-categories", true) ? history.getItemLastValueParent("sysad-categories", true) : prevAction.getSysadCategories1())
-                .sysadCategories2(history.itemExist("sysad-categories", true) ? history.getItemLastValueChild("sysad-categories", true) : prevAction.getSysadCategories2())
-                .milliStoryPoints(history.itemExist("story-points", true) ? CustomFieldValue.numericStringToMilliNumericString(history.getItemLastValue("story-points", true)) : prevAction.getMilliStoryPoints());
+                .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels());
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
-            builder.putCustomFieldValues(customFieldDefinition, CustomFieldApiParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
+            builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
         }
 
         return builder.build();

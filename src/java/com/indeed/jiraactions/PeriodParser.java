@@ -10,11 +10,10 @@ import java.util.regex.Pattern;
 /**
  * Copied from com.indeed.imhotep.sql.parser.PeriodParser
  */
-public class PeriodParser {
+public abstract class PeriodParser {
     private static final Pattern relativeDatePattern = Pattern.compile("(\\s*(\\d+)?\\s*y(?:ear)?s?\\s*,?\\s*)?(\\s*(\\d+)?\\s*mo(?:nth)?s?\\s*,?\\s*)?(\\s*(\\d+)?\\s*w(?:eek)?s?\\s*,?\\s*)?(\\s*(\\d+)?\\s*d(?:ay)?s?\\s*,?\\s*)?(\\s*(\\d+)?\\s*h(?:our)?s?\\s*,?\\s*)?(\\s*(\\d+)?\\s*m(?:inute)?s?\\s*,?\\s*)?(\\s*(\\d+)?\\s*s(?:econd)?s?\\s*)?(?:ago)?\\s*");
 
-    public PeriodParser() {
-    }
+    private PeriodParser() { /* No */ }
 
     @Nullable
     public static Period parseString(final String value) {

@@ -2,6 +2,8 @@ package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.indeed.jiraactions.FriendlyUserLookupService;
+import com.indeed.jiraactions.UserLookupService;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,6 +12,8 @@ import java.io.StringWriter;
 
 public class TestCustomFieldValue {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    final UserLookupService userLookupService = new FriendlyUserLookupService();
+    final CustomFieldApiParser apiParser = new CustomFieldApiParser(userLookupService);
 
     private static final CustomFieldDefinition directCause = ImmutableCustomFieldDefinition.builder()
             .name("Direct Cause")
@@ -40,6 +44,20 @@ public class TestCustomFieldValue {
             .customFieldId("customfield_15290")
             .imhotepFieldName("protest_countries*|")
             .separator("|")
+            .build();
+
+    private static final CustomFieldDefinition sprint = ImmutableCustomFieldDefinition.builder()
+            .name("Sprint")
+            .customFieldId("customfield_11490")
+            .imhotepFieldName("sprints*|")
+            .separator("|")
+            .build();
+
+    private static final CustomFieldDefinition verifier = ImmutableCustomFieldDefinition.builder()
+            .name("Verifier")
+            .customFieldId("customfield_10003")
+            .imhotepFieldName("verifier")
+            .multiValueFieldConfiguration(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME)
             .build();
 
     @Test
@@ -127,9 +145,21 @@ public class TestCustomFieldValue {
     }
 
     @Test
+    public void testGreenhopperObjectFromInitial() throws IOException {
+        testFromInitial(sprint, "[\"com.atlassian.greenhopper.service.sprint.Sprint@8b01a9a[id=811,rapidViewId=1712,state=CLOSED,name=WP Sprint 2,startDate=2017-08-07T14:30:48.610-05:00,endDate=2017-08-21T14:30:00.000-05:00,completeDate=2017-08-21T13:34:01.341-05:00,sequence=811]\",\"com.atlassian.greenhopper.service.sprint.Sprint@8a8d1d7[id=842,rapidViewId=1712,state=CLOSED,name=Sprint R: 8/21-9/1,startDate=2017-08-21T14:05:47.318-05:00,endDate=2017-09-04T14:05:00.000-05:00,completeDate=2017-09-05T10:06:40.253-05:00,sequence=842]\"]",
+                "WP Sprint 2|Sprint R: 8/21-9/1");
+    }
+
+    @Test
+    public void testUserLookupFromInitial() throws IOException {
+        testFromInitial(verifier, "{\"self\":\"https://***REMOVED***/rest/api/2/user?username=***REMOVED***\",\"name\":\"***REMOVED***\",\"key\":\"***REMOVED***\",\"emailAddress\":\"***REMOVED***@indeed.com\",\"avatarUrls\":{\"48x48\":\"https://***REMOVED***/secure/useravatar?ownerId=***REMOVED***&avatarId=25105\",\"24x24\":\"https://***REMOVED***/secure/useravatar?size=small&ownerId=***REMOVED***&avatarId=25105\",\"16x16\":\"https://***REMOVED***/secure/useravatar?size=xsmall&ownerId=***REMOVED***&avatarId=25105\",\"32x32\":\"https://***REMOVED***/secure/useravatar?size=medium&ownerId=***REMOVED***&avatarId=25105\"},\"displayName\":\"***REMOVED***\",\"active\":true,\"timeZone\":\"America/Chicago\"}{\"self\":\"https://***REMOVED***/rest/api/2/user?username=***REMOVED***\",\"name\":\"***REMOVED***\",\"key\":\"***REMOVED***\",\"emailAddress\":\"***REMOVED***@indeed.com\",\"avatarUrls\":{\"48x48\":\"https://***REMOVED***/secure/useravatar?ownerId=***REMOVED***&avatarId=25105\",\"24x24\":\"https://***REMOVED***/secure/useravatar?size=small&ownerId=***REMOVED***&avatarId=25105\",\"16x16\":\"https://***REMOVED***/secure/useravatar?size=xsmall&ownerId=***REMOVED***&avatarId=25105\",\"32x32\":\"https://***REMOVED***/secure/useravatar?size=medium&ownerId=***REMOVED***&avatarId=25105\"},\"displayName\":\"***REMOVED***\",\"active\":true,\"timeZone\":\"America/Chicago\"}",
+                "***REMOVED***\t***REMOVED***");
+    }
+
+    @Test
     public void testExpandedWithChildFromChangelog() throws IOException {
         final String value = "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)";
-        final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(directCause, "", value);
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(directCause, "", value);
 
         assertEquals(field, "Escaped bug - Latent Code Issue");
     }
@@ -137,7 +167,7 @@ public class TestCustomFieldValue {
     @Test
     public void testExpandedWithoutChildFromChangelog() throws IOException {
         final String value = "Parent values: Escaped bug(20664)";
-        final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(directCause, "", value);
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(directCause, "", value);
 
         assertEquals(field, "Escaped bug");
     }
@@ -145,7 +175,7 @@ public class TestCustomFieldValue {
     @Test
     public void testSeparateWithChildFromChangelog() throws IOException {
         final String value = "Parent values: Misconfiguration(20661)Level 1 values: App Config(20669)";
-        final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(sysadCategories, "", value);
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(sysadCategories, "", value);
 
         assertEquals(field, "Misconfiguration\tApp Config");
     }
@@ -153,11 +183,16 @@ public class TestCustomFieldValue {
     @Test
     public void testSeparateWithoutChildFromChangelog() throws IOException {
         final String value = "Parent values: Misconfiguration(20661)";
-        final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(sysadCategories, "", value);
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(sysadCategories, "", value);
 
         // This tab is important because we need the empty space for the field that isn't present
-
         assertEquals(field, "Misconfiguration\t");
+    }
+
+    @Test
+    public void testUserLookupFromChangelog() throws IOException {
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(verifier, "aaldridge", "Andreas Aldridge");
+        assertEquals(field, "Andreas Aldridge\taaldridge");
     }
 
     @Test
@@ -170,7 +205,7 @@ public class TestCustomFieldValue {
                 .transformation(CustomFieldDefinition.Transformation.MULTIPLY_BY_THOUSAND)
                 .build();
         final String value = "Parent values: 99(32767)Level 1 values: .5(86753)";
-        final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(definition, "", value);
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(definition, "", value);
 
         assertEquals(field, "99000\t500");
     }
@@ -185,14 +220,32 @@ public class TestCustomFieldValue {
                 .transformation(CustomFieldDefinition.Transformation.MULTIPLY_BY_THOUSAND)
                 .build();
         final String value = "Parent values: 9.9(32767)Level 1 values: .5(86753)";
-        final CustomFieldValue field = CustomFieldValue.customFieldValueFromChangelog(definition, "", value);
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(definition, "", value);
 
         assertEquals(field, "9900 - 500");
     }
 
+    @Test
+    public void testMultiValueFIeldFromChangelog() throws IOException {
+        final String value = "2016-11-02 Money, 2016-11-09 Money, 2016-11-16 Money, 2016-11-23 Money, 2016-11-30 Money, 2016-12-07 Money, 2016-12-14 Money";
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(sprint, "", value);
+
+        assertEquals(field, "2016-11-02 Money|2016-11-09 Money|2016-11-16 Money|2016-11-23 Money|2016-11-30 Money|2016-12-07 Money|2016-12-14 Money");
+    }
+
+    @Test
+    public void testNumericStringToMilliNumericString() {
+        Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString(null));
+        Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString(""));
+        Assert.assertEquals("", CustomFieldValue.numericStringToMilliNumericString("5 cows"));
+
+        Assert.assertEquals("5000", CustomFieldValue.numericStringToMilliNumericString("5"));
+        Assert.assertEquals("230", CustomFieldValue.numericStringToMilliNumericString(".23"));
+    }
+
     private void testFromInitial(final CustomFieldDefinition definition, final String input, final String expected) throws IOException {
         final JsonNode node = OBJECT_MAPPER.readTree(input);
-        final CustomFieldValue field = CustomFieldValue.customFieldFromInitialFields(definition, node);
+        final CustomFieldValue field = apiParser.customFieldFromInitialFields(definition, node);
 
         assertEquals(field, expected);
     }
