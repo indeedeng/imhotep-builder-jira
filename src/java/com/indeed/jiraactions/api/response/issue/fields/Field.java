@@ -55,7 +55,6 @@ public class Field {
         switch (attribute) {
             case "assignee": return assignee == null ? "" : assignee.displayName;
             case "assigneekey": return assignee == null ? "" : assignee.key;
-            case "assigneeusername": return assignee == null ? "" : assignee.name;
             case "creator": return creator == null ? "" : creator.displayName;
             case "issuetype": return issuetype == null ? "" : issuetype.name;
             case "project": return project == null ? "" : project.name;
