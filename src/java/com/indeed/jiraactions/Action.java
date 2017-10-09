@@ -37,6 +37,7 @@ public interface Action {
     String getDueDate();
     String getComponents();
     String getLabels();
+    String getCreatedDate();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
 
     @Nullable

@@ -131,7 +131,9 @@ public class JiraActionsIndexBuilder {
                                 reFoundTheBeginning = true;
                                 break;
                             }
-                            firstIssue = false;
+                            if(preFilteredActions.size() > 0) {
+                                firstIssue = false;
+                            }
                         } catch (final Exception e) {
                             log.error(String.format("Error parsing actions for issue %s.", issue.key), e);
                         }
