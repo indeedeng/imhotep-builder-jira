@@ -72,7 +72,7 @@ public class CustomFieldApiParser {
                                                    final String value, final String valueString) {
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
             if (StringUtils.isNotEmpty(definition.getSeparator()) && StringUtils.isNotEmpty(valueString)) {
-                return new CustomFieldValue(definition, valueString.replace(", ", definition.getSeparator()), "");
+                return new CustomFieldValue(definition, valueString.replaceAll(", ?", definition.getSeparator()), "");
             } else {
                 return new CustomFieldValue(definition, valueString, "");
             }
