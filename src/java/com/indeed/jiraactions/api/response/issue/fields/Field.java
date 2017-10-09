@@ -7,7 +7,6 @@ import com.google.common.base.Joiner;
 import com.indeed.jiraactions.JiraActionsUtil;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
@@ -17,8 +16,6 @@ import java.util.Map;
 
 @SuppressWarnings("CanBeFinal")
 public class Field {
-    private static final Logger log = Logger.getLogger(Field.class);
-
     public User assignee;
     public CommentCollection comment;
     public DateTime created;

@@ -51,7 +51,8 @@ public class ActionFactory {
                 .fixversions(issue.initialValue("fixversions"))
                 .dueDate(issue.initialValue("duedate"))
                 .components(issue.initialValue("components"))
-                .labels(issue.initialValue("labels"));
+                .labels(issue.initialValue("labels"))
+                .createdDate(issue.fields.created.toString("yyyy-MM-dd"));
 
             for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
                 builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseInitialValue(customFieldDefinition, issue));
@@ -86,7 +87,8 @@ public class ActionFactory {
                 .fixversions(history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.getFixversions())
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate").replace(" 00:00:00.0", "") : prevAction.getDueDate())
                 .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
-                .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels());
+                .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
+                .createdDate(prevAction.getCreatedDate());
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
