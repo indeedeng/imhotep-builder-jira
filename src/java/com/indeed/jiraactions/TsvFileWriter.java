@@ -31,7 +31,7 @@ public class TsvFileWriter {
     private final Map<DateMidnight, WriterData> writerDataMap;
 
     private static final String[] FILE_HEADER = {
-        "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "duedate",
+        "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "createddate", "duedate",
             "int duedate_time", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "project",
             "projectkey", "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
             "timesinceaction", "time"
@@ -98,6 +98,8 @@ public class TsvFileWriter {
             bw.write(action.getCategory());
             bw.write("\t");
             bw.write(action.getComponents());
+            bw.write("\t");
+            bw.write(action.getCreatedDate());
             bw.write("\t");
             bw.write(action.getDueDate());
             bw.write("\t");
