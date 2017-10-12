@@ -2,7 +2,6 @@ package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
-import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -152,7 +151,7 @@ public class IssuesAPICaller extends ApiCaller {
         } else {
             return "fields=" +
                     String.join(",", config.getJiraFields(),
-                    String.join(",", Arrays.stream(config.getCustomFields()).map(CustomFieldDefinition::getCustomFieldId).collect(Collectors.toList())));
+                    String.join(",", Arrays.stream(config.getCustomFields()).flatMap(x -> Arrays.stream(x.getCustomFieldId())).collect(Collectors.toList())));
         }
     }
 

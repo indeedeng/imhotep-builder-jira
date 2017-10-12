@@ -44,7 +44,7 @@ public class TestCustomFieldDefinitionParser {
             "    \"name\": \"Issue Size Estimate\",\n" +
             "    \"customfieldid\": \"customfield_17090\",\n" +
             "    \"imhotepfieldname\": \"issuesizeestimate\",\n" +
-            "    \"alternatename\": \"T-Shirt Size Estimate\"\n" +
+            "    \"alternatenames\": \"T-Shirt Size Estimate\"\n" +
             "  }";
 
     private static final String VERIFIER = "  {\n" +
@@ -52,6 +52,14 @@ public class TestCustomFieldDefinitionParser {
             "    \"customfieldid\": \"customfield_10003\",\n" +
             "    \"imhotepfieldname\": \"verifier\",\n" +
             "    \"multivaluefieldconfiguration\": \"username\"\n" +
+            "  }";
+
+    private static final String ITSUP_CATEGORY2 = "  {\n" +
+            "    \"name\": \"ITSUP Category 2\",\n" +
+            "    \"customfieldid\": [\"customfield_17993\", \"customfield_17994\", \"customfield_17995\", \"customfield_17996\", \"customfield_17997\", \"customfield_18006\"],\n" +
+            "    \"imhotepfieldname\": \"itsup_category2\",\n" +
+            "    \"alternatenames\": [\"ITSUP User Equipment (Connectivity)\", \"ITSUP Infrastructure (Hardware)\",\n" +
+            "      \"ITSUP User Equipment (Software)\", \"ITSUP User Equipment (Mobile Device)\", \"ITSUP User Equipment (MiFi)\", \"ITSUP Phone Support Type\"]\n" +
             "  }";
 
     @Test
@@ -123,9 +131,21 @@ public class TestCustomFieldDefinitionParser {
                 .name("Issue Size Estimate")
                 .customFieldId("customfield_17090")
                 .imhotepFieldName("issuesizeestimate")
-                .alternateName("T-Shirt Size Estimate")
+                .alternateNames("T-Shirt Size Estimate")
                 .build();
         assertComparison(definition, "issuesizeestimate", ISSUE_SIZE_ESTIMATE);
+    }
+
+    @Test
+    public void testAlternateCustomFields() throws IOException {
+        final CustomFieldDefinition definition = ImmutableCustomFieldDefinition.builder()
+                .name("ITSUP Category 2")
+                .customFieldId("customfield_17993", "customfield_17994", "customfield_17995", "customfield_17996", "customfield_17997", "customfield_18006")
+                .imhotepFieldName("itsup_category2")
+                .alternateNames("ITSUP User Equipment (Connectivity)", "ITSUP Infrastructure (Hardware)",
+                        "ITSUP User Equipment (Software)", "ITSUP User Equipment (Mobile Device)", "ITSUP User Equipment (MiFi)", "ITSUP Phone Support Type")
+                .build();
+        assertComparison(definition, "itsup_category2", ITSUP_CATEGORY2);
     }
 
     @Test

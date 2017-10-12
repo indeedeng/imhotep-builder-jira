@@ -15,7 +15,7 @@ public class TestCustomFieldApiParser {
                 .name("Issue Size Estimate")
                 .customFieldId("customfield_17090")
                 .imhotepFieldName("issuesizeestimate")
-                .alternateName("T-Shirt Size Estimate")
+                .alternateNames("T-Shirt Size Estimate")
                 .build();
 
         Assert.assertArrayEquals(new String[] {"issue-size-estimate", "t-shirt-size-estimate"}, CustomFieldApiParser.getItemLabels(definition));

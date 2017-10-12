@@ -3,6 +3,7 @@ package com.indeed.jiraactions.api.customfields;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.indeed.common.util.StringUtils;
 import com.indeed.jiraactions.Action;
 import com.indeed.jiraactions.UserLookupService;
@@ -12,10 +13,14 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
@@ -37,12 +42,8 @@ public class CustomFieldApiParser {
         if(item != null) {
             return customFieldValueFromChangelog(definition, item.from, item.fromString);
         } else {
-            final JsonNode jsonNode = issue.fields.getCustomField(definition.getCustomFieldId());
-            if(jsonNode == null) {
-                return new CustomFieldValue(definition);
-            } else {
-                return customFieldFromInitialFields(definition, jsonNode);
-            }
+            final Optional<JsonNode> firstFound = Arrays.stream(definition.getCustomFieldId()).map(id -> issue.fields.getCustomField(id)).filter(Objects::nonNull).findFirst();
+            return firstFound.map(jsonNode -> customFieldFromInitialFields(definition, jsonNode)).orElseGet(() -> new CustomFieldValue(definition));
         }
     }
 
@@ -168,11 +169,13 @@ public class CustomFieldApiParser {
     static String[] getItemLabels(final CustomFieldDefinition definition) {
         final String label = getItemLabel(definition.getName());
 
-        if (StringUtils.isEmpty(definition.getAlternateName())) {
+        if (ArrayUtils.isEmpty(definition.getAlternateNames())) {
             return new String[] { label };
         } else {
-            final String alternateLabel = getItemLabel(definition.getAlternateName());
-            return new String[] { label, alternateLabel };
+            return ImmutableList.<String>builder()
+                    .add(label)
+                    .addAll(Arrays.stream(definition.getAlternateNames()).map(CustomFieldApiParser::getItemLabel)::iterator)
+                    .build().toArray(new String[0]);
         }
     }
 }
