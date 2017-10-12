@@ -51,7 +51,7 @@ public interface CustomFieldDefinition {
     }
 
     String getName();
-    String getCustomFieldId();
+    String[] getCustomFieldId();
     String getImhotepFieldName();
 
     @Value.Default
@@ -60,8 +60,8 @@ public interface CustomFieldDefinition {
     }
 
     @Value.Default
-    default String getAlternateName() {
-        return "";
+    default String[] getAlternateNames() {
+        return new String[] {};
     }
 
     @Value.Default
