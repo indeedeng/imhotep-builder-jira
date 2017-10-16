@@ -83,14 +83,18 @@ public abstract class ApiCaller {
             }
             if (urlConnection != null) {
                 final InputStream error = urlConnection.getErrorStream();
-                final BufferedReader errorBr = new BufferedReader(new InputStreamReader(error));
-                sb.append("\"Error Body\": \"");
-                String line = errorBr.readLine();
-                while (line != null) {
-                    sb.append(line).append(System.lineSeparator());
-                    line = errorBr.readLine();
+                if(error != null) {
+                    final BufferedReader errorBr = new BufferedReader(new InputStreamReader(error));
+                    sb.append("\"Error Body\": \"");
+                    String line = errorBr.readLine();
+                    while (line != null) {
+                        sb.append(line).append(System.lineSeparator());
+                        line = errorBr.readLine();
+                    }
+                    errorBr.close();
+                } else {
+                    sb.append("Unable to open error stream for reading");
                 }
-                errorBr.close();
                 sb.append("\"");
             }
 
