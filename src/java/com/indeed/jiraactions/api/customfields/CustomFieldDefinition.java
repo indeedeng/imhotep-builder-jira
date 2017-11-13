@@ -3,6 +3,7 @@ package com.indeed.jiraactions.api.customfields;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 
@@ -36,6 +37,7 @@ public interface CustomFieldDefinition {
 
     enum Transformation {
         MULTIPLY_BY_THOUSAND("multiply_by_thousand"),
+        FIRST_NUMBER("first_number"),
         NONE("none");
 
         private final String key;
@@ -56,6 +58,11 @@ public interface CustomFieldDefinition {
 
     @Value.Default
     default String getSeparator() {
+        return "";
+    }
+
+    @Value.Default
+    default String getSplit() {
         return "";
     }
 
