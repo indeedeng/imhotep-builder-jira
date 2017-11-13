@@ -3,6 +3,9 @@ package com.indeed.jiraactions.api.customfields;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.indeed.common.util.StringUtils;
 import com.indeed.jiraactions.Action;
 import com.indeed.jiraactions.UserLookupService;
@@ -12,10 +15,14 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
+
 import org.apache.log4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
@@ -24,12 +31,16 @@ import java.util.stream.StreamSupport;
 @ReturnValuesAreNonnullByDefault
 public class CustomFieldApiParser {
     private static final Logger log = Logger.getLogger(CustomFieldApiParser.class);
-    private static final Pattern multivaluePattern = Pattern.compile("Parent values: (.*?)\\(\\d+\\)(Level 1 values: (.*?)\\(\\d+\\))?");
+    private static final Pattern MULTIVALUE_PATTERN = Pattern.compile("Parent values: (.*?)\\(\\d+\\)(Level 1 values: (.*?)\\(\\d+\\))?");
 
     private final UserLookupService userLookupService;
+    private final Set<CustomFieldDefinition> failedCustomFields;
+    private final Set<CustomFieldDefinition> failedCustomHistoryFields;
 
     public CustomFieldApiParser(final UserLookupService userLookupService) {
         this.userLookupService = userLookupService;
+        this.failedCustomFields = new HashSet<>();
+        this.failedCustomHistoryFields = new HashSet<>();
     }
 
     public CustomFieldValue parseInitialValue(final CustomFieldDefinition definition, final Issue issue) {
@@ -41,7 +52,14 @@ public class CustomFieldApiParser {
             if(jsonNode == null) {
                 return new CustomFieldValue(definition);
             } else {
-                return customFieldFromInitialFields(definition, jsonNode);
+                final CustomFieldValue customFieldValue = customFieldFromInitialFields(definition, jsonNode);
+                if (StringUtils.isEmpty(customFieldValue.getFormattedValue())) {
+                    if (!failedCustomFields.contains(definition)) {
+                        log.debug(String.format("Customfield %s failed to parse json node %s", definition, jsonNode));
+                        failedCustomFields.add(definition);
+                    }
+                }
+                return customFieldValue;
             }
         }
     }
@@ -50,7 +68,14 @@ public class CustomFieldApiParser {
                                                  final History history) {
         final Item item = history.getItem(true, getItemLabels(definition));
         if(item != null) {
-            return customFieldValueFromChangelog(definition, item.to, item.toString);
+            final CustomFieldValue value = customFieldValueFromChangelog(definition, item.to, item.toString);
+            if (StringUtils.isNotEmpty(item.toString) && StringUtils.isEmpty(value.getFormattedValue())) {
+                if (!failedCustomHistoryFields.contains(definition)) {
+                    log.debug(String.format("Customfield %s failed to parse history item %s", definition, item.toString));
+                    failedCustomHistoryFields.add(definition);
+                }
+            }
+            return value;
         } else {
             final CustomFieldValue prevValue = prevAction.getCustomFieldValues().get(definition);
             if(prevValue == null) {
@@ -68,25 +93,51 @@ public class CustomFieldApiParser {
      * @param value The "to" or "from" value. A keyed representation.
      * @param valueString The "toString" or "fromString" value. A more verbose representation.
      */
-    CustomFieldValue customFieldValueFromChangelog(final CustomFieldDefinition definition,
-                                                   final String value, final String valueString) {
+    CustomFieldValue customFieldValueFromChangelog(
+            final CustomFieldDefinition definition,
+            final String value,
+            final String valueString
+    ) {
+        final boolean valueStringIsEmpty = StringUtils.isEmpty(valueString);
+        final String splitValueString;
+        final boolean shouldSplit =
+                StringUtils.isNotEmpty(definition.getSplit())
+                && StringUtils.isNotEmpty(definition.getSeparator())
+                && !valueStringIsEmpty;
+        if (shouldSplit) {
+            splitValueString = valueString.replaceAll(definition.getSplit(), definition.getSeparator());
+        } else {
+            splitValueString = valueString;
+        }
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
-            if (StringUtils.isNotEmpty(definition.getSeparator()) && StringUtils.isNotEmpty(valueString)) {
-                return new CustomFieldValue(definition, valueString.replaceAll(", ?", definition.getSeparator()), "");
+            if (StringUtils.isNotEmpty(definition.getSeparator()) && !valueStringIsEmpty) {
+                return new CustomFieldValue(definition, splitValueString.replaceAll(", ?", definition.getSeparator()), "");
             } else {
-                return new CustomFieldValue(definition, valueString, "");
+                return new CustomFieldValue(definition, splitValueString, "");
             }
         } else if(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME.equals(definition.getMultiValueFieldConfiguration())) {
+            final String usernames;
+            if (shouldSplit) {
+                final ImmutableList.Builder<String> usernameList = ImmutableList.builder();
+                for (final String userKey : Splitter.on(definition.getSeparator()).split(splitValueString)) {
+                    final User user = userLookupService.getUser(userKey);
+                    usernameList.add(user.name);
+                }
+                usernames = Joiner.on(definition.getSeparator()).join(usernameList.build());
+            } else {
+                final User user = userLookupService.getUser(value);
+                usernames = user.name;
+            }
             final User user = userLookupService.getUser(value);
-            return new CustomFieldValue(definition, valueString, user.name);
+            return new CustomFieldValue(definition, splitValueString, usernames);
         } else {
 
-            if (StringUtils.isEmpty(valueString)) {
+            if (valueStringIsEmpty) {
                 return new CustomFieldValue(definition, "", "");
             }
 
             // Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)
-            final Matcher matcher = multivaluePattern.matcher(valueString);
+            final Matcher matcher = MULTIVALUE_PATTERN.matcher(splitValueString);
             final String parent;
             final String child;
             if (matcher.find()) {
@@ -141,7 +192,12 @@ public class CustomFieldApiParser {
             return String.join(separator, values);
         } else {
             if(node.has("value")) {
-                return node.get("value").asText();
+                final String nodeValue = node.get("value").asText();
+                if (StringUtils.isNotEmpty(definition.getSplit()) && StringUtils.isNotEmpty(definition.getSeparator())) {
+                    return nodeValue.replaceAll(definition.getSplit(), definition.getSeparator());
+                } else {
+                    return nodeValue;
+                }
             } else {
                 final String text = node.asText();
                 if (text.startsWith("com.atlassian.greenhopper.service")) { // This is a hack since we don't have the source code or JAR for greenhopper
@@ -152,13 +208,14 @@ public class CustomFieldApiParser {
                     final int start = index + "name=".length();
                     final int end = text.indexOf(",", start);
                     return text.substring(start, end >= start ? end : text.length());
+                } else if (StringUtils.isNotEmpty(definition.getSplit()) && StringUtils.isNotEmpty(definition.getSeparator())) {
+                    return text.replaceAll(definition.getSplit(), definition.getSeparator());
                 } else {
                     return text;
                 }
             }
         }
     }
-
 
     @VisibleForTesting
     static String getItemLabel(final String name) {
