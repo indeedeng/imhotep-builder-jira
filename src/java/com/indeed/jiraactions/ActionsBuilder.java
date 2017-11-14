@@ -80,8 +80,13 @@ public class ActionsBuilder {
                     /* You'd think this would never happen, but it can. I found legitimate examples with a comment
                      * on a ticket *before* that ticket was created.
                      */
-                        Loggers.warn(LOG, "Unable to process comment %s by %s on issue %s, somehow doesn't fit in our timeline.",
-                                comment.id, comment.author.displayName, issue.key, comment.author.displayName);
+                        if (comment.created.isBefore(actions.get(0).getTimestamp())) {
+                            Loggers.debug(LOG, "Skipping comment %s on %s because it's before the issue was created.",
+                                    comment.id, issue.key);
+                        } else {
+                            Loggers.warn(LOG, "Unable to process comment %s by %s on issue %s, somehow doesn't fit in our timeline.",
+                                    comment.id, comment.author.displayName, issue.key, comment.author.displayName);
+                        }
                         currentActionIndex = 0;
                         break;
                     }
