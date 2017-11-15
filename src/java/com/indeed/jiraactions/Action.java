@@ -38,6 +38,7 @@ public interface Action {
     String getComponents();
     String getLabels();
     String getCreatedDate();
+    String getPriority();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
 
     @Nullable
