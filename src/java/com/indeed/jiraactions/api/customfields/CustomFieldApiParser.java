@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.indeed.common.util.StringUtils;
 import com.indeed.jiraactions.Action;
 import com.indeed.jiraactions.UserLookupService;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition.SplitRule;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
@@ -101,17 +102,24 @@ public class CustomFieldApiParser {
         final boolean valueStringIsEmpty = StringUtils.isEmpty(valueString);
         final String splitValueString;
         final boolean shouldSplit =
-                StringUtils.isNotEmpty(definition.getSplit())
+                definition.getSplit() != SplitRule.NONE
                 && StringUtils.isNotEmpty(definition.getSeparator())
                 && !valueStringIsEmpty;
+        final String splitPattern;
         if (shouldSplit) {
-            splitValueString = valueString.replaceAll(definition.getSplit(), definition.getSeparator());
+            splitPattern = definition.getSplit().getSplitPattern();
+            splitValueString = valueString.replaceAll(
+                    splitPattern,
+                    definition.getSeparator()
+            );
         } else {
+            splitPattern = "";
             splitValueString = valueString;
         }
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
             if (StringUtils.isNotEmpty(definition.getSeparator()) && !valueStringIsEmpty) {
-                return new CustomFieldValue(definition, splitValueString.replaceAll(", ?", definition.getSeparator()), "");
+                final String split = StringUtils.isEmpty(splitPattern) ? ", ?" : splitPattern;
+                return new CustomFieldValue(definition, splitValueString.replaceAll(split, definition.getSeparator()), "");
             } else {
                 return new CustomFieldValue(definition, splitValueString, "");
             }
@@ -193,8 +201,8 @@ public class CustomFieldApiParser {
         } else {
             if(node.has("value")) {
                 final String nodeValue = node.get("value").asText();
-                if (StringUtils.isNotEmpty(definition.getSplit()) && StringUtils.isNotEmpty(definition.getSeparator())) {
-                    return nodeValue.replaceAll(definition.getSplit(), definition.getSeparator());
+                if (definition.getSplit() != SplitRule.NONE && StringUtils.isNotEmpty(definition.getSeparator())) {
+                    return nodeValue.replaceAll(definition.getSplit().getSplitPattern(), definition.getSeparator());
                 } else {
                     return nodeValue;
                 }
@@ -208,8 +216,8 @@ public class CustomFieldApiParser {
                     final int start = index + "name=".length();
                     final int end = text.indexOf(",", start);
                     return text.substring(start, end >= start ? end : text.length());
-                } else if (StringUtils.isNotEmpty(definition.getSplit()) && StringUtils.isNotEmpty(definition.getSeparator())) {
-                    return text.replaceAll(definition.getSplit(), definition.getSeparator());
+                } else if (definition.getSplit() != SplitRule.NONE && StringUtils.isNotEmpty(definition.getSeparator())) {
+                    return text.replaceAll(definition.getSplit().getSplitPattern(), definition.getSeparator());
                 } else {
                     return text;
                 }

@@ -52,6 +52,9 @@ public class JiraActionsIndexBuilderCommandLineTool implements CommandLineTool {
         if(IndeedSystemProperty.INSTANCE.toString().contains("Apache")) {
             jiraUsername = config.getString("apachejira.username.indexer");
             jiraPassword = config.getString("apachejira.password.indexer");
+        } else if (IndeedSystemProperty.INSTANCE.toString().contains("mecha")) {
+            jiraUsername = config.getString("mechabugs.username.indexer");
+            jiraPassword = config.getString("mechabugs.password.indexer");
         } else {
             jiraUsername = config.getString("jira.username.indexer");
             jiraPassword = config.getString("jira.password.indexer");
