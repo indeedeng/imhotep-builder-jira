@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.indeed.jiraactions.JiraActionsUtil;
+import com.indeed.jiraactions.api.response.issue.Priority;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
 import org.joda.time.DateTime;
@@ -30,6 +31,7 @@ public class Field {
     public String duedate;
     public Component[] components;
     public String[] labels;
+    public Priority priority;
     public Map<String, JsonNode> otherProperties = new HashMap<>();
 
     @JsonProperty("created")
@@ -73,6 +75,7 @@ public class Field {
             case "duedate": return duedate == null ? "" : duedate;
             case "components": return components == null ? "" : Joiner.on("|").join(components);
             case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
+            case "priority": return priority == null ? "" : priority.name;
         }
         throw new IOException("Wrong input name " + attribute);
     }
