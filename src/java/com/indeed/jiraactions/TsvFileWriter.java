@@ -191,6 +191,9 @@ public class TsvFileWriter {
                     try {
                         final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
                         log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
+                        if(response.getStatusLine().getStatusCode() != 200) {
+                            continue;
+                        }
                         return;
                     } catch (final IOException e) {
                         log.warn("Failed to upload file: " + wd.file.getName() + ".", e);
