@@ -1,13 +1,17 @@
 package com.indeed.jiraactions.api.customfields;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -15,6 +19,7 @@ import java.io.Writer;
 @ReturnValuesAreNonnullByDefault
 public class CustomFieldValue {
     private static final Logger log = Logger.getLogger(CustomFieldValue.class);
+    private static final Splitter NUMBER_SPLITTER = Splitter.onPattern("\\D+").omitEmptyStrings();
 
     private final CustomFieldDefinition definition;
     private final String value;
@@ -44,26 +49,28 @@ public class CustomFieldValue {
 
     @SuppressWarnings("ConstantConditions")
     public void writeValue(final Writer writer) throws IOException {
+        writer.write(getFormattedValue());
+    }
+
+    public String getFormattedValue() {
         switch(definition.getMultiValueFieldConfiguration()) {
             case NONE:
-                writer.write(sanitize(getTransformedValue(value)));
-                break;
+                return sanitize(getTransformedValue(value));
             case EXPANDED:
                 if(StringUtils.isNotEmpty(value) && StringUtils.isNotEmpty(childValue)) {
-                    writer.write(String.format("%s - %s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue))));
+                    return String.format("%s - %s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue)));
                 } else if(StringUtils.isNotEmpty(value)) {
-                    writer.write(sanitize(getTransformedValue(value)));
+                    return sanitize(getTransformedValue(value));
                 } else {
-                    writer.write("");
+                    return "";
                 }
-                break;
             default:
                 Loggers.error(log, "Unknown multi-field definition %s trying to process field %s",
                         definition.getMultiValueFieldConfiguration(), definition.getName());
                 // Intentional fall-through
             case SEPARATE:
             case USERNAME:
-                writer.write(String.format("%s\t%s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue))));
+                return String.format("%s\t%s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue)));
         }
     }
 
@@ -71,6 +78,8 @@ public class CustomFieldValue {
         switch(definition.getTransformation()) {
             case MULTIPLY_BY_THOUSAND:
                 return numericStringToMilliNumericString(value);
+            case FIRST_NUMBER:
+                return findFirstNumber(value);
             case NONE:
                 return value;
             default:
@@ -99,5 +108,14 @@ public class CustomFieldValue {
             Loggers.warn(log, "Failed to convert value %s to milli-value", e, input);
             return "";
         }
+    }
+
+    @Nonnull
+    public static String findFirstNumber(@Nullable final String input) {
+        if(StringUtils.isEmpty(input)) {
+            return "";
+        }
+        final Iterable<String> numberParts = NUMBER_SPLITTER.split(input);
+        return Iterables.getFirst(numberParts, "");
     }
 }
