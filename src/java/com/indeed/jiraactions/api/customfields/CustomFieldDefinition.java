@@ -3,6 +3,7 @@ package com.indeed.jiraactions.api.customfields;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 
@@ -17,16 +18,10 @@ public interface CustomFieldDefinition {
      * https://stackoverflow.com/a/44217670/1515497
      */
     enum MultiValueFieldConfiguration {
-        SEPARATE("separate"),
-        EXPANDED("expanded"),
-        USERNAME("username"), // This is kind of a kludge because it doesn't fit the other types of multi-values, but it keeps the model clean
-        NONE("none");
-
-        private final String key;
-
-        MultiValueFieldConfiguration(final String key) {
-            this.key = key;
-        }
+        SEPARATE,
+        EXPANDED,
+        USERNAME, // This is kind of a kludge because it doesn't fit the other types of multi-values, but it keeps the model clean
+        NONE;
 
         @JsonCreator
         public static MultiValueFieldConfiguration fromString(final String key) {
@@ -35,18 +30,33 @@ public interface CustomFieldDefinition {
     }
 
     enum Transformation {
-        MULTIPLY_BY_THOUSAND("multiply_by_thousand"),
-        NONE("none");
-
-        private final String key;
-
-        Transformation(final String key) {
-            this.key = key;
-        }
+        MULTIPLY_BY_THOUSAND,
+        FIRST_NUMBER,
+        NONE;
 
         @JsonCreator
         public static Transformation fromString(final String key) {
             return StringUtils.isEmpty(key) ? NONE : Transformation.valueOf(key.toUpperCase());
+        }
+    }
+
+    enum SplitRule {
+        NON_NUMBER("\\D+"),
+        NONE("");
+
+        private final String splitPattern;
+
+        SplitRule(final String splitPattern) {
+            this.splitPattern = splitPattern;
+        }
+
+        public String getSplitPattern() {
+            return splitPattern;
+        }
+
+        @JsonCreator
+        public static SplitRule fromString(final String key) {
+            return StringUtils.isEmpty(key) ? NONE : SplitRule.valueOf(key.toUpperCase());
         }
     }
 
@@ -57,6 +67,11 @@ public interface CustomFieldDefinition {
     @Value.Default
     default String getSeparator() {
         return "";
+    }
+
+    @Value.Default
+    default SplitRule getSplit() {
+        return SplitRule.NONE;
     }
 
     @Value.Default
