@@ -10,7 +10,6 @@ import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -45,6 +44,11 @@ public class JiraActionsIndexBuilder {
 
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config);
             initializeIssuesApiCaller(issuesAPICaller);
+
+            if(!issuesAPICaller.currentPageExist()) {
+                log.warn("No issues found for this time range.");
+                return;
+            }
 
             long apiTime = 0;
             long processTime = 0;
