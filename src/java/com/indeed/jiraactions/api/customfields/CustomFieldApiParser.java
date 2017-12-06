@@ -16,17 +16,14 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
-
 import org.apache.log4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
@@ -184,19 +181,21 @@ public class CustomFieldApiParser {
 
     private static String getValueFromNode(final CustomFieldDefinition definition, final JsonNode node) {
         if(JsonNodeType.ARRAY.equals(node.getNodeType())) {
+            final List<JsonNode> children = ImmutableList.copyOf(node.elements());
+
             final String separator;
             if(StringUtils.isEmpty(definition.getSeparator())) {
-                Loggers.error(log, "No specified separator for array node %s for field %s", node.toString(), definition.getName());
+                if(children.size() > 1) {
+                    Loggers.error(log, "No specified separator for multi-valued field %s, array node: %s", definition.getName(), node.toString());
+                } else {
+                    Loggers.warn(log, "No specified separator for field %s with an array of one element", definition.getName());
+                }
                 separator = " ";
             } else {
                 separator = definition.getSeparator();
             }
-            final Iterator<JsonNode> children = node.elements();
-            if(children == null) {
-                return "";
-            }
-            final Iterable<JsonNode> iterable = () -> children;
-            final Iterable<String> values = () -> StreamSupport.stream(iterable.spliterator(), false).map(x -> getValueFromNode(definition, x)).iterator();
+
+            final Iterable<String> values = children.stream().map(x -> getValueFromNode(definition, x))::iterator;
             return String.join(separator, values);
         } else {
             if(node.has("value")) {
