@@ -4,7 +4,9 @@ import com.google.common.base.Joiner;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.util.logging.Loggers;
+
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -32,8 +34,8 @@ public class TsvFileWriter {
 
     private static final String[] FILE_HEADER = {
         "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "createddate", "duedate",
-            "int duedate_time", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "project",
-            "projectkey", "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
+            "int duedate_time", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "priority",
+            "project", "projectkey", "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
             "timesinceaction", "time"
     };
 
@@ -59,7 +61,11 @@ public class TsvFileWriter {
     private void createFileAndWriteHeaders(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getIndexName(), reformatDate(day));
         final File file = new File(filename);
-        file.deleteOnExit();
+        if (StringUtils.isNotEmpty(config.getIuploadURL())) {
+            file.deleteOnExit();
+        } else {
+            log.info("Not deleting tsv file because upload url is unset.");
+        }
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
@@ -117,6 +123,8 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.getLabels());
             bw.write("\t");
+            bw.write(action.getPriority());
+            bw.write("\t");
             bw.write(action.getProject());
             bw.write("\t");
             bw.write(action.getProjectkey());
@@ -163,6 +171,11 @@ public class TsvFileWriter {
 
     private static final int NUM_RETRIES = 5;
     public void uploadTsvFile() {
+        if (StringUtils.isEmpty(config.getIuploadURL())) {
+            log.info("Skipping upload because iuploadurl is empty.");
+            return;
+        }
+
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
 
         log.info("Uploading to " + iuploadUrl);
@@ -189,6 +202,9 @@ public class TsvFileWriter {
                     try {
                         final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
                         log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
+                        if(response.getStatusLine().getStatusCode() != 200) {
+                            continue;
+                        }
                         return;
                     } catch (final IOException e) {
                         log.warn("Failed to upload file: " + wd.file.getName() + ".", e);
