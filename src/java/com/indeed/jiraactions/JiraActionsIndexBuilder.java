@@ -2,17 +2,23 @@ package com.indeed.jiraactions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.indeed.jiraactions.api.ApiUserLookupService;
 import com.indeed.jiraactions.api.IssueAPIParser;
 import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
+import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,11 +43,11 @@ public class JiraActionsIndexBuilder {
             final ActionFactory actionFactory = new ActionFactory(userLookupService, customFieldApiParser, config);
 
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config);
-            {
-                final long start = System.currentTimeMillis();
-                final int total = issuesAPICaller.setNumTotal();
-                final long end = System.currentTimeMillis();
-                log.debug(String.format("%d ms, found %d total issues.", end - start, total));
+            initializeIssuesApiCaller(issuesAPICaller);
+
+            if(!issuesAPICaller.currentPageExist()) {
+                log.warn("No issues found for this time range.");
+                return;
             }
 
             long apiTime = 0;
@@ -87,7 +93,8 @@ public class JiraActionsIndexBuilder {
             boolean reFoundTheBeginning = false;
             boolean firstIssue = true;
             boolean firstPass = true;
-            while(!reFoundTheBeginning || !firstIssue) {
+            final ImmutableSet.Builder<CustomFieldDefinition> customFieldsSeen = ImmutableSet.builder();
+            while (!reFoundTheBeginning || !firstIssue) {
                 reFoundTheBeginning = false;
                 firstIssue = true;
                 while (issuesAPICaller.currentPageExist()) {
@@ -115,6 +122,12 @@ public class JiraActionsIndexBuilder {
                             final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
                             final List<Action> preFilteredActions = actionsBuilder.buildActions();
                             final List<Action> actions = getActionsFilterByLastSeen(seenIssues, issue, preFilteredActions);
+                            actions.stream()
+                                    .map(action -> action.getCustomFieldValues().entrySet())
+                                    .flatMap(Set::stream)
+                                    .filter(v -> StringUtils.isNotEmpty(v.getValue().getFormattedValue()))
+                                    .map(Map.Entry::getKey)
+                                    .forEach(customFieldsSeen::add);
 
                             process_end = System.currentTimeMillis();
                             processTime += process_end - process_start;
@@ -153,6 +166,17 @@ public class JiraActionsIndexBuilder {
 
             log.debug(String.format("Had to look up %d users.", userLookupService.numLookups()));
 
+            final Set<CustomFieldDefinition> missedFieldDefinitions =
+                    Sets.difference(
+                            ImmutableSet.copyOf(config.getCustomFields()),
+                            customFieldsSeen.build()
+                    );
+            final List<String> missedFields = missedFieldDefinitions.stream()
+                    .map(CustomFieldDefinition::getName)
+                    .collect(Collectors.toList());
+
+            log.debug("No values seen for these custom fields: " + missedFields);
+
             start = System.currentTimeMillis();
             // Create and Upload a TSV file.
             writer.uploadTsvFile();
@@ -171,6 +195,13 @@ public class JiraActionsIndexBuilder {
             log.error("Threw an exception trying to run the index builder", e);
             throw e;
         }
+    }
+
+    private void initializeIssuesApiCaller(final IssuesAPICaller issuesAPICaller) throws IOException {
+        final long start = System.currentTimeMillis();
+        final int total = issuesAPICaller.setNumTotal();
+        final long end = System.currentTimeMillis();
+        log.debug(String.format("%d ms, found %d total issues.", end - start, total));
     }
 
     /*
