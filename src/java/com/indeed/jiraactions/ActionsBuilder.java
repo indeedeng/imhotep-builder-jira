@@ -96,7 +96,7 @@ public class ActionsBuilder {
     }
 
     private boolean isCreatedDuringRange(final DateTime createdDate) {
-        return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) >= 0;
+        return startDate.compareTo(createdDate) <= 0 && endDate.compareTo(createdDate) > 0;
     }
 
     private boolean commentIsAfter(final Comment comment, final Action action) {
