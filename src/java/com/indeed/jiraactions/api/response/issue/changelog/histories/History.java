@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Joiner;
 import com.indeed.jiraactions.JiraActionsUtil;
 import com.indeed.jiraactions.api.response.issue.User;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
@@ -65,7 +66,7 @@ public class History {
         for(final Item item : items) {
             for(final String field : fields) {
                 if (Objects.equals(item.field, field) && (acceptCustom || !item.customField)) {
-                    if(item.toString.length() > 0) {
+                    if(StringUtils.isNotEmpty(item.toString)) {
                         return item;
                     } else {
                         bestItem = item;

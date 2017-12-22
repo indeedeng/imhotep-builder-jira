@@ -135,7 +135,6 @@ public class CustomFieldApiParser {
                 final User user = userLookupService.getUser(value);
                 usernames = user.name;
             }
-            final User user = userLookupService.getUser(value);
             return new CustomFieldValue(definition, splitValueString, usernames);
         } else {
 
