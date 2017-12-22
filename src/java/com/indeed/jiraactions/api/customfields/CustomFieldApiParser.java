@@ -16,12 +16,16 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,10 +50,8 @@ public class CustomFieldApiParser {
         if(item != null) {
             return customFieldValueFromChangelog(definition, item.from, item.fromString);
         } else {
-            final JsonNode jsonNode = issue.fields.getCustomField(definition.getCustomFieldId());
-            if(jsonNode == null) {
-                return new CustomFieldValue(definition);
-            } else {
+            final Optional<JsonNode> firstFound = Arrays.stream(definition.getCustomFieldId()).map(id -> issue.fields.getCustomField(id)).filter(Objects::nonNull).findFirst();
+            return firstFound.map(jsonNode -> {
                 final CustomFieldValue customFieldValue = customFieldFromInitialFields(definition, jsonNode);
                 if (StringUtils.isEmpty(customFieldValue.getFormattedValue())) {
                     if (!failedCustomFields.contains(definition)) {
@@ -58,7 +60,7 @@ public class CustomFieldApiParser {
                     }
                 }
                 return customFieldValue;
-            }
+            }).orElseGet(() -> new CustomFieldValue(definition));
         }
     }
 
@@ -133,7 +135,6 @@ public class CustomFieldApiParser {
                 final User user = userLookupService.getUser(value);
                 usernames = user.name;
             }
-            final User user = userLookupService.getUser(value);
             return new CustomFieldValue(definition, splitValueString, usernames);
         } else {
 
@@ -232,11 +233,13 @@ public class CustomFieldApiParser {
     static String[] getItemLabels(final CustomFieldDefinition definition) {
         final String label = getItemLabel(definition.getName());
 
-        if (StringUtils.isEmpty(definition.getAlternateName())) {
+        if (ArrayUtils.isEmpty(definition.getAlternateNames())) {
             return new String[] { label };
         } else {
-            final String alternateLabel = getItemLabel(definition.getAlternateName());
-            return new String[] { label, alternateLabel };
+            return ImmutableList.<String>builder()
+                    .add(label)
+                    .addAll(Arrays.stream(definition.getAlternateNames()).map(CustomFieldApiParser::getItemLabel)::iterator)
+                    .build().toArray(new String[0]);
         }
     }
 }
