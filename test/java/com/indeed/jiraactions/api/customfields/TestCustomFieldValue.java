@@ -60,6 +60,14 @@ public class TestCustomFieldValue {
             .multiValueFieldConfiguration(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME)
             .build();
 
+    private static final CustomFieldDefinition feedid = ImmutableCustomFieldDefinition.builder()
+            .name("Feed ID")
+            .customFieldId("customfield_10042")
+            .imhotepFieldName("allfeedids*|")
+            .separator("|")
+            .split(CustomFieldDefinition.SplitRule.NON_NUMBER)
+            .build();
+
     @Test
     public void testNoModifications() throws IOException {
         final CustomFieldDefinition definition = ImmutableCustomFieldDefinition.builder()
@@ -154,6 +162,20 @@ public class TestCustomFieldValue {
     public void testUserLookupFromInitial() throws IOException {
         testFromInitial(verifier, "{\"self\":\"https://***REMOVED***/rest/api/2/user?username=***REMOVED***\",\"name\":\"***REMOVED***\",\"key\":\"***REMOVED***\",\"emailAddress\":\"***REMOVED***@indeed.com\",\"avatarUrls\":{\"48x48\":\"https://***REMOVED***/secure/useravatar?ownerId=***REMOVED***&avatarId=25105\",\"24x24\":\"https://***REMOVED***/secure/useravatar?size=small&ownerId=***REMOVED***&avatarId=25105\",\"16x16\":\"https://***REMOVED***/secure/useravatar?size=xsmall&ownerId=***REMOVED***&avatarId=25105\",\"32x32\":\"https://***REMOVED***/secure/useravatar?size=medium&ownerId=***REMOVED***&avatarId=25105\"},\"displayName\":\"***REMOVED***\",\"active\":true,\"timeZone\":\"America/Chicago\"}{\"self\":\"https://***REMOVED***/rest/api/2/user?username=***REMOVED***\",\"name\":\"***REMOVED***\",\"key\":\"***REMOVED***\",\"emailAddress\":\"***REMOVED***@indeed.com\",\"avatarUrls\":{\"48x48\":\"https://***REMOVED***/secure/useravatar?ownerId=***REMOVED***&avatarId=25105\",\"24x24\":\"https://***REMOVED***/secure/useravatar?size=small&ownerId=***REMOVED***&avatarId=25105\",\"16x16\":\"https://***REMOVED***/secure/useravatar?size=xsmall&ownerId=***REMOVED***&avatarId=25105\",\"32x32\":\"https://***REMOVED***/secure/useravatar?size=medium&ownerId=***REMOVED***&avatarId=25105\"},\"displayName\":\"***REMOVED***\",\"active\":true,\"timeZone\":\"America/Chicago\"}",
                 "***REMOVED***\t***REMOVED***");
+    }
+
+    @Test
+    public void testSplitFromInitial() throws IOException {
+        testFromInitial(feedid, "\"25448, 144772, 10150, 260152, 72045, 186255, 72022, 120551, 75954, 136235, 71965, 72048, 72044, 70836, 15049, 72536, 13876, 70863, 44076, 64467, 72047, 59019, 187277, 59234, 148076, 7016, 14482, 40794, 72050, 213443, 68955, 7662, 21344, 69180\"",
+                "25448|144772|10150|260152|72045|186255|72022|120551|75954|136235|71965|72048|72044|70836|15049|72536|13876|70863|44076|64467|72047|59019|187277|59234|148076|7016|14482|40794|72050|213443|68955|7662|21344|69180");
+    }
+
+    @Test
+    public void testSplitFromChangelog() throws IOException {
+        final String value = "25448, 144772, 10150, 260152, 186255, 70836, 15049, 72536, 13876, 70863, 44076, 64467, 72047, 59019, 59234, 148076, 7016, 14482, 40794, 72050, 213443, 68955";
+        final CustomFieldValue field = apiParser.customFieldValueFromChangelog(feedid, "", value);
+
+        assertEquals(field, "25448|144772|10150|260152|186255|70836|15049|72536|13876|70863|44076|64467|72047|59019|59234|148076|7016|14482|40794|72050|213443|68955");
     }
 
     @Test

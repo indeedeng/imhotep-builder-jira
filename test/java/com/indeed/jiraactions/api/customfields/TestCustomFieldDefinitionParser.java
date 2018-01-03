@@ -62,6 +62,14 @@ public class TestCustomFieldDefinitionParser {
             "      \"ITSUP User Equipment (Software)\", \"ITSUP User Equipment (Mobile Device)\", \"ITSUP User Equipment (MiFi)\", \"ITSUP Phone Support Type\"]\n" +
             "  }";
 
+    private static final String FEED_ID = "  {\n" +
+            "    \"name\": \"Feed ID\",\n" +
+            "    \"customfieldid\": \"customfield_10042\",\n" +
+            "    \"imhotepfieldname\": \"allfeedids*|\",\n" +
+            "    \"separator\": \"|\",\n" +
+            "    \"split\": \"non_number\"\n" +
+            "  }";
+
     @Test
     public void testProductionConfigs() throws IOException {
         final File directory = new File("src/resources/customfields");
@@ -123,6 +131,18 @@ public class TestCustomFieldDefinitionParser {
                 .separator("|")
                 .build();
         assertComparison(definition, "protest_countries*|", TEST_COUNTRIES);
+    }
+
+    @Test
+    public void testSplit() throws IOException {
+        final CustomFieldDefinition definition = ImmutableCustomFieldDefinition.builder()
+                .name("Feed ID")
+                .customFieldId("customfield_10042")
+                .imhotepFieldName("allfeedids*|")
+                .separator("|")
+                .split(CustomFieldDefinition.SplitRule.NON_NUMBER)
+                .build();
+        assertComparison(definition, "allfeedids*|", FEED_ID);
     }
 
     @Test
