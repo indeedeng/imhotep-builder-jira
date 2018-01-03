@@ -135,7 +135,7 @@ public class TsvFileWriter {
             bw.write("\t");
             bw.write(action.getReporterusername());
             bw.write("\t");
-            bw.write(action.getResolution());
+            bw.write(action.getResolution().replace(Character.toString('\t'), "<tab>"));
             bw.write("\t");
             bw.write(action.getStatus());
             bw.write("\t");
