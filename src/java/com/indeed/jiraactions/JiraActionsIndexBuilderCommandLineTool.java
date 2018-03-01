@@ -146,6 +146,7 @@ public class JiraActionsIndexBuilderCommandLineTool implements CommandLineTool {
         try {
             indexBuilder.run();
         } catch (final Exception e) {
+            LOGGER.error("Threw an exception trying to run the index builder", e);
             System.exit(-1);
         }
     }

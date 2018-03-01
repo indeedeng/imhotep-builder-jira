@@ -10,6 +10,7 @@ import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
+import com.indeed.util.logging.Loggers;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -58,6 +59,10 @@ public class JiraActionsIndexBuilder {
 
             final DateTime startDate = JiraActionsUtil.parseDateTime(config.getStartDate());
             final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
+
+            if (!startDate.isBefore(endDate)) {
+                Loggers.error(log, "Invalid start date '%s' not before end date '%s'", startDate, endDate);
+            }
 
             final TsvFileWriter writer = new TsvFileWriter(config);
             start = System.currentTimeMillis();
