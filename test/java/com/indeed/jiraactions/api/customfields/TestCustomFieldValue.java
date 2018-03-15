@@ -274,8 +274,7 @@ public class TestCustomFieldValue {
 
     private void assertEquals(final CustomFieldValue field, final String expected) throws IOException {
         final StringWriter writer = new StringWriter();
-        field.writeValue(writer);
 
-        Assert.assertEquals(expected, writer.getBuffer().toString());
+        Assert.assertEquals(expected, String.join("\t", field.getValues()));
     }
 }

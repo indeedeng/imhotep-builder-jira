@@ -1,16 +1,21 @@
 package com.indeed.jiraactions.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 import com.indeed.jiraactions.UserLookupService;
+import com.indeed.jiraactions.api.response.issue.ImmutableUser;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -42,14 +47,6 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
 
         if(!users.containsKey(key)) {
             final User user = lookupUser(key);
-            if(user == null) {
-                final User fallback = new User();
-                fallback.displayName = "Fallback User " + key;
-                fallback.key = "fallback_" + key;
-                fallback.name = "fallback_" + key;
-
-                return fallback;
-            }
             users.put(key, user);
         }
 
@@ -61,7 +58,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
     }
 
     private String getApiUrlForUser(final String key) throws UnsupportedEncodingException {
-        return baseUrl + "?key=" + URLEncoder.encode(key, "UTF-8");
+        return baseUrl + "?expand=groups&key=" + URLEncoder.encode(key, "UTF-8");
     }
 
     public long getUserLookupTotalTime() {
@@ -75,13 +72,23 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
         try {
             final String url = getApiUrlForUser(key);
             final JsonNode json = getJsonNode(url);
-            return objectMapper.treeToValue(json, User.class);
+            return parseUser(json);
         } catch(final IOException e) {
             log.error("Could not find user " + key + ". Using fallback.", e);
-            return null;
+            final User fallback = ImmutableUser.builder()
+                    .displayName("Fallback User " + key)
+                    .key("fallback_" + key)
+                    .name("fallback_" + key)
+                    .build();
+            return fallback;
         } finally {
             final long end = System.currentTimeMillis();
             userLookupTime += (end - start);
         }
+    }
+
+    @VisibleForTesting
+    static User parseUser(final JsonNode json) throws JsonProcessingException {
+        return objectMapper.treeToValue(json, User.class);
     }
 }

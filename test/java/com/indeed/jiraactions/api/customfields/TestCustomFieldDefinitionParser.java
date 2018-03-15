@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.List;
 
 public class TestCustomFieldDefinitionParser {
     private static final String STORY_POINTS =   "  {\n" +
@@ -191,8 +192,8 @@ public class TestCustomFieldDefinitionParser {
 
         Assert.assertEquals(expected, actual);
 
-        actual.writeHeader(writer);
-        Assert.assertEquals(expectedHeader, writer.getBuffer().toString());
+        final List<String> headers = actual.getHeaders();
+        Assert.assertEquals(expectedHeader, String.join("\t", headers));
     }
 
     private InputStream createInputStreamFromDefinitions(final String... elements) {

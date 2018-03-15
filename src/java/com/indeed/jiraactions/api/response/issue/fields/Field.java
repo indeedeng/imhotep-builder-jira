@@ -52,14 +52,15 @@ public class Field {
 
     public String getStringValue(final String attribute) throws IOException {
         switch (attribute) {
-            case "assignee": return assignee == null ? "" : assignee.displayName;
-            case "assigneekey": return assignee == null ? "" : assignee.key;
-            case "creator": return creator == null ? "" : creator.displayName;
+            case "assignee": return assignee == null ? "" : assignee.getDisplayName();
+            case "assigneekey": return assignee == null ? "" : assignee.getKey();
+            case "creator": return creator == null ? "" : creator.getDisplayName();
             case "issuetype": return issuetype == null ? "" : issuetype.name;
             case "project": return project == null ? "" : project.name;
             case "projectkey": return project == null ? "" : project.key;
-            case "reporter": return reporter == null ? "" : reporter.displayName;
-            case "reporterusername": return reporter == null ? "" : reporter.name;
+            case "reporter": return reporter == null ? "" : reporter.getDisplayName();
+            case "reporterusername": return reporter == null ? "" : reporter.getName();
+            case "reporterkey": return reporter == null ? "" : reporter.getKey();
             case "resolution": return resolution == null? "" : resolution.name;
             case "status": return status == null? "" : status.name;
             case "summary": return summary;

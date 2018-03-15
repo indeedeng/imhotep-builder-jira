@@ -1,6 +1,7 @@
 package com.indeed.jiraactions.api.customfields;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import com.indeed.util.logging.Loggers;
@@ -12,8 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.util.List;
 
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
@@ -47,22 +47,21 @@ public class CustomFieldValue {
         return new CustomFieldValue(definition);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public void writeValue(final Writer writer) throws IOException {
-        writer.write(getFormattedValue());
+    public boolean isEmpty() {
+        return StringUtils.isEmpty(String.join("", getValues()));
     }
 
-    public String getFormattedValue() {
+    public List<String> getValues() {
         switch(definition.getMultiValueFieldConfiguration()) {
             case NONE:
-                return sanitize(getTransformedValue(value));
+                return ImmutableList.of(sanitize(getTransformedValue(value)));
             case EXPANDED:
                 if(StringUtils.isNotEmpty(value) && StringUtils.isNotEmpty(childValue)) {
-                    return String.format("%s - %s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue)));
+                    return ImmutableList.of(String.format("%s - %s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue))));
                 } else if(StringUtils.isNotEmpty(value)) {
-                    return sanitize(getTransformedValue(value));
+                    return ImmutableList.of(sanitize(getTransformedValue(value)));
                 } else {
-                    return "";
+                    return ImmutableList.of("");
                 }
             default:
                 Loggers.error(log, "Unknown multi-field definition %s trying to process field %s",
@@ -70,7 +69,7 @@ public class CustomFieldValue {
                 // Intentional fall-through
             case SEPARATE:
             case USERNAME:
-                return String.format("%s\t%s", sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue)));
+                return ImmutableList.of(sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue)));
         }
     }
 

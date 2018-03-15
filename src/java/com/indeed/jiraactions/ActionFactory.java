@@ -26,12 +26,12 @@ public class ActionFactory {
     }
 
     public Action create(final Issue issue) throws Exception {
+        final User assignee = userLookupService.getUser(issue.initialValueKey("assignee", "assigneekey"));
+        final User reporter = userLookupService.getUser(issue.initialValueKey("reporter", "reporterkey"));
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
-                .actor(issue.fields.creator == null ? User.INVALID_USER.displayName : issue.fields.creator.displayName)
-                .actorusername(issue.fields.creator == null ? User.INVALID_USER.name : issue.fields.creator.name)
-                .assignee(issue.initialValue("assignee"))
-                .assigneeusername(userLookupService.getUser(issue.initialValueKey("assignee", "assigneekey")).name)
+                .actor(issue.fields.creator == null ? User.INVALID_USER : issue.fields.creator)
+                .assignee(assignee)
                 .fieldschanged("created")
                 .issueage(0)
                 .issuekey(issue.key)
@@ -40,8 +40,7 @@ public class ActionFactory {
                 .project(issue.initialValue("project"))
                 .projectkey(issue.initialValue("projectkey"))
                 .prevstatus("")
-                .reporter(issue.initialValue("reporter"))
-                .reporterusername(issue.initialValueKey("reporter", "reporterusername"))
+                .reporter(reporter)
                 .resolution(issue.initialValue("resolution"))
                 .status(issue.initialValue("status"))
                 .summary(issue.initialValue("summary"))
@@ -63,12 +62,16 @@ public class ActionFactory {
     }
 
     public Action update(final Action prevAction, final History history) throws IOException {
+        final User assignee = history.itemExist("assignee")
+                ? userLookupService.getUser(history.getItemLastValueKey("assignee"))
+                : prevAction.getAssignee();
+        final User reporter = history.itemExist("reporter")
+                ? userLookupService.getUser(history.getItemLastValueKey("reporter"))
+                : prevAction.getReporter();
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("update")
-                .actor(history.author == null ? User.INVALID_USER.displayName : history.author.displayName)
-                .actorusername(history.author == null ? User.INVALID_USER.name : history.author.name)
-                .assignee(history.itemExist("assignee") ? history.getItemLastValue("assignee") : prevAction.getAssignee())
-                .assigneeusername(history.itemExist("assignee") ? userLookupService.getUser(history.getItemLastValueKey("assignee")).name : prevAction.getAssigneeusername())
+                .actor(history.author == null ? User.INVALID_USER: history.author)
+                .assignee(assignee)
                 .fieldschanged(history.getChangedFields())
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created))
                 .issuekey(prevAction.getIssuekey())
@@ -77,8 +80,7 @@ public class ActionFactory {
                 .project(history.itemExist("project") ? history.getItemLastValue("project") : prevAction.getProject())
                 .projectkey(history.itemExist("projectkey") ? history.getItemLastValue("projectkey") : prevAction.getProjectkey())
                 .prevstatus(prevAction.getStatus())
-                .reporter(history.itemExist("reporter") ? history.getItemLastValue("reporter") : prevAction.getReporter())
-                .reporterusername(history.itemExist("reporter") ? userLookupService.getUser(history.getItemLastValueKey("reporter")).name : prevAction.getReporterusername())
+                .reporter(reporter)
                 .resolution(history.itemExist("resolution") ? history.getItemLastValue("resolution") : prevAction.getResolution())
                 .status(history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus())
                 .summary(history.itemExist("summary") ? history.getItemLastValue("summary") : prevAction.getSummary())
@@ -103,8 +105,7 @@ public class ActionFactory {
         return ImmutableAction.builder()
                 .from(prevAction)
                 .action("comment")
-                .actor(comment.author == null ? User.INVALID_USER.displayName : comment.author.displayName)
-                .actorusername(comment.author == null ? User.INVALID_USER.name : comment.author.name)
+                .actor(comment.author == null ? User.INVALID_USER : comment.author)
                 .fieldschanged("comment")
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), comment.created))
                 .timeinstate(timeInState(prevAction, comment))

@@ -85,7 +85,7 @@ public class ActionsBuilder {
                                     comment.id, issue.key);
                         } else {
                             Loggers.warn(LOG, "Unable to process comment %s by %s on issue %s, somehow doesn't fit in our timeline.",
-                                    comment.id, comment.author.displayName, issue.key, comment.author.displayName);
+                                    comment.id, comment.author.getDisplayName(), issue.key, comment.author.getDisplayName());
                         }
                         currentActionIndex = 0;
                         break;

@@ -3,12 +3,12 @@ package com.indeed.jiraactions.api.customfields;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
 
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.util.List;
 
 @Value.Immutable
 @JsonSerialize(as = ImmutableCustomFieldDefinition.class)
@@ -89,18 +89,15 @@ public interface CustomFieldDefinition {
         return Transformation.NONE;
     }
 
-    default void writeHeader(final Writer writer) throws IOException {
+    default List<String> getHeaders() {
         switch(getMultiValueFieldConfiguration()) {
             case SEPARATE:
-                writer.write(String.format("%s\t%s", getImhotepFieldName()+"1", getImhotepFieldName()+"2"));
-                break;
+                return ImmutableList.of(getImhotepFieldName() + "1", getImhotepFieldName() + "2");
             case USERNAME:
-                writer.write(String.format("%s\t%s", getImhotepFieldName(), getImhotepFieldName()+"username"));
-                break;
+                return ImmutableList.of(getImhotepFieldName(), getImhotepFieldName() + "username");
             case EXPANDED:
             default:
-                writer.write(getImhotepFieldName());
-                break;
+                return ImmutableList.of(getImhotepFieldName());
         }
     }
 }
