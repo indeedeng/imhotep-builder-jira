@@ -31,13 +31,6 @@ public class TsvFileWriter {
     private final Map<DateMidnight, WriterData> writerDataMap;
     private final List<TSVColumnSpec> columnSpecs;
 
-    private static final String[] FILE_HEADER = {
-        "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "createddate", "duedate",
-            "int duedate_time", "fieldschanged*", "fixversion*|", "issueage", "issuekey", "issuetype", "labels*", "priority",
-            "project", "projectkey", "prevstatus", "reporter", "reporterusername", "resolution", "status", "summary", "timeinstate",
-            "timesinceaction", "time"
-    };
-
     public TsvFileWriter(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
