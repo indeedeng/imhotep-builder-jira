@@ -2,11 +2,13 @@ package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+import com.indeed.jiraactions.api.response.issue.ImmutableUser;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.test.junit.Check;
+
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -44,9 +46,11 @@ public class ActionTest {
 
         actionFactory = new ActionFactory(userLookupService, new CustomFieldApiParser(userLookupService), config);
 
-        author = new User();
-        author.displayName = "Author";
-        author.name = "author";
+        author = ImmutableUser.builder()
+                .displayName("Author")
+                .name("author")
+                .key("key")
+                .build();
 
         final Action defaultAction = ImmutableProxy.createProxy(Action.class);
 
@@ -99,7 +103,10 @@ public class ActionTest {
     @Test
     public void testAction_update_actor() throws ParseException, IOException {
         final String actor = "Test Actor";
-        author.displayName = actor;
+        author = ImmutableUser.builder()
+                .from(author)
+                .displayName(actor)
+                .build();
 
         final Action action = actionFactory.update(prevAction, history);
         Check.checkTrue(action.getActor().equals(actor));

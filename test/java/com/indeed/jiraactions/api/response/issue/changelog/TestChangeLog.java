@@ -1,9 +1,11 @@
 package com.indeed.jiraactions.api.response.issue.changelog;
 
 import com.indeed.jiraactions.JiraActionsUtil;
+import com.indeed.jiraactions.api.response.issue.ImmutableUser;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,8 +15,11 @@ public class TestChangeLog {
     @Test
     public void testSort() throws ParseException {
         final History a = new History();
-        a.author = new User();
-        a.author.displayName = "authorA";
+        a.author = ImmutableUser.builder()
+                .displayName("authorA")
+                .name("authorA")
+                .key("authorA")
+                .build();
         a.created = JiraActionsUtil.parseDateTime("2017-01-01 00:00:00");
         final Item changeA = new Item();
         changeA.field = "fixVersion";
@@ -23,8 +28,11 @@ public class TestChangeLog {
         a.items = new Item[]{ changeA };
 
         final History b = new History();
-        b.author = new User();
-        b.author.displayName = "authorB";
+        b.author = ImmutableUser.builder()
+                .displayName("authorB")
+                .name("authorB")
+                .key("authorB")
+                .build();
         b.created = JiraActionsUtil.parseDateTime("2017-01-02 01:00:00");
         final Item changeB = new Item();
         changeB.field = "fixVersion";
@@ -33,8 +41,11 @@ public class TestChangeLog {
         b.items = new Item[]{ changeB };
 
         final History c = new History();
-        c.author = new User();
-        c.author.displayName = "authorC";
+        c.author = ImmutableUser.builder()
+                .displayName("authorC")
+                .name("authorC")
+                .key("authorC")
+                .build();
         c.created = JiraActionsUtil.parseDateTime("2017-01-02 12:00:00");
         final Item changeC = new Item();
         changeC.field = "fixVersion";
@@ -43,8 +54,11 @@ public class TestChangeLog {
         c.items = new Item[]{ changeC };
 
         final History d = new History();
-        d.author = new User();
-        d.author.displayName = "authorD";
+        d.author = ImmutableUser.builder()
+                .displayName("authorD")
+                .name("authorD")
+                .key("authorD")
+                .build();
         d.created = JiraActionsUtil.parseDateTime("2017-02-01 12:00:00");
         final Item changeD = new Item();
         changeD.field = "fixVersion";

@@ -53,7 +53,7 @@ public class CustomFieldApiParser {
             final Optional<JsonNode> firstFound = Arrays.stream(definition.getCustomFieldId()).map(id -> issue.fields.getCustomField(id)).filter(Objects::nonNull).findFirst();
             return firstFound.map(jsonNode -> {
                 final CustomFieldValue customFieldValue = customFieldFromInitialFields(definition, jsonNode);
-                if (StringUtils.isEmpty(customFieldValue.getFormattedValue())) {
+                if (customFieldValue.isEmpty()) {
                     if (!failedCustomFields.contains(definition)) {
                         log.debug(String.format("Customfield %s failed to parse json node %s", definition, jsonNode));
                         failedCustomFields.add(definition);
@@ -69,7 +69,7 @@ public class CustomFieldApiParser {
         final Item item = history.getItem(true, getItemLabels(definition));
         if(item != null) {
             final CustomFieldValue value = customFieldValueFromChangelog(definition, item.to, item.toString);
-            if (StringUtils.isNotEmpty(item.toString) && StringUtils.isEmpty(value.getFormattedValue())) {
+            if (StringUtils.isNotEmpty(item.toString) && value.isEmpty()) {
                 if (!failedCustomHistoryFields.contains(definition)) {
                     log.debug(String.format("Customfield %s failed to parse history item %s", definition, item.toString));
                     failedCustomHistoryFields.add(definition);
@@ -128,12 +128,12 @@ public class CustomFieldApiParser {
                 final ImmutableList.Builder<String> usernameList = ImmutableList.builder();
                 for (final String userKey : Splitter.on(definition.getSeparator()).split(splitValueString)) {
                     final User user = userLookupService.getUser(userKey);
-                    usernameList.add(user.name);
+                    usernameList.add(user.getName());
                 }
                 usernames = Joiner.on(definition.getSeparator()).join(usernameList.build());
             } else {
                 final User user = userLookupService.getUser(value);
-                usernames = user.name;
+                usernames = user.getName();
             }
             return new CustomFieldValue(definition, splitValueString, usernames);
         } else {
@@ -167,7 +167,7 @@ public class CustomFieldApiParser {
             final String username = getValueFromNode(definition, json.get("key"));
             final String displayName = getValueFromNode(definition, json.get("displayName"));
             final User user = userLookupService.getUser(username);
-            return new CustomFieldValue(definition, displayName, user.name);
+            return new CustomFieldValue(definition, displayName, user.getName());
         } else {
             final String value = getValueFromNode(definition, json);
             final JsonNode child = json.get("child");

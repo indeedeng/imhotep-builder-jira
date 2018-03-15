@@ -2,6 +2,7 @@ package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+import com.indeed.jiraactions.api.response.issue.ImmutableUser;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.ChangeLog;
@@ -10,6 +11,7 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
+
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -40,9 +42,11 @@ public class ActionsBuilderTest {
         issue.key = "ABC-123";
         issue.fields = new Field();
 
-        final User issueCreator = new User();
-        issueCreator.displayName = "Test issueCreator";
-        issueCreator.name = "test";
+        final User issueCreator = ImmutableUser.builder()
+                .displayName("Test issueCreator")
+                .name("test")
+                .key("test key")
+                .build();
         issue.fields.creator = issueCreator;
 
         final ChangeLog changeLog = new ChangeLog();
@@ -175,10 +179,12 @@ public class ActionsBuilderTest {
 
         history.created = created;
 
-        final User historyAuthor = new User();
+        final User historyAuthor = ImmutableUser.builder()
+                .displayName("AuthorDisplayName")
+                .name("name")
+                .key("author key")
+                .build();
         history.author = historyAuthor;
-        history.author.displayName = "AuthorDisplayName";
-        history.author.name = "name";
 
         if(issue.changelog.histories == null) {
             issue.changelog.histories = new History[0];
@@ -194,10 +200,12 @@ public class ActionsBuilderTest {
         final Comment comment = new Comment();
         comment.created = created;
 
-        final User commentAuthor = new User();
+        final User commentAuthor = ImmutableUser.builder()
+                .displayName("commentDisplayName")
+                .name("commentName")
+                .key("comment key")
+                .build();
         comment.author = commentAuthor;
-        comment.author.displayName = "commentDisplayName";
-        comment.author.name = "commentName";
 
         if(issue.fields.comment.comments == null) {
             issue.fields.comment.comments = new Comment[0];

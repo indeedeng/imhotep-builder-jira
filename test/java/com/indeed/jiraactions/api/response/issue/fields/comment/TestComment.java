@@ -13,7 +13,7 @@ public class TestComment {
 
         comment.id = "id";
 
-        final User user = new User();
+        final User user = User.INVALID_USER;
         comment.author = user;
 
         comment.body = "body";

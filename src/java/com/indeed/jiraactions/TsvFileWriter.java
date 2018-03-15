@@ -1,9 +1,6 @@
 package com.indeed.jiraactions;
 
-import com.google.common.base.Joiner;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
-import com.indeed.jiraactions.api.customfields.CustomFieldValue;
-import com.indeed.util.logging.Loggers;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class TsvFileWriter {
@@ -31,6 +29,7 @@ public class TsvFileWriter {
 
     private final JiraActionsIndexBuilderConfig config;
     private final Map<DateMidnight, WriterData> writerDataMap;
+    private final List<TSVColumnSpec> columnSpecs;
 
     private static final String[] FILE_HEADER = {
         "action", "actor", "actorusername", "assignee", "assigneeusername", "category", "components*|", "createddate", "duedate",
@@ -44,6 +43,7 @@ public class TsvFileWriter {
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
+        this.columnSpecs = createColumnSpecs();
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
@@ -58,6 +58,39 @@ public class TsvFileWriter {
         }
     }
 
+    private List<TSVColumnSpec> createColumnSpecs() {
+        final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
+        specBuilder
+                .addColumn("action", Action::getAction)
+                .addUserColumns("actor", Action::getActor)
+                .addUserColumns("assignee", Action::getAssignee)
+                .addColumn("category", Action::getCategory)
+                .addColumn("components*|", Action::getComponents)
+                .addColumn("createdate", Action::getCreatedDate)
+                .addColumn("duedate", Action::getDueDate)
+                .addTimeColumn("int duedate_time", Action::getDueDateTime)
+                .addColumn("fieldschanged*", Action::getFieldschanged)
+                .addColumn("fixversion*|", Action::getFixversions)
+                .addLongColumn("issueage", Action::getIssueage)
+                .addColumn("issuekey", Action::getIssuekey)
+                .addColumn("issuetype", Action::getIssuetype)
+                .addColumn("labels*", Action::getLabels)
+                .addColumn("project", Action::getProject)
+                .addColumn("projectkey", Action::getProjectkey)
+                .addColumn("prevstatus", Action::getPrevstatus)
+                .addUserColumns("reporter", Action::getReporter)
+                .addColumn("resolution", Action::getResolution)
+                .addColumn("status", Action::getStatus)
+                .addColumn("summary", Action::getSummary)
+                .addLongColumn("timeinstate", Action::getTimeinstate)
+                .addLongColumn("timesinceaction", Action::getTimesinceaction)
+                .addTimeColumn("time", Action::getTimestamp);
+        for (final CustomFieldDefinition customField : config.getCustomFields()) {
+            specBuilder.addCustomFieldColumns(customField);
+        }
+        return specBuilder.build();
+    }
+
     private void createFileAndWriteHeaders(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getIndexName(), reformatDate(day));
         final File file = new File(filename);
@@ -69,13 +102,12 @@ public class TsvFileWriter {
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
-        // Write header
-        bw.write(Joiner.on("\t").join(FILE_HEADER));
+        final String headerLine = columnSpecs.stream()
+                .map(TSVColumnSpec::getHeader)
+                .collect(Collectors.joining("\t"));
 
-        for(final CustomFieldDefinition customField : config.getCustomFields()) {
-            bw.write("\t");
-            customField.writeHeader(bw);
-        }
+        // Write header
+        bw.write(headerLine);
         bw.newLine();
         bw.flush();
 
@@ -91,72 +123,11 @@ public class TsvFileWriter {
             final WriterData writerData = writerDataMap.get(action.getTimestamp().toDateMidnight());
             final BufferedWriter bw = writerData.getBufferedWriter();
             writerData.setWritten();
-            bw.write(action.getAction());
-            bw.write("\t");
-            bw.write(action.getActor());
-            bw.write("\t");
-            bw.write(action.getActorusername());
-            bw.write("\t");
-            bw.write(action.getAssignee());
-            bw.write("\t");
-            bw.write(action.getAssigneeusername());
-            bw.write("\t");
-            bw.write(action.getCategory());
-            bw.write("\t");
-            bw.write(action.getComponents());
-            bw.write("\t");
-            bw.write(action.getCreatedDate());
-            bw.write("\t");
-            bw.write(action.getDueDate());
-            bw.write("\t");
-            bw.write(JiraActionsUtil.getUnixTimestamp(action.getDueDateTime()));
-            bw.write("\t");
-            bw.write(action.getFieldschanged());
-            bw.write("\t");
-            bw.write(action.getFixversions().replace(Character.toString('\t'), "<tab>"));
-            bw.write("\t");
-            bw.write(String.valueOf(action.getIssueage()));
-            bw.write("\t");
-            bw.write(action.getIssuekey());
-            bw.write("\t");
-            bw.write(action.getIssuetype());
-            bw.write("\t");
-            bw.write(action.getLabels());
-            bw.write("\t");
-            bw.write(action.getPriority());
-            bw.write("\t");
-            bw.write(action.getProject());
-            bw.write("\t");
-            bw.write(action.getProjectkey());
-            bw.write("\t");
-            bw.write(action.getPrevstatus());
-            bw.write("\t");
-            bw.write(action.getReporter());
-            bw.write("\t");
-            bw.write(action.getReporterusername());
-            bw.write("\t");
-            bw.write(action.getResolution().replace(Character.toString('\t'), "<tab>"));
-            bw.write("\t");
-            bw.write(action.getStatus());
-            bw.write("\t");
-            bw.write(action.getSummary().replace(Character.toString('\t'), "<tab>"));
-            bw.write("\t");
-            bw.write(String.valueOf(action.getTimeinstate()));
-            bw.write("\t");
-            bw.write(String.valueOf(action.getTimesinceaction()));
-            bw.write("\t");
-            bw.write(JiraActionsUtil.getUnixTimestamp(action.getTimestamp()));
-
-            for(final CustomFieldDefinition customField : config.getCustomFields()) {
-                bw.write("\t");
-                final CustomFieldValue value = action.getCustomFieldValues().get(customField);
-                if(value == null) {
-                    Loggers.error(log, "No value found for custom field %s for issue %s", customField.getImhotepFieldName(), action.getIssuekey());
-                    CustomFieldValue.emptyCustomField(customField).writeValue(bw);
-                } else {
-                    value.writeValue(bw);
-                }
-            }
+            final String line = columnSpecs.stream()
+                    .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
+                    .map(rawValue -> rawValue.replace("\t", "<tab>"))
+                    .collect(Collectors.joining("\t"));
+            bw.write(line);
             bw.newLine();
         }
 

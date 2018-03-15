@@ -11,6 +11,7 @@ import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.util.logging.Loggers;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -130,7 +131,7 @@ public class JiraActionsIndexBuilder {
                             actions.stream()
                                     .map(action -> action.getCustomFieldValues().entrySet())
                                     .flatMap(Set::stream)
-                                    .filter(v -> StringUtils.isNotEmpty(v.getValue().getFormattedValue()))
+                                    .filter(v -> !v.getValue().isEmpty())
                                     .map(Map.Entry::getKey)
                                     .forEach(customFieldsSeen::add);
 
