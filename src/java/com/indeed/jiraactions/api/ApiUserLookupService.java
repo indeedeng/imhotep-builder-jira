@@ -65,7 +65,6 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
         return userLookupTime;
     }
 
-    @Nullable
     private User lookupUser(final String key) {
         final long start = System.currentTimeMillis();
 
