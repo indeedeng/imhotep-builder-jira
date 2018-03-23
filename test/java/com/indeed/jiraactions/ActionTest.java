@@ -109,7 +109,7 @@ public class ActionTest {
                 .build();
 
         final Action action = actionFactory.update(prevAction, history);
-        Check.checkTrue(action.getActor().equals(actor));
+        Check.checkTrue(action.getActor().getDisplayName().equals(actor));
     }
 
     @Test
@@ -121,13 +121,17 @@ public class ActionTest {
         history2.items = new Item[] { item };
 
         final Action action = actionFactory.update(prevAction, history2);
-        Check.checkTrue(action.getAssignee().equals(item.toString));
+        Check.checkTrue(action.getAssignee().getDisplayName().equals(item.toString));
         Check.checkTrue(action.getFieldschanged().contains(item.field));
     }
 
     @Test
     public void testAction_update_assignee_whenAssigneeNotChanged() throws ParseException, IOException {
-        final String assignee = "Test Assignee";
+        final User assignee = ImmutableUser.builder()
+                .displayName("Test Assignee")
+                .name("Test Assignee")
+                .key("Test Assignee")
+                .build();
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).assignee(assignee).build();
 
         final Action action = actionFactory.update(newPrevAction, history);
