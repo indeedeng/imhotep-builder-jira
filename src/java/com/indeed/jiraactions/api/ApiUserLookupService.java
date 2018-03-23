@@ -6,16 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 import com.indeed.jiraactions.UserLookupService;
-import com.indeed.jiraactions.api.response.issue.ImmutableUser;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -42,7 +39,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
     @Override
     public User getUser(@Nullable final String key) {
         if(StringUtils.isEmpty(key)) {
-            return User.INVALID_USER;
+            return User.NOBODY;
         }
 
         if(!users.containsKey(key)) {
@@ -74,12 +71,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
             return parseUser(json);
         } catch(final IOException e) {
             log.error("Could not find user " + key + ". Using fallback.", e);
-            final User fallback = ImmutableUser.builder()
-                    .displayName("Fallback User " + key)
-                    .key("fallback_" + key)
-                    .name("fallback_" + key)
-                    .build();
-            return fallback;
+            return User.getFallbackUser(key);
         } finally {
             final long end = System.currentTimeMillis();
             userLookupTime += (end - start);
