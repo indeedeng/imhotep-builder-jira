@@ -1,8 +1,11 @@
 package com.indeed.jiraactions;
 
+import com.indeed.jiraactions.api.response.issue.User;
+
 import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -73,6 +76,8 @@ public class ImmutableProxy<T> implements InvocationHandler {
             return Collections.emptyList();
         } else if(returnType.equals(Map.class)) {
             return Collections.emptyMap();
+        } else if(returnType.equals(User.class)) {
+            return User.INVALID_USER;
         }
         //noinspection ConstantConditions
         return null;
