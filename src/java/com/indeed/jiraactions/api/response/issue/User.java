@@ -23,19 +23,33 @@ import java.util.stream.StreamSupport;
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonDeserialize(as = ImmutableUser.class)
 public interface User {
-    public static final User INVALID_USER = ImmutableUser.builder()
+    User INVALID_USER = ImmutableUser.builder()
             .displayName("No User")
+            .name("nouser")
+            .key("nouser")
+            .build();
+
+    User NOBODY = ImmutableUser.builder()
+            .displayName("")
             .name("")
             .key("")
             .build();
 
-    public String getDisplayName();
-    public String getName();
-    public String getKey();
-    @JsonDeserialize(using = GroupDeserializer.class)
-    public List<String> getGroups();
+    static User getFallbackUser(final String key) {
+        return ImmutableUser.builder()
+                .displayName("Unknown User " + key)
+                .key(key)
+                .name(key)
+                .build();
+    }
 
-    static class GroupDeserializer extends StdDeserializer<List<String>> {
+    String getDisplayName();
+    String getName();
+    String getKey();
+    @JsonDeserialize(using = GroupDeserializer.class)
+    List<String> getGroups();
+
+    class GroupDeserializer extends StdDeserializer<List<String>> {
         GroupDeserializer() {
             super(List.class);
         }
