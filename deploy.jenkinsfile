@@ -87,7 +87,7 @@ buildPipeline(script) {
                         templateOwner: config.productGroup,
                         startDate: dayBefore,
                         endDate: yesterday,
-                        apiKeyCredentialId: orcCredentialId,
+                        apiKeyCredentialId: orcCredentialsId,
                         waitForActiveTasks: true
                 )
             }
