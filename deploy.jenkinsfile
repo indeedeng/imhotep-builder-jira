@@ -69,10 +69,6 @@ buildPipeline(script) {
         inputVerificationNotes(script, message: "Input verification notes", abortMessage: "Input verification notes for why you are aborting this build", timeout:365)
     }
  
-    pipelineStage(script, "APPROVE PROD DEPLOY") {
-        inputWithTimeout(script, message: "Deploy to Prod?", stage: "PROD")
-    }
- 
     deployToProd(script) {
         changeArcLabel(script)
     }
