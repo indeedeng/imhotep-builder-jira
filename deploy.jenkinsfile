@@ -67,6 +67,7 @@ buildPipeline(script) {
 
     def orcCredentialsId = "jobsearch-orc-key"
     def today = Calendar.getInstance()
+    today.clearTime()
     def yesterday = today.previous()
     def dayBefore = yesterday.previous()
  
