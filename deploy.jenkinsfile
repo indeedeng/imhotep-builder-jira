@@ -70,6 +70,7 @@ buildPipeline(script) {
     def yesterday = today.previous()
     def dayBefore = yesterday.previous()
  
+    Map<String, Closure> orcTasksToRun = [:]
     def orcTaskNames = [
         "JiraActionsIndexBuilderCommandLineTool",
         "JiraActionsIndexBuilderCommandLineTool-mecha"
