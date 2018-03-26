@@ -118,7 +118,8 @@ public class TsvFileWriter {
             writerData.setWritten();
             final String line = columnSpecs.stream()
                     .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
-                    .map(rawValue -> rawValue.replace("\t", "<tab>"))
+                    .map(rawValue -> rawValue.replace("\t", "\\t"))
+                    .map(rawValue -> rawValue.replace("\n", "\\n"))
                     .collect(Collectors.joining("\t"));
             bw.write(line);
             bw.newLine();
