@@ -1,5 +1,6 @@
 #!/usr/bin/env groovy
 @Library("pipeline@release/2.x") _
+import com.indeed.pipeline.OrcEnvironment
  
 script = this
  
@@ -63,7 +64,33 @@ buildPipeline(script) {
     deployToQa(script) {
         uploadToArc(script)
     }
+
+    def orcCredentialsId = "jobsearch-orc-key"
+    def today = Calendar.getInstance()
+    def yesterday = today.previous()
+    def dayBefore = yesterday.previous()
+
  
+    runOrcTask(
+        script,
+        templateName: "JiraActionsIndexBuilderCommandLineTool",
+        environment: OrcEnvironment.QA,
+        templateOwner: config.productGroup,
+        startDate: dayBefore,
+        endDate: yesterday,
+        apiKey: orcCredentialsId
+    )
+
+    runOrcTask(
+        script,
+        templateName: "JiraActionsIndexBuilderCommandLineTool-mecha",
+        environment: OrcEnvironment.QA,
+        templateOwner: config.productGroup,
+        startDate: dayBefore,
+        endDate: yesterday,
+        apiKey: orcCredentialsId
+    )
+
     // Include this block to allow inputting your verification notes directly from the stage view. The notes will be posted to the deploy ticket.
     pipelineStage(script, "INPUT VERIFICATION NOTES") {
         inputVerificationNotes(script, message: "Input verification notes", abortMessage: "Input verification notes for why you are aborting this build", timeout:365)
