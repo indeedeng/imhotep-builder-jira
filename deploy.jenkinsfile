@@ -69,27 +69,30 @@ buildPipeline(script) {
     def today = Calendar.getInstance()
     def yesterday = today.previous()
     def dayBefore = yesterday.previous()
-
  
-    runOrcTask(
-        script,
-        templateName: "JiraActionsIndexBuilderCommandLineTool",
-        environment: OrcEnvironment.QA,
-        templateOwner: config.productGroup,
-        startDate: dayBefore,
-        endDate: yesterday,
-        apiKey: orcCredentialsId
-    )
+    def orcTaskNames = [
+        "JiraActionsIndexBuilderCommandLineTool",
+        "JiraActionsIndexBuilderCommandLineTool-mecha"
+    ]
 
-    runOrcTask(
-        script,
-        templateName: "JiraActionsIndexBuilderCommandLineTool-mecha",
-        environment: OrcEnvironment.QA,
-        templateOwner: config.productGroup,
-        startDate: dayBefore,
-        endDate: yesterday,
-        apiKey: orcCredentialsId
-    )
+    orcTaskNames.each { orcTaskName ->
+        orcTasksToRun.put(
+            orcTaskName,
+            {
+                runOrcTask(
+                        script,
+                        templateName: orcTaskName,
+                        environment: OrcEnvironment.QA,
+                        templateOwner: config.productGroup,
+                        startDate: dayBefore,
+                        endDate: yesterday,
+                        apiKeyCredentialId: orcCredentialId,
+                        waitForActiveTasks: true
+                )
+            }
+        )
+    }
+    parallel orcTasksToRun
 
     // Include this block to allow inputting your verification notes directly from the stage view. The notes will be posted to the deploy ticket.
     pipelineStage(script, "INPUT VERIFICATION NOTES") {
