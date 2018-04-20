@@ -50,7 +50,10 @@ public class CustomFieldApiParser {
         if(item != null) {
             return customFieldValueFromChangelog(definition, item.from, item.fromString);
         } else {
-            final Optional<JsonNode> firstFound = Arrays.stream(definition.getCustomFieldId()).map(id -> issue.fields.getCustomField(id)).filter(Objects::nonNull).findFirst();
+            final Optional<JsonNode> firstFound = Arrays.stream(definition.getCustomFieldId())
+                    .map(id -> issue.fields.getCustomField(id))
+                    .filter(Objects::nonNull)
+                    .filter(x -> !"null".equals(x.asText())).findFirst();
             return firstFound.map(jsonNode -> {
                 final CustomFieldValue customFieldValue = customFieldFromInitialFields(definition, jsonNode);
                 if (customFieldValue.isEmpty()) {
