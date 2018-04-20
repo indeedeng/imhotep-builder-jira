@@ -50,6 +50,7 @@ public interface User {
     List<String> getGroups();
 
     class GroupDeserializer extends StdDeserializer<List<String>> {
+        private final static ObjectMapper objectMapper = new ObjectMapper();
         GroupDeserializer() {
             super(List.class);
         }
@@ -58,7 +59,6 @@ public interface User {
                 final JsonParser jsonParser,
                 final DeserializationContext context
         ) throws IOException {
-            final ObjectMapper objectMapper = new ObjectMapper();
             final JsonNode groupsNode = objectMapper.readTree(jsonParser);
             final JsonNode itemsNode = groupsNode.get("items");
             return StreamSupport.stream(itemsNode.spliterator(), false)
