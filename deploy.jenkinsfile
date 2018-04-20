@@ -89,7 +89,7 @@ buildPipeline(script) {
                         startDate: dayBefore,
                         endDate: yesterday,
                         apiKeyCredentialId: orcCredentialsId,
-                        waitForActiveTasks: true
+                        waitForActiveTasks: false
                 )
             }
         )
