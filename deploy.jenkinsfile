@@ -81,7 +81,8 @@ buildPipeline(script) {
         orcTasksToRun.put(
             orcTaskName,
             {
-                runOrcTask(
+                try {
+                    runOrcTask(
                         script,
                         templateName: orcTaskName,
                         environment: OrcEnvironment.QA,
@@ -90,7 +91,11 @@ buildPipeline(script) {
                         endDate: yesterday,
                         apiKeyCredentialId: orcCredentialsId,
                         waitForActiveTasks: false
-                )
+                    )
+                } catch(any) {
+                    // Ignoring to let it continue if they fail
+                    echo "Caught exception: ${any.message}"
+                }
             }
         )
     }
