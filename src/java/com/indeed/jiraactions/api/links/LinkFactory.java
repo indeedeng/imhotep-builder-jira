@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LinkFactory {
-    private static final Pattern LINK_PATTERN = Pattern.compile("This issue ([A-Za-z ]+) ([A-Z]+-[0-9]+)");
+    private static final Pattern LINK_PATTERN = Pattern.compile("This issue ([A-Za-z ]+) ([A-Z0-9]+-[0-9]+)");
 
     protected Link makeLink(@Nonnull final String input) {
         final Matcher matcher = LINK_PATTERN.matcher(input);
