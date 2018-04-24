@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 public class TestLinkFactory {
@@ -15,7 +16,7 @@ public class TestLinkFactory {
     }
 
     @Test
-    public void testNewLink() {
+    public void testNewLink() throws IOException {
         final String issuekey = "ABC-123";
         final List<String> types = ImmutableList.<String>builder()
                 .add("is referenced by")
