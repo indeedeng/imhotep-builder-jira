@@ -31,12 +31,12 @@ public class TsvFileWriter {
     private final Map<DateMidnight, WriterData> writerDataMap;
     private final List<TSVColumnSpec> columnSpecs;
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes) {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
-        this.columnSpecs = createColumnSpecs();
+        this.columnSpecs = createColumnSpecs(linkTypes);
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
@@ -77,7 +77,9 @@ public class TsvFileWriter {
                 .addColumn("summary", Action::getSummary)
                 .addLongColumn("timeinstate", Action::getTimeinstate)
                 .addLongColumn("timesinceaction", Action::getTimesinceaction)
-                .addTimeColumn("time", Action::getTimestamp);
+                .addTimeColumn("time", Action::getTimestamp)
+                .addLinkColumns(linkTypes);
+
         for (final CustomFieldDefinition customField : config.getCustomFields()) {
             specBuilder.addCustomFieldColumns(customField);
         }
