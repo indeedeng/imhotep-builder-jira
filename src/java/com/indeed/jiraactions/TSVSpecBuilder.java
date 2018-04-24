@@ -59,7 +59,13 @@ public class TSVSpecBuilder {
     }
 
     public TSVSpecBuilder addLinkColumns(final List<String> linkTypes) {
-        final Function<Action, >
+        for(final String type : linkTypes) {
+            final Function<Action, String> valueExtractor = action -> getLinkValue(type, action);
+            addColumn(
+                    String.format("link_%s*", type.replace(" ", "_")), valueExtractor);
+        }
+
+        return this;
     }
 
     private static List<String> getCustomFieldValue(final CustomFieldDefinition customField, final Action action) {

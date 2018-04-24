@@ -96,9 +96,8 @@ public class ActionFactory {
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate").replace(" 00:00:00.0", "") : prevAction.getDueDate())
                 .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
-                .createdDate(prevAction.getCreatedDate());
-
-        builder.links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("Link")));
+                .createdDate(prevAction.getCreatedDate())
+                .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")));
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
