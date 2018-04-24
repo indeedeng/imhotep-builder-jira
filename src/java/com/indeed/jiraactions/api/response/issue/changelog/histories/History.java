@@ -8,10 +8,14 @@ import com.indeed.jiraactions.api.response.issue.User;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author soono
@@ -76,6 +80,10 @@ public class History {
             }
         }
         return bestItem;
+    }
+
+    public List<Item> getAllItems(@Nonnull final String field) {
+        return Arrays.stream(items).filter(i -> field.equals(i.field)).collect(Collectors.toList());
     }
 
     public String getItemLastValue(final String field) {
