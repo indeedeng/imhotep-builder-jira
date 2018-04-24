@@ -3,6 +3,7 @@ package com.indeed.jiraactions;
 import com.google.common.collect.ImmutableList;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
+import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.util.logging.Loggers;
 
@@ -57,6 +58,10 @@ public class TSVSpecBuilder {
         return this;
     }
 
+    public TSVSpecBuilder addLinkColumns(final List<String> linkTypes) {
+        final Function<Action, >
+    }
+
     private static List<String> getCustomFieldValue(final CustomFieldDefinition customField, final Action action) {
         final CustomFieldValue value = action.getCustomFieldValues().get(customField);
         if (value == null) {
@@ -70,5 +75,13 @@ public class TSVSpecBuilder {
         } else {
             return value.getValues();
         }
+    }
+
+    private static String getLinkValue(final String linkType, final Action action) {
+        final Iterable<String> values = action.getLinks().stream()
+                .filter(x -> x.getDescription().equals(linkType))
+                .map(Link::getTargetKey)::iterator;
+
+        return String.join(" ", values);
     }
 }

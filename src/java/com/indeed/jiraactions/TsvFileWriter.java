@@ -51,7 +51,7 @@ public class TsvFileWriter {
         }
     }
 
-    private List<TSVColumnSpec> createColumnSpecs() {
+    private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
         final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
         specBuilder
                 .addColumn("action", Action::getAction)

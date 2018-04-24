@@ -3,16 +3,15 @@ package com.indeed.jiraactions;
 import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
+import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
-
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
-
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Value.Immutable
 public interface Action {
@@ -41,6 +40,7 @@ public interface Action {
     String getCreatedDate();
     String getPriority();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
+    Set<Link> getLinks();
 
     @Nullable
     @VisibleForTesting

@@ -1,17 +1,16 @@
 package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.response.issue.User;
-
 import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Immutables are awesome, but they have one primary flaw: they can be hard to use in tests. We want the fields on the actual Action class
@@ -56,7 +55,7 @@ public class ImmutableProxy<T> implements InvocationHandler {
     @Override
     public Object invoke(final Object proxy,
                          final Method method,
-                         final Object[] args) throws Throwable {
+                         final Object[] args) {
         final Class<?> returnType = method.getReturnType();
         if(returnType.isAssignableFrom(Number.class)) {
             return returnType.cast(0);
@@ -76,6 +75,8 @@ public class ImmutableProxy<T> implements InvocationHandler {
             return Collections.emptyList();
         } else if(returnType.equals(Map.class)) {
             return Collections.emptyMap();
+        } else if(returnType.equals(Set.class)) {
+            return Collections.emptySet();
         } else if(returnType.equals(User.class)) {
             return User.INVALID_USER;
         }

@@ -2,13 +2,14 @@ package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+import com.indeed.jiraactions.api.links.LinkFactory;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import org.joda.time.DateTime;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.Objects;
 
 public class ActionFactory {
@@ -16,7 +17,9 @@ public class ActionFactory {
     private final UserLookupService userLookupService;
     private final CustomFieldApiParser customFieldParser;
     private final JiraActionsIndexBuilderConfig config;
+    private final LinkFactory linkFactory = new LinkFactory();
 
+    @SuppressWarnings("WeakerAccess")
     public ActionFactory(final UserLookupService userLookupService,
                          final CustomFieldApiParser customFieldApiParser,
                          final JiraActionsIndexBuilderConfig config) {
@@ -52,7 +55,8 @@ public class ActionFactory {
                 .dueDate(issue.initialValue("duedate"))
                 .components(issue.initialValue("components"))
                 .labels(issue.initialValue("labels"))
-                .createdDate(issue.fields.created.toString("yyyy-MM-dd"));
+                .createdDate(issue.fields.created.toString("yyyy-MM-dd"))
+                .links(Collections.emptySet());
 
             for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
                 builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseInitialValue(customFieldDefinition, issue));
@@ -61,7 +65,7 @@ public class ActionFactory {
         return builder.build();
     }
 
-    public Action update(final Action prevAction, final History history) throws IOException {
+    public Action update(final Action prevAction, final History history) {
         final User assignee = history.itemExist("assignee")
                 ? userLookupService.getUser(history.getItemLastValueKey("assignee"))
                 : prevAction.getAssignee();
@@ -93,6 +97,8 @@ public class ActionFactory {
                 .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate());
+
+        builder.links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("Link")));
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
