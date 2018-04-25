@@ -65,6 +65,9 @@ public class TSVSpecBuilder {
                     String.format("link_%s*", type.replace(" ", "_")), valueExtractor);
         }
 
+        final Function<Action, String> valueExtractor = TSVSpecBuilder::getAllLinksValue;
+        addColumn("links*", valueExtractor);
+
         return this;
     }
 
@@ -86,6 +89,13 @@ public class TSVSpecBuilder {
     private static String getLinkValue(final String linkType, final Action action) {
         final Iterable<String> values = action.getLinks().stream()
                 .filter(x -> x.getDescription().equals(linkType))
+                .map(Link::getTargetKey)::iterator;
+
+        return String.join(" ", values);
+    }
+
+    private static String getAllLinksValue(final Action action) {
+        final Iterable<String> values = action.getLinks().stream()
                 .map(Link::getTargetKey)::iterator;
 
         return String.join(" ", values);
