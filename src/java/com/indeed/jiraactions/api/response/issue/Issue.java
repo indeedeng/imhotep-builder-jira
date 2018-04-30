@@ -19,7 +19,7 @@ public class Issue {
     public Field fields;
     public ChangeLog changelog;
 
-    public String initialValue(final String field) throws Exception {
+    public String initialValue(final String field) throws IOException {
         return initialValue(field, field);
     }
 

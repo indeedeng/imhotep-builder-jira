@@ -118,6 +118,7 @@ public class TsvFileWriter {
             final WriterData writerData = writerDataMap.get(action.getTimestamp().toDateMidnight());
             final BufferedWriter bw = writerData.getBufferedWriter();
             writerData.setWritten();
+            writerData.setDirty(true);
             final String line = columnSpecs.stream()
                     .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
                     .map(rawValue -> rawValue.replace("\t", "\\t"))
@@ -127,9 +128,11 @@ public class TsvFileWriter {
             bw.newLine();
         }
 
-        writerDataMap.values().forEach(x -> {
+        writerDataMap.values().stream()
+                .filter(WriterData::isDirty).forEach(x -> {
             try {
                 x.getBufferedWriter().flush();
+                x.setDirty(false);
             } catch (final IOException e) {
                 log.error("Failed to flush.", e);
             }
@@ -185,12 +188,12 @@ public class TsvFileWriter {
     private static class WriterData {
         private final File file;
         private final BufferedWriter bw;
-        private boolean written;
+        private boolean written = false;
+        private boolean dirty = false;
 
         private WriterData(final File file, final BufferedWriter bw) {
             this.file = file;
             this.bw = bw;
-            this.written = false;
         }
 
         private File getFile() {
@@ -207,6 +210,14 @@ public class TsvFileWriter {
 
         private void setWritten() {
             this.written = true;
+        }
+
+        private boolean isDirty() {
+            return dirty;
+        }
+
+        private void setDirty(final boolean dirty) {
+            this.dirty = dirty;
         }
     }
 }

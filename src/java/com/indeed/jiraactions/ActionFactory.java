@@ -9,6 +9,7 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import org.joda.time.DateTime;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -28,7 +29,7 @@ public class ActionFactory {
         this.config = config;
     }
 
-    public Action create(final Issue issue) throws Exception {
+    public Action create(final Issue issue) throws IOException {
         final User assignee = userLookupService.getUser(issue.initialValueKey("assignee", "assigneekey"));
         final User reporter = userLookupService.getUser(issue.initialValueKey("reporter", "reporterkey"));
         final ImmutableAction.Builder builder = ImmutableAction.builder()

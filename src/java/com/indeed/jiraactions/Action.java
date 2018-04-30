@@ -51,4 +51,9 @@ public interface Action {
         }
         return JiraActionsUtil.parseDateTime(getDueDate()).plusDays(1).withTimeAtStartOfDay();
     }
+
+    @Value.Derived
+    default boolean isInRange(final DateTime start, final DateTime end) {
+        return start.compareTo(getTimestamp()) <= 0 && end.compareTo(getTimestamp()) > 0;
+    }
 }
