@@ -74,20 +74,6 @@ public class ActionsBuilderTest {
     }
 
     @Test
-    public void testBuildActions_oldIssueDoesNotHaveCreateAction() throws Exception {
-        final DateTime issueDate = startDate.minusDays(7);
-        setCreationDate(issueDate);
-
-        final DateTime updateDate = startDate.plusDays(1);
-        createHistory(updateDate);
-
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
-        final List<Action> actions = actionsBuilder.buildActions();
-
-        Assert.assertFalse("create".equals(actions.get(0).getAction()));
-    }
-
-    @Test
     public void testBuildActions_setNewUpdate() throws Exception {
         final DateTime issueDate = startDate.plusDays(1);
         setCreationDate(issueDate);
@@ -108,29 +94,6 @@ public class ActionsBuilderTest {
     }
 
     @Test
-    public void testBuildActions_doesNotSetOldUpdate() throws Exception {
-        final DateTime issueDate = startDate.minusDays(7);
-        setCreationDate(issueDate);
-
-        final DateTime tooOldUpdateDate = issueDate.plusDays(1);
-        createHistory(tooOldUpdateDate);
-
-        final DateTime tooNewUpdateDate = endDate.plusDays(1);
-        createHistory(tooNewUpdateDate);
-
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
-        final List<Action> actions = actionsBuilder.buildActions();
-
-        boolean containsUpdate = false;
-        for (final Action action : actions) {
-            if ("update".equals(action.getAction())) {
-                containsUpdate = true;
-            }
-        }
-        Assert.assertFalse(containsUpdate);
-    }
-
-    @Test
     public void testBuildActions_setNewComments() throws Exception {
         final DateTime issueDate = startDate.plusDays(1);
         setCreationDate(issueDate);
@@ -148,29 +111,6 @@ public class ActionsBuilderTest {
             }
         }
         Assert.assertTrue(containsComment);
-    }
-
-    @Test
-    public void testBuildActions_doesNotSetOldComments() throws Exception {
-        final DateTime issueDate = startDate.minusDays(7);
-        setCreationDate(issueDate);
-
-        final DateTime tooOldUpdateDate = issueDate.plusDays(1);
-        createComment(tooOldUpdateDate);
-
-        final DateTime tooNewUpdateDate = endDate.plusDays(1);
-        createComment(tooNewUpdateDate);
-
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
-        final List<Action> actions = actionsBuilder.buildActions();
-
-        boolean containsComment = false;
-        for (final Action action : actions) {
-            if ("comment".equals(action.getAction())) {
-                containsComment = true;
-            }
-        }
-        Assert.assertFalse(containsComment);
     }
 
     private void createHistory(final DateTime created) {

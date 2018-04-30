@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestJiraActionsIndexBuilder {
+public class TestPaginatorFiltering {
     private static final Issue issue = new Issue();
     private static final DateTime base = DateTime.now();
     private static final Action defaultAction = ImmutableProxy.createProxy(Action.class);
@@ -33,7 +33,7 @@ public class TestJiraActionsIndexBuilder {
 
     @Test
     public void testFilterActionsEmpty() {
-        final List<Action> actions = JiraActionsIndexBuilder.getActionsFilterByLastSeen(ImmutableMap.of(), issue, ImmutableList.of());
+        final List<Action> actions = Paginator.getActionsFilterByLastSeen(ImmutableMap.of(), issue, ImmutableList.of());
         Assert.assertNotNull(actions);
         Assert.assertEquals(0, actions.size());
     }
@@ -43,7 +43,7 @@ public class TestJiraActionsIndexBuilder {
         final Map<String, DateTime> seenIssues = new HashMap<>();
         final List<Action> actions = ImmutableList.of(create, update);
 
-        final List<Action> filteredActions = JiraActionsIndexBuilder.getActionsFilterByLastSeen(seenIssues, issue, actions);
+        final List<Action> filteredActions = Paginator.getActionsFilterByLastSeen(seenIssues, issue, actions);
 
         Assert.assertEquals(actions, filteredActions);
         Assert.assertEquals(1, seenIssues.size());
@@ -56,13 +56,13 @@ public class TestJiraActionsIndexBuilder {
         final List<Action> actions = new ArrayList<>(2);
         actions.add(create);
 
-        final List<Action> filteredActions1 = JiraActionsIndexBuilder.getActionsFilterByLastSeen(seenIssues, issue, actions);
+        final List<Action> filteredActions1 = Paginator.getActionsFilterByLastSeen(seenIssues, issue, actions);
         Assert.assertEquals(actions, filteredActions1);
         Assert.assertEquals(1, seenIssues.size());
         Assert.assertEquals(create.getTimestamp(), seenIssues.get(issue.key));
 
         actions.add(update);
-        final List<Action> filteredActions2 = JiraActionsIndexBuilder.getActionsFilterByLastSeen(seenIssues, issue, actions);
+        final List<Action> filteredActions2 = Paginator.getActionsFilterByLastSeen(seenIssues, issue, actions);
         Assert.assertEquals(ImmutableList.of(update), filteredActions2);
         Assert.assertEquals(1, seenIssues.size());
         Assert.assertEquals(update.getTimestamp(), seenIssues.get(issue.key));

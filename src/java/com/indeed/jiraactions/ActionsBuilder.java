@@ -7,9 +7,10 @@ import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ActionsBuilder {
     private static final Logger LOG = Logger.getLogger(ActionsBuilder.class);
@@ -29,18 +30,19 @@ public class ActionsBuilder {
         actions = new ArrayList<>(issue.changelog.histories.length + issue.fields.comment.comments.length);
     }
 
-    public List<Action> buildActions() throws Exception {
+    @Nonnull
+    public List<Action> buildActions() throws IOException {
         setCreateAction();
         setUpdateActions();
         setCommentActions();
-        return actions.stream().filter(a -> isCreatedDuringRange(a.getTimestamp())).collect(Collectors.toList());
+        return actions;
     }
 
     //
     // For Create Action
     //
 
-    private void setCreateAction() throws Exception {
+    private void setCreateAction() throws IOException {
         final Action createAction = actionFactory.create(issue);
         actions.add(createAction);
     }
@@ -49,7 +51,7 @@ public class ActionsBuilder {
     // For Update Action
     //
 
-    private void setUpdateActions() throws Exception {
+    private void setUpdateActions() {
         issue.changelog.sortHistories();
 
         Action prevAction = actions.get(actions.size()-1); // safe because we always add the create action
