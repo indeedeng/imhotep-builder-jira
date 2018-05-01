@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestPaginator {
-    private final Action defaultAction = ImmutableAction.builder().from(ImmutableProxy.createProxy(Action.class)).updated(null).build();I
+    private final Action defaultAction = ImmutableAction.builder().from(ImmutableProxy.createProxy(Action.class)).updated(null).build();
     private final DateTime start = DateTime.now().minusYears(3);
     private final DateTime mid = start.plusYears(1);
     private final DateTime end = mid.plusYears(1);
