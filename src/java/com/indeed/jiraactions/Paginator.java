@@ -72,16 +72,17 @@ public class Paginator {
                         pageProvider.writeActions(filteredActions);
 
 
+                        final boolean existingActionUpdatedNew = isAnyActionsUpdatedAfterLastSeen(seenIssues, issue, preFilteredActions);
                         if(!firstPass // Don't bail out the first time through
                                 && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
                                 && actions.size() == 0// There is nothing new since the last time we saw it
-                                && !isAnyActionsUpdatedAfterLastSeen(seenIssues, issue, preFilteredActions) // Ignore edited comments
+                                && !existingActionUpdatedNew // Ignore edited comments
                              ) {
                             Loggers.debug(log, "Saw no new actions for %s, stopping.", issue.key);
                             reFoundTheBeginning = true;
                             break;
                         }
-                        if(preFilteredActions.size() > 0) {
+                        if(preFilteredActions.size() > 0 && !existingActionUpdatedNew) {
                             firstIssue = false;
                         }
                     } catch (final Exception e) {
