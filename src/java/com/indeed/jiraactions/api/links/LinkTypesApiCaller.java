@@ -13,17 +13,21 @@ import java.util.List;
  * Each JIRA could have its own set of links. We need to know what links exist when we start so we can keep them
  * in the right place in the TSV.
  */
-public class LinkTypesApiCaller extends ApiCaller {
+public class LinkTypesApiCaller {
     private static final String API_PATH = "/rest/api/2/issueLinkType";
 
-    public LinkTypesApiCaller(final JiraActionsIndexBuilderConfig config) {
-        super(config);
+    private final JiraActionsIndexBuilderConfig config;
+    private final ApiCaller apiCaller;
+
+    public LinkTypesApiCaller(final JiraActionsIndexBuilderConfig config, final ApiCaller apiCaller) {
+        this.config = config;
+        this.apiCaller = apiCaller;
     }
 
     public List<String> getLinkTypes() throws IOException {
         final ImmutableList.Builder<String> output = ImmutableList.builder();
 
-        final JsonNode root = getJsonNode(config.getJiraBaseURL() + API_PATH);
+        final JsonNode root = apiCaller.getJsonNode(config.getJiraBaseURL() + API_PATH);
         for (final Iterator<JsonNode> it = root.get("issueLinkTypes").elements(); it.hasNext(); ) {
             final JsonNode node = it.next();
             output.add(node.get("inward").textValue());

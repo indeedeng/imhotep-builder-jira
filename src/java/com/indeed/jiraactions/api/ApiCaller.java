@@ -3,6 +3,7 @@ package com.indeed.jiraactions.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
+import com.indeed.util.logging.Loggers;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
@@ -14,20 +15,25 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-public abstract class ApiCaller {
+public class ApiCaller {
     protected final JiraActionsIndexBuilderConfig config;
 
     private static final Logger log = Logger.getLogger(ApiCaller.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String authentication;
+    private String jsessionId = null;
+    private String upstream = null;
+    private String cookies = "";
+    private String pinnedNode = "";
 
     public ApiCaller(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
         this.authentication = getBasicAuth();
     }
 
-    protected JsonNode getJsonNode(final String url) throws IOException {
+    public JsonNode getJsonNode(final String url) throws IOException {
         HttpsURLConnection urlConnection = null;
         Map<String, List<String>> headers = null;
         BufferedReader br = null;
@@ -38,6 +44,33 @@ public abstract class ApiCaller {
             final InputStream in = urlConnection.getInputStream();
             br = new BufferedReader(new InputStreamReader(in));
             apiResults = br.readLine();
+
+            final String anodeId = urlConnection.getHeaderField("X-ANODEID");
+
+            if(jsessionId == null || upstream == null) {
+                final Map<String, List<String>> responseHeaders = urlConnection.getHeaderFields();
+                final List<String> cookies = responseHeaders.get("Set-Cookie");
+                if(cookies != null) {
+                    for(final String cookie : cookies) {
+                        if(cookie.startsWith("JSESSIONID=")) {
+                            final int start = "JSESSIONID=".length();
+                            final int end = cookie.contains(";") ? cookie.indexOf(";") : cookie.length();
+                            jsessionId = cookie.substring(start, end);
+                        } else if(cookie.startsWith("upstream")) {
+                            final int start = "upstream=".length();
+                            final int end = cookie.contains(";") ? cookie.indexOf(";") : cookie.length();
+                            upstream = cookie.substring(start, end);
+                        }
+                    }
+                    setCookies();
+                    pinnedNode = anodeId;
+                    Loggers.info(log, "Set JSESSION=%s;upstream=%s. Pinning to X-ANODEID=%s",
+                            jsessionId, upstream, anodeId);
+                }
+            }
+            if(!Objects.equals(pinnedNode, anodeId)) {
+                Loggers.warn(log, "Expected X-ANODEID=%s but found %s", pinnedNode, anodeId);
+            }
             return objectMapper.readTree(apiResults);
         } catch (final IOException e) {
             final StringBuilder sb = new StringBuilder();
@@ -116,7 +149,25 @@ public abstract class ApiCaller {
         final URL url = new URL(urlString);
         final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", authentication);
+
+        if(cookies.length() > 0) {
+            urlConnection.setRequestProperty("Cookie", cookies);
+        }
         return urlConnection;
+    }
+
+    private void setCookies() {
+        final StringBuilder sb = new StringBuilder();
+        if(jsessionId != null) {
+            sb.append("JSESSIONID=").append(jsessionId);
+        }
+        if(upstream != null) {
+            if(sb.length() > 0) {
+                sb.append(";");
+            }
+            sb.append("upstream=").append(upstream);
+        }
+        cookies = sb.toString();
     }
 
     private String getBasicAuth() {

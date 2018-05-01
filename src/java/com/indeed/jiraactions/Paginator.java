@@ -7,7 +7,7 @@ import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +51,7 @@ public class Paginator {
      * 3) We find something we've already seen at the very beginning of our list. We're done.
      */
     public void process() throws InterruptedException {
-        final Map<String, DateTime> seenIssues = new LinkedHashMap<>();
+        final Map<String, DateTime> seenIssues = new HashMap<>();
         boolean reFoundTheBeginning = false;
         boolean firstIssue = true;
         boolean firstPass = true;
@@ -114,10 +114,9 @@ public class Paginator {
 
         final List<Action> output;
         if(!seenIssues.containsKey(issue.key)) {
-            seenIssues.remove(issue.key); // Need to change its ordering in the map
             output = actions;
         } else {
-            final DateTime lastActionTime = seenIssues.get(issue.key);
+            final DateTime lastActionTime = seenIssues.remove(issue.key); // Need to change its ordering in the map
             // We could binary search this instead for efficiency, but I don't think it's worth the extra work right now
             output = actions.stream().filter(a -> a.getTimestamp().isAfter(lastActionTime)).collect(Collectors.toList());
         }
