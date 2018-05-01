@@ -14,11 +14,13 @@ import java.util.stream.Collectors;
 /**
  * @author soono
  */
-public class IssuesAPICaller extends ApiCaller {
+public class IssuesAPICaller {
     private static final Logger log = Logger.getLogger(IssuesAPICaller.class);
     private static final String API_PATH = "/rest/api/2/search";
 
     private final String urlBase;
+    private final ApiCaller apiCaller;
+    private final JiraActionsIndexBuilderConfig config;
 
     // For Pagination
     private final int maxPerPage; // Max number of issues per page
@@ -28,12 +30,14 @@ public class IssuesAPICaller extends ApiCaller {
 
     private int backoff = 10_000;
 
-    public IssuesAPICaller(final JiraActionsIndexBuilderConfig config) throws UnsupportedEncodingException {
-        super(config);
-        this.maxPerPage = config.getJiraBatchSize()*2;
-        this.batchSize = config.getJiraBatchSize();
+    public IssuesAPICaller(final JiraActionsIndexBuilderConfig config, final ApiCaller apiCaller) throws UnsupportedEncodingException {
+        this.config = config;
+        this.apiCaller = apiCaller;
 
-        this.urlBase = getIssuesUrlBase();
+        maxPerPage = config.getJiraBatchSize()*2;
+        batchSize = config.getJiraBatchSize();
+
+        urlBase = getIssuesUrlBase();
     }
 
     public JsonNode getIssuesNodeWithBackoff() throws InterruptedException {
@@ -66,14 +70,14 @@ public class IssuesAPICaller extends ApiCaller {
     }
 
     private JsonNode getIssuesNode() throws IOException {
-        final JsonNode apiRes = getJsonNode(getIssuesURL());
+        final JsonNode apiRes = apiCaller.getJsonNode(getIssuesURL());
         setNextPage();
         this.numTotal = apiRes.get("total").intValue();
         return apiRes.get("issues");
     }
 
     public int setNumTotal() throws IOException {
-        final JsonNode apiRes = getJsonNode(getBasicInfoURL());
+        final JsonNode apiRes = apiCaller.getJsonNode(getBasicInfoURL());
         final JsonNode totalNode = apiRes.path("total");
         final int total = totalNode.intValue();
         this.numTotal = total;

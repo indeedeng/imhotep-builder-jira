@@ -3,6 +3,7 @@ package com.indeed.jiraactions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.indeed.jiraactions.api.ApiCaller;
 import com.indeed.jiraactions.api.ApiUserLookupService;
 import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
@@ -31,11 +32,13 @@ public class JiraActionsIndexBuilder {
         try {
             final Stopwatch stopwatch = Stopwatch.createStarted();
 
-            final ApiUserLookupService userLookupService = new ApiUserLookupService(config);
+            final ApiCaller apiCaller = new ApiCaller(config);
+
+            final ApiUserLookupService userLookupService = new ApiUserLookupService(config, apiCaller);
             final CustomFieldApiParser customFieldApiParser = new CustomFieldApiParser(userLookupService);
             final ActionFactory actionFactory = new ActionFactory(userLookupService, customFieldApiParser, config);
 
-            final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config);
+            final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config, apiCaller);
             initializeIssuesApiCaller(issuesAPICaller);
 
             if(!issuesAPICaller.currentPageExist()) {
@@ -52,7 +55,7 @@ public class JiraActionsIndexBuilder {
                 Loggers.error(log, "Invalid start date '%s' not before end date '%s'", startDate, endDate);
             }
 
-            final LinkTypesApiCaller linkTypesApiCaller = new LinkTypesApiCaller(config);
+            final LinkTypesApiCaller linkTypesApiCaller = new LinkTypesApiCaller(config, apiCaller);
             final List<String> linkTypes = linkTypesApiCaller.getLinkTypes();
 
             final TsvFileWriter writer = new TsvFileWriter(config, linkTypes);

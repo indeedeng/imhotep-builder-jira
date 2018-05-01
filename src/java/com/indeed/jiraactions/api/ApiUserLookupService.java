@@ -21,17 +21,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
-public class ApiUserLookupService extends ApiCaller implements UserLookupService {
+public class ApiUserLookupService implements UserLookupService {
     private static final Logger log = Logger.getLogger(ApiUserLookupService.class);
     private static final String API_BASE = "/rest/api/2/user";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ApiCaller apiCaller;
     private final String baseUrl;
     private long userLookupTime;
 
-    public ApiUserLookupService(final JiraActionsIndexBuilderConfig config) {
-        super(config);
+    public ApiUserLookupService(final JiraActionsIndexBuilderConfig config, final ApiCaller apiCaller) {
+        this.apiCaller = apiCaller;
 
         baseUrl = config.getJiraBaseURL() + API_BASE;
     }
@@ -67,7 +68,7 @@ public class ApiUserLookupService extends ApiCaller implements UserLookupService
 
         try {
             final String url = getApiUrlForUser(key);
-            final JsonNode json = getJsonNode(url);
+            final JsonNode json = apiCaller.getJsonNode(url);
             return parseUser(json);
         } catch(final IOException e) {
             log.error("Could not find user " + key + ". Using fallback.", e);
