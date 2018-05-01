@@ -75,6 +75,7 @@ public class Paginator {
                         if(!firstPass // Don't bail out the first time through
                                 && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
                                 && actions.size() == 0) { // There is nothing new since the last time we saw it
+                            Loggers.debug(log, "Saw no new actions for %s, stopping.", issue.key);
                             reFoundTheBeginning = true;
                             break;
                         }
