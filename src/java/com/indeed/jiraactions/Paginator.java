@@ -72,17 +72,17 @@ public class Paginator {
                         pageProvider.writeActions(filteredActions);
 
 
-                        final boolean existingActionUpdatedNew = isAnyActionsUpdatedAfterLastSeen(seenIssues, issue, preFilteredActions);
+                        final boolean ignoreForEndDetection = ignoreUpdatedDate(issue, preFilteredActions);
                         if(!firstPass // Don't bail out the first time through
                                 && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
                                 && actions.size() == 0// There is nothing new since the last time we saw it
-                                && !existingActionUpdatedNew // Ignore edited comments
+                                && !ignoreForEndDetection // Ignore out of order issues
                              ) {
                             Loggers.debug(log, "Saw no new actions for %s, stopping.", issue.key);
                             reFoundTheBeginning = true;
                             break;
                         }
-                        if(preFilteredActions.size() > 0 && !existingActionUpdatedNew) {
+                        if(preFilteredActions.size() > 0 && !ignoreForEndDetection) {
                             firstIssue = false;
                         }
                     } catch (final Exception e) {
@@ -104,14 +104,22 @@ public class Paginator {
         }
     }
 
-    protected static boolean isAnyActionsUpdatedAfterLastSeen(final Map<String, DateTime> seenIssues, final Issue issue,
-                                                              final List<Action> actions) {
-        final DateTime lastActionTime = seenIssues.get(issue.key);
-
-        return actions.stream().anyMatch(a -> a.getUpdated() != null && a.getUpdated().isAfter(lastActionTime));
+    /**
+     * Jira sorts things by the lastUpdatedDate. That doesn't always correspond to the timestamp of an action. This
+     * could happen because there's an update that's not visible (for example, a restricted visibility comment) or
+     * because an existing action was modified (for example, editing a comment).
+     * We retrieve the list of issues from Jira in descending updatedDate order. A comment with an action we can't
+     * see could cause us to prematuerly think we've finished processing all the new updates. To avoid this, we should
+     * ignore things that have an updatedDate later than the last action.
+     * not updates.
+     *
+     * ATTENTION: Requires that actions be sorted by timestamp, ascending.
+     */
+    protected static boolean ignoreUpdatedDate(final Issue issue, final List<Action> actions) {
+        return issue.fields.updated.isAfter(actions.get(actions.size()-1).getTimestamp());
     }
 
-    /*
+    /**
      * We've changed the way this works, and now we could see an issue more than once (I guess technically we always
      * could, but it was far rarer). If we write the same row to the TSV more than once, we'll have duplicate data. To
      * prevent this, we'll keep track of the last timestamp for each issue, and filter out anything that's before that

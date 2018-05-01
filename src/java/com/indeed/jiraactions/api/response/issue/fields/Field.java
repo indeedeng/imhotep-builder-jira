@@ -20,6 +20,7 @@ public class Field {
     public User assignee;
     public CommentCollection comment;
     public DateTime created;
+    public DateTime updated;
     public User creator;
     public Issuetype issuetype;
     public Project project;
@@ -37,6 +38,11 @@ public class Field {
     @JsonProperty("created")
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);
+    }
+
+    @JsonProperty("updated")
+    public void setUpdated(final String updated) {
+        this.updated = JiraActionsUtil.parseDateTime(updated);
     }
 
     @SuppressWarnings("unused")
