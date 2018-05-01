@@ -74,7 +74,9 @@ public class Paginator {
 
                         if(!firstPass // Don't bail out the first time through
                                 && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
-                                && actions.size() == 0) { // There is nothing new since the last time we saw it
+                                && actions.size() == 0// There is nothing new since the last time we saw it
+                                && !isAnyActionsUpdatedAfterLastSeen(seenIssues, issue, preFilteredActions) // Ignore edited comments
+                             ) {
                             Loggers.debug(log, "Saw no new actions for %s, stopping.", issue.key);
                             reFoundTheBeginning = true;
                             break;
@@ -99,6 +101,13 @@ public class Paginator {
             firstPass = false;
             log.info("Starting over to pick up lost issues.");
         }
+    }
+
+    protected static boolean isAnyActionsUpdatedAfterLastSeen(final Map<String, DateTime> seenIssues, final Issue issue,
+                                                              final List<Action> actions) {
+        final DateTime lastActionTime = seenIssues.get(issue.key);
+
+        return actions.stream().anyMatch(a -> a.getUpdated() != null && a.getUpdated().isAfter(lastActionTime));
     }
 
     /*
