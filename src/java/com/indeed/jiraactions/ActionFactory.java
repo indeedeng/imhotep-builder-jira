@@ -117,6 +117,7 @@ public class ActionFactory {
                 .timeinstate(timeInState(prevAction, comment))
                 .timesinceaction(getTimeDiff(prevAction.getTimestamp(), comment.created))
                 .timestamp(comment.created)
+                .updated(comment.updated)
                 .build();
     }
 
