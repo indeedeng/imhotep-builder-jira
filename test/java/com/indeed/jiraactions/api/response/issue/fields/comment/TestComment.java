@@ -18,7 +18,6 @@ public class TestComment {
 
         comment.body = "body";
         comment.created = JiraActionsUtil.parseDateTime("2017-01-01");
-        comment.updated = JiraActionsUtil.parseDateTime("2017-01-02");
 
         Assert.assertTrue(comment.isValid());
     }

@@ -17,7 +17,6 @@ public class Comment {
     public User author;
     public String body;
     public DateTime created;
-    public DateTime updated;
 
     public boolean isValid() {
         return author != null;
@@ -26,10 +25,5 @@ public class Comment {
     @JsonProperty("created")
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);
-    }
-
-    @JsonProperty("updated")
-    public void setUpdate(final String updated) {
-        this.updated = JiraActionsUtil.parseDateTime(updated);
     }
 }

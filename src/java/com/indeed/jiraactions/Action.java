@@ -42,8 +42,6 @@ public interface Action {
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
 
-    @Nullable DateTime getUpdated();
-
     @Nullable
     @VisibleForTesting
     @Value.Derived
