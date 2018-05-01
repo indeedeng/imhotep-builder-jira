@@ -2,6 +2,7 @@ package com.indeed.jiraactions;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.util.logging.Loggers;
 import org.apache.log4j.Logger;
@@ -61,7 +62,9 @@ public class Paginator {
 
             while (pageProvider.hasPage()) {
                 final Stopwatch stopwatch = Stopwatch.createStarted();
-                for(final Issue issue : pageProvider.getPage()) {
+                final List<Issue> issues = Lists.newArrayList(pageProvider.getPage());
+                log.debug(String.join(", ", issues.stream().map(x -> x.key).collect(Collectors.toList())));
+                for(final Issue issue : issues) {
                     try {
                         final List<Action> preFilteredActions = pageProvider.getActions(issue);
                         final List<Action> actions = getActionsFilterByLastSeen(seenIssues, issue, preFilteredActions);
