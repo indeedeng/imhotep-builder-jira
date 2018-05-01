@@ -46,4 +46,8 @@ public class Issue {
     public Item initialItem(final boolean acceptCustom, final String... fields) {
         return this.changelog.getFirstHistoryItem(acceptCustom, fields);
     }
+
+    public String toString() {
+        return key;
+    }
 }

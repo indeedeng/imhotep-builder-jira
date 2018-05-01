@@ -186,6 +186,108 @@ public class TestPaginator {
         mw.verifyAll();
     }
 
+    @Test
+    public void skipUpdatedComment() throws InterruptedException, IOException {
+        final Iterable<Issue> page1 = ImmutableList.of(a, b, c);
+        EasyMock.expect(provider.hasPage()).andReturn(true);
+        EasyMock.expect(provider.getPage()).andReturn(page1);
+        aActions.add(getCreateAction(a, mid));
+        bActions.add(getCreateAction(b, mid.minusHours(1)));
+        cActions.add(getCreateAction(c, mid.minusHours(2)));
+
+        final List<Action> page1A = new ArrayList<>(aActions);
+        EasyMock.expect(provider.getActions(a)).andReturn(page1A);
+        final List<Action> page1B = new ArrayList<>(bActions);
+        EasyMock.expect(provider.getActions(b)).andReturn(page1B);
+        final List<Action> page1C = new ArrayList<>(cActions);
+        EasyMock.expect(provider.getActions(c)).andReturn(page1C);
+
+        provider.writeActions(page1A);
+        EasyMock.expectLastCall();
+        provider.writeActions(page1B);
+        EasyMock.expectLastCall();
+        provider.writeActions(page1C);
+        EasyMock.expectLastCall();
+
+        EasyMock.expect(provider.hasPage()).andReturn(false);
+        provider.reset();
+        EasyMock.expectLastCall();
+
+
+        final Iterable<Issue> page2 = ImmutableList.of(a, b, c);
+        EasyMock.expect(provider.hasPage()).andReturn(true);
+        EasyMock.expect(provider.getPage()).andReturn(page2);
+        aActions.add(getCommentAction(a, mid.plusMinutes(5)));
+        bActions.add(getCommentAction(b, mid.plusMinutes(3)));
+
+        final List<Action> page2A = new ArrayList<>(aActions);
+        EasyMock.expect(provider.getActions(a)).andReturn(page2A);
+        final List<Action> page2B = new ArrayList<>(bActions);
+        EasyMock.expect(provider.getActions(b)).andReturn(page2B);
+        final List<Action> page2C = new ArrayList<>(cActions);
+        EasyMock.expect(provider.getActions(c)).andReturn(page2C);
+
+        provider.writeActions(EasyMock.eq(ImmutableList.of(aActions.get(1))));
+        EasyMock.expectLastCall();
+        provider.writeActions(EasyMock.eq(ImmutableList.of(bActions.get(1))));
+        EasyMock.expectLastCall();
+        provider.writeActions(EasyMock.eq(ImmutableList.of()));
+        EasyMock.expectLastCall();
+
+        provider.reset();
+        EasyMock.expectLastCall();
+
+        final Iterable<Issue> page3 = ImmutableList.of(b, a, c);
+        EasyMock.expect(provider.hasPage()).andReturn(true);
+        EasyMock.expect(provider.getPage()).andReturn(page3);
+
+        bActions.set(1, ImmutableAction.builder()
+                            .from(bActions.get(1))
+                            .updated(mid.plusMinutes(10))
+                            .build()
+                        );
+        aActions.add(getCommentAction(a, mid.plusMinutes(7)));
+
+        final List<Action> page3B = new ArrayList<>(bActions);
+        EasyMock.expect(provider.getActions(b)).andReturn(page3B);
+        final List<Action> page3A = new ArrayList<>(aActions);
+        EasyMock.expect(provider.getActions(a)).andReturn(page3A);
+        final List<Action> page3C = new ArrayList<>(cActions);
+        EasyMock.expect(provider.getActions(c)).andReturn(page3C);
+
+        provider.writeActions(EasyMock.eq(ImmutableList.of()));
+        EasyMock.expectLastCall();
+        provider.writeActions(EasyMock.eq(ImmutableList.of(aActions.get(2))));
+        EasyMock.expectLastCall();
+        provider.writeActions(EasyMock.eq(ImmutableList.of()));
+        EasyMock.expectLastCall();
+
+        provider.reset();
+        EasyMock.expectLastCall();
+
+        EasyMock.expect(provider.hasPage()).andReturn(true);
+        EasyMock.expect(provider.getPage()).andReturn(page3);
+
+        EasyMock.expect(provider.getActions(b)).andReturn(page3B);
+        EasyMock.expect(provider.getActions(a)).andReturn(page3A);
+
+        provider.writeActions(EasyMock.eq(ImmutableList.of()));
+        EasyMock.expectLastCall();
+
+        provider.writeActions(EasyMock.eq(ImmutableList.of()));
+        EasyMock.expectLastCall();
+
+        provider.reset();
+        EasyMock.expectLastCall();
+
+        mw.replayAll();
+
+        final Paginator paginator = new Paginator(provider, start, end);
+        paginator.process();
+
+        mw.verifyAll();
+    }
+
     private Action getCreateAction(final Issue issue, final DateTime timestamp) {
         return ImmutableAction.builder()
                 .from(defaultAction)
