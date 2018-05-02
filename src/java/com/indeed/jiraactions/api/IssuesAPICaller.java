@@ -1,6 +1,7 @@
 package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 import com.indeed.jiraactions.JiraActionsUtil;
 import org.apache.commons.lang.StringUtils;
@@ -9,7 +10,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.python.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
