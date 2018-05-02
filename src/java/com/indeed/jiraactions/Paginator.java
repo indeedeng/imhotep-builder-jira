@@ -9,8 +9,10 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,7 @@ public class Paginator {
         while (!reFoundTheBeginning || !firstIssue) {
             reFoundTheBeginning = false;
             firstIssue = true;
+            final Set<String> seenThisLoop = new HashSet<>();
 
             while (pageProvider.hasPage()) {
                 final Stopwatch stopwatch = Stopwatch.createStarted();
@@ -77,11 +80,13 @@ public class Paginator {
                                 && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
                                 && actions.size() == 0// There is nothing new since the last time we saw it
                                 && !ignoreForEndDetection // Ignore out of order issues
+                                && !seenThisLoop.contains(issue.key) // Ignore if we see it and a few things push it down into our page
                              ) {
                             Loggers.debug(log, "Saw no new actions for %s, stopping.", issue.key);
                             reFoundTheBeginning = true;
                             break;
                         }
+                        seenThisLoop.add(issue.key);
                         if(preFilteredActions.size() > 0 && !ignoreForEndDetection) {
                             firstIssue = false;
                         }
