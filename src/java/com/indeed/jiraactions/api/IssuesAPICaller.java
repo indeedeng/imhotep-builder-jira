@@ -2,8 +2,14 @@ package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
+import com.indeed.jiraactions.JiraActionsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.python.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -125,6 +131,20 @@ public class IssuesAPICaller {
         return url;
     }
 
+    protected static final DateTimeZone JIRA_TIME_ZONE = DateTimeZone.forID("America/Chicago");
+    private static final DateTimeFormatter JIRA_TIME_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+    /**
+     * Imhotep builders always runs in UTC-6, regardless of DST. However, Jira observes daylight savings time.
+     * So when we're in DST and run for "2018-04-01" to "2018-04-02", we need to tell Jira we actually mean
+     * "2018-04-01T01:00:00" to "2018-04-02T01:00:00"
+     */
+    @VisibleForTesting
+    protected static String getDateStringInJiraTime(final String dateString) {
+        final DateTime date = JiraActionsUtil.parseDateTime(dateString);
+        final DateTime adjusted = date.toDateTime(JIRA_TIME_ZONE);
+        return JIRA_TIME_FORMAT.print(adjusted);
+    }
+
     private String getJQLParam() throws UnsupportedEncodingException {
         final StringBuilder query = new StringBuilder();
 
@@ -133,8 +153,11 @@ public class IssuesAPICaller {
          * have not been updated since our start) and only issues that were created before our end (i.e., exclude things
          * that were created after we started).
          */
-        query.append("updatedDate>=").append(config.getStartDate())
-                .append(" AND createdDate<").append(config.getEndDate());
+
+        final String start = getDateStringInJiraTime(config.getStartDate());
+        final String end = getDateStringInJiraTime(config.getEndDate());
+        query.append("updatedDate>=\"").append(start)
+                .append("\" AND createdDate<\"").append(end).append("\"");
 
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");

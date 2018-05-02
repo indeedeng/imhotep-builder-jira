@@ -11,16 +11,16 @@ import javax.annotation.Nullable;
 public abstract class JiraActionsUtil {
     private JiraActionsUtil() { /* No */ }
 
-    public static final DateTimeZone ZONE = DateTimeZone.forOffsetHours(-6);
+    public static final DateTimeZone RAMSES_TIME = DateTimeZone.forOffsetHours(-6);
 
     // copied from imhotep-builders
     @SuppressWarnings("Duplicates")
     @Nonnull
     public static DateTime parseDateTime(final String arg) {
         try {
-            return new DateTime(arg.trim().replace(" ", "T"), ZONE);
+            return new DateTime(arg.trim().replace(" ", "T"), RAMSES_TIME);
         } catch (final IllegalArgumentException ignored) { }
-        final DateTime now = new DateTime(ZONE);
+        final DateTime now = new DateTime(RAMSES_TIME);
 
         switch (arg) {
             case "now":
@@ -37,7 +37,7 @@ public abstract class JiraActionsUtil {
 
         final Period p = PeriodParser.parseString(arg);
         if (p != null) {
-            DateTime basePoint = new DateTime(ZONE);
+            DateTime basePoint = new DateTime(RAMSES_TIME);
             final Duration duration = p.toDurationTo(basePoint);
 
             if(duration.isLongerThan(Duration.standardHours(1))) {

@@ -15,7 +15,7 @@ public class TestAction {
 
     @Test
     public void testCreateDueDate() {
-        final DateTime expected = new DateTime(2017, 6, 16, 0, 0, 0, JiraActionsUtil.ZONE);
+        final DateTime expected = new DateTime(2017, 6, 16, 0, 0, 0, JiraActionsUtil.RAMSES_TIME);
         final String dueDate = "2017-06-15";
         final Action action = ImmutableAction.builder().from(defaultAction).dueDate(dueDate).build();
 
