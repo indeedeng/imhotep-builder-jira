@@ -68,6 +68,7 @@ public class TsvFileWriter {
                 .addColumn("issuekey", Action::getIssuekey)
                 .addColumn("issuetype", Action::getIssuetype)
                 .addColumn("labels*", Action::getLabels)
+                .addColumn("priority", Action::getPriority)
                 .addColumn("project", Action::getProject)
                 .addColumn("projectkey", Action::getProjectkey)
                 .addColumn("prevstatus", Action::getPrevstatus)
