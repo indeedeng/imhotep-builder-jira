@@ -54,6 +54,7 @@ public class TsvFileWriter {
     private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
         final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
         specBuilder
+                .addColumn("issuekey", Action::getIssuekey)
                 .addColumn("action", Action::getAction)
                 .addUserColumns("actor", Action::getActor)
                 .addUserColumns("assignee", Action::getAssignee)
@@ -65,7 +66,6 @@ public class TsvFileWriter {
                 .addColumn("fieldschanged*", Action::getFieldschanged)
                 .addColumn("fixversion*|", Action::getFixversions)
                 .addLongColumn("issueage", Action::getIssueage)
-                .addColumn("issuekey", Action::getIssuekey)
                 .addColumn("issuetype", Action::getIssuetype)
                 .addColumn("labels*", Action::getLabels)
                 .addColumn("priority", Action::getPriority)
@@ -124,6 +124,7 @@ public class TsvFileWriter {
                     .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
                     .map(rawValue -> rawValue.replace("\t", "\\t"))
                     .map(rawValue -> rawValue.replace("\n", "\\n"))
+                    .map(rawValue -> rawValue.replace("\r", "\\r"))
                     .collect(Collectors.joining("\t"));
             bw.write(line);
             bw.newLine();
