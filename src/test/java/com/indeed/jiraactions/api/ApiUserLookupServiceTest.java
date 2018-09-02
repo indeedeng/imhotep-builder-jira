@@ -13,7 +13,7 @@ import java.io.File;
 public class ApiUserLookupServiceTest {
     @Test
     public void test() throws Exception {
-        final JsonNode node = new ObjectMapper().readTree(new File("test/resources/example-user.json"));
+        final JsonNode node = new ObjectMapper().readTree(new File("src/test/resources/example-user.json"));
         final User user = ApiUserLookupService.parseUser(node);
         final User expectedUser = ImmutableUser.builder()
                 .displayName("***REMOVED***")

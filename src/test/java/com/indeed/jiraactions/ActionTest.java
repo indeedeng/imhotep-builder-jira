@@ -7,10 +7,10 @@ import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-import com.indeed.test.junit.Check;
 
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -97,7 +97,7 @@ public class ActionTest {
     @Test
     public void testAction_update_action() throws ParseException, IOException {
         final Action action = actionFactory.update(prevAction, history);
-        Check.checkTrue("update".equals(action.getAction()));
+        Assert.assertTrue("update".equals(action.getAction()));
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ActionTest {
                 .build();
 
         final Action action = actionFactory.update(prevAction, history);
-        Check.checkTrue(action.getActor().getDisplayName().equals(actor));
+        Assert.assertTrue(action.getActor().getDisplayName().equals(actor));
     }
 
     @Test
@@ -121,8 +121,8 @@ public class ActionTest {
         history2.items = new Item[] { item };
 
         final Action action = actionFactory.update(prevAction, history2);
-        Check.checkTrue(action.getAssignee().getDisplayName().equals(item.toString));
-        Check.checkTrue(action.getFieldschanged().contains(item.field));
+        Assert.assertEquals(item.toString, action.getAssignee().getDisplayName());
+        Assert.assertTrue(action.getFieldschanged().contains(item.field));
     }
 
     @Test
@@ -135,15 +135,15 @@ public class ActionTest {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).assignee(assignee).build();
 
         final Action action = actionFactory.update(newPrevAction, history);
-        Check.checkTrue(action.getAssignee().equals(assignee));
+        Assert.assertTrue(action.getAssignee().equals(assignee));
     }
 
     @Test
     public void testAction_updatenotstate_timing() throws ParseException, IOException {
         final Action action = actionFactory.update(prevAction, history);
-        Check.checkEquals(timeDiffWithPrevAction, action.getIssueage());
-        Check.checkEquals(timeDiffWithPrevAction, action.getTimeinstate());
-        Check.checkEquals(timeDiffWithPrevAction, action.getTimesinceaction());
+        Assert.assertEquals(timeDiffWithPrevAction, action.getIssueage());
+        Assert.assertEquals(timeDiffWithPrevAction, action.getTimeinstate());
+        Assert.assertEquals(timeDiffWithPrevAction, action.getTimesinceaction());
     }
 
     @Test
@@ -151,9 +151,9 @@ public class ActionTest {
         final Action action = actionFactory.update(prevAction, history);
 
         final Action action2 = actionFactory.update(action, history2);
-        Check.checkEquals(timeDiffWithPrevAction*2, action2.getIssueage());
-        Check.checkEquals(timeDiffWithPrevAction*2, action2.getTimeinstate());
-        Check.checkEquals(timeDiffWithPrevAction, action2.getTimesinceaction());
+        Assert.assertEquals(timeDiffWithPrevAction*2, action2.getIssueage());
+        Assert.assertEquals(timeDiffWithPrevAction*2, action2.getTimeinstate());
+        Assert.assertEquals(timeDiffWithPrevAction, action2.getTimesinceaction());
     }
 
     //
@@ -165,9 +165,9 @@ public class ActionTest {
         final Action action = actionFactory.update(prevAction, history);
 
         final Action action2 = actionFactory.comment(action, comment);
-        Check.checkEquals(timeDiffWithPrevAction*3, action2.getIssueage());
-        Check.checkEquals(timeDiffWithPrevAction*3, action2.getTimeinstate());
-        Check.checkEquals(timeDiffWithPrevAction*2, action2.getTimesinceaction());
+        Assert.assertEquals(timeDiffWithPrevAction*3, action2.getIssueage());
+        Assert.assertEquals(timeDiffWithPrevAction*3, action2.getTimeinstate());
+        Assert.assertEquals(timeDiffWithPrevAction*2, action2.getTimesinceaction());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class ActionTest {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).action("update").build();
 
         final Action action = actionFactory.comment(newPrevAction, comment);
-        Check.checkEquals(timeDiffWithPrevAction, action.getIssueage());
+        Assert.assertEquals(timeDiffWithPrevAction, action.getIssueage());
     }
 
     @Test
@@ -185,7 +185,7 @@ public class ActionTest {
                 .timeinstate(prevActionTimeinstate)
                 .build();
         final Action action = actionFactory.comment(newPrevAction, comment);
-        Check.checkEquals(prevActionTimeinstate + timeDiffWithPrevAction, action.getIssueage());
+        Assert.assertEquals(prevActionTimeinstate + timeDiffWithPrevAction, action.getIssueage());
     }
 
     @Test
@@ -205,6 +205,6 @@ public class ActionTest {
         history2.items = new Item[] { item };
 
         final Action action = actionFactory.update(newPrevAction, history2);
-        Check.checkEquals(history2.created.getMillis() - prevAction.getTimestamp().getMillis(), action.getTimeinstate());
+        Assert.assertEquals(history2.created.getMillis() - prevAction.getTimestamp().getMillis(), action.getTimeinstate());
     }
 }

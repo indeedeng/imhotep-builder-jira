@@ -73,7 +73,7 @@ public class TestCustomFieldDefinitionParser {
 
     @Test
     public void testProductionConfigs() throws IOException {
-        final File directory = new File("src/resources/customfields");
+        final File directory = new File("src/main/resources/customfields");
         Assert.assertTrue(directory.exists());
 
         final File[] configs = directory.listFiles();

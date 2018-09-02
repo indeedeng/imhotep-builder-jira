@@ -2,7 +2,6 @@ package com.indeed.jiraactions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.indeed.common.util.Pair;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition.MultiValueFieldConfiguration;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
@@ -141,9 +140,9 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
                 .collect(Collectors.toList());
         Assert.assertEquals(expectedHeaders, actualHeaders);
         replayAll();
-        for (final Pair<TSVColumnSpec, String> specAndExpected : Pair.zip(specs, expectedValues)) {
-            final TSVColumnSpec spec = specAndExpected.getFirst();
-            final String expectedValue = specAndExpected.getSecond();
+        for (int i = 0; i < specs.size(); i++) {
+            final TSVColumnSpec spec = specs.get(i);
+            final String expectedValue = expectedValues.get(i);
             Assert.assertEquals(expectedValue, spec.getActionExtractor().apply(action));
         }
     }
