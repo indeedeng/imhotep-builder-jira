@@ -4,10 +4,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
-import com.indeed.util.logging.Loggers;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,7 +18,7 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
 public class CustomFieldValue {
-    private static final Logger log = Logger.getLogger(CustomFieldValue.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomFieldValue.class);
     private static final Splitter NUMBER_SPLITTER = Splitter.onPattern("\\D+").omitEmptyStrings();
 
     private final CustomFieldDefinition definition;
@@ -64,7 +64,7 @@ public class CustomFieldValue {
                     return ImmutableList.of("");
                 }
             default:
-                Loggers.error(log, "Unknown multi-field definition %s trying to process field %s",
+                log.error("Unknown multi-field definition {} trying to process field {}",
                         definition.getMultiValueFieldConfiguration(), definition.getName());
                 // Intentional fall-through
             case SEPARATE:
@@ -82,7 +82,7 @@ public class CustomFieldValue {
             case NONE:
                 return value;
             default:
-                Loggers.error(log, "Unknown transformation %s trying to process field %s",
+                log.error("Unknown transformation {} trying to process field {}",
                         definition.getTransformation(), definition.getName());
                 return value;
         }
@@ -104,7 +104,7 @@ public class CustomFieldValue {
             final double result = Double.parseDouble(input);
             return String.format("%.0f", result*1000);
         } catch(final NumberFormatException e) {
-            Loggers.warn(log, "Failed to convert value %s to milli-value", e, input);
+            log.warn("Failed to convert value {} to milli-value", e, input);
             return "";
         }
     }

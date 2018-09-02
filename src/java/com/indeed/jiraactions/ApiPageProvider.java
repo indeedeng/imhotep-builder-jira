@@ -6,8 +6,8 @@ import com.indeed.jiraactions.api.IssueAPIParser;
 import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.Issue;
-import com.indeed.util.logging.Loggers;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 
 public class ApiPageProvider implements PageProvider {
-    private static final Logger log = Logger.getLogger(ApiPageProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(ApiPageProvider.class);
 
     private final IssuesAPICaller issuesAPICaller;
     private final ActionFactory actionFactory;
@@ -79,7 +79,7 @@ public class ApiPageProvider implements PageProvider {
         stopwatch.stop();
 
         apiTime += stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        Loggers.trace(log, "%d ms for an API call.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        log.trace("{} ms for an API call.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
         return issuesNode;
     }

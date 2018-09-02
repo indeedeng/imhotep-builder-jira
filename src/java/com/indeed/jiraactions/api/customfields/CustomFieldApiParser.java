@@ -6,7 +6,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.indeed.common.util.StringUtils;
 import com.indeed.jiraactions.Action;
 import com.indeed.jiraactions.UserLookupService;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition.SplitRule;
@@ -15,9 +14,10 @@ import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
-import com.indeed.util.logging.Loggers;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
 public class CustomFieldApiParser {
-    private static final Logger log = Logger.getLogger(CustomFieldApiParser.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomFieldApiParser.class);
     private static final Pattern MULTIVALUE_PATTERN = Pattern.compile("Parent values: (.*?)\\(\\d+\\)(Level 1 values: (.*?)\\(\\d+\\))?");
 
     private final UserLookupService userLookupService;
@@ -58,7 +58,7 @@ public class CustomFieldApiParser {
                 final CustomFieldValue customFieldValue = customFieldFromInitialFields(definition, jsonNode);
                 if (customFieldValue.isEmpty()) {
                     if (!failedCustomFields.contains(definition)) {
-                        log.debug(String.format("Customfield %s failed to parse json node %s", definition, jsonNode));
+                        log.debug("Customfield {} failed to parse json node {}", definition, jsonNode);
                         failedCustomFields.add(definition);
                     }
                 }
@@ -74,7 +74,7 @@ public class CustomFieldApiParser {
             final CustomFieldValue value = customFieldValueFromChangelog(definition, item.to, item.toString);
             if (StringUtils.isNotEmpty(item.toString) && value.isEmpty()) {
                 if (!failedCustomHistoryFields.contains(definition)) {
-                    log.debug(String.format("Customfield %s failed to parse history item %s", definition, item.toString));
+                    log.debug("Customfield {} failed to parse history item {}", definition, item.toString);
                     failedCustomHistoryFields.add(definition);
                 }
             }
@@ -82,7 +82,7 @@ public class CustomFieldApiParser {
         } else {
             final CustomFieldValue prevValue = prevAction.getCustomFieldValues().get(definition);
             if(prevValue == null) {
-                Loggers.error(log,"No previous value for %s found for issue %s.", definition.getName(), prevAction.getIssuekey());
+                log.error("No previous value for {} found for issue {}.", definition.getName(), prevAction.getIssuekey());
                 return new CustomFieldValue(definition);
             } else {
                 return new CustomFieldValue(prevValue);
@@ -153,7 +153,7 @@ public class CustomFieldApiParser {
                 parent = matcher.group(1);
                 child = matcher.group(3);
             } else {
-                Loggers.error(log, "Unable to parse multi-valued field %s with value %s", definition.getName(), value);
+                log.error("Unable to parse multi-valued field {} with value {}", definition.getName(), value);
                 parent = "";
                 child = "";
             }
@@ -190,9 +190,9 @@ public class CustomFieldApiParser {
             final String separator;
             if(StringUtils.isEmpty(definition.getSeparator())) {
                 if(children.size() > 1) {
-                    Loggers.error(log, "No specified separator for multi-valued field %s, array node: %s", definition.getName(), node.toString());
+                    log.error("No specified separator for multi-valued field {}, array node: {}", definition.getName(), node.toString());
                 } else {
-                    Loggers.warn(log, "No specified separator for field %s with an array of one element", definition.getName());
+                    log.warn("No specified separator for field {} with an array of one element", definition.getName());
                 }
                 separator = " ";
             } else {

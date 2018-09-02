@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown=true)
 
 public class Item {
-    private static final Logger log = Logger.getLogger(Item.class);
+    private static final Logger log = LoggerFactory.getLogger(Item.class);
 
     public String field;
     public String from;
@@ -34,8 +35,8 @@ public class Item {
         if("custom".equals(fieldType)) {
             customField = true;
         } else if(!"jira".equals(fieldType)) {
-            log.warn(String.format("Invalid fieldtype %s for field '%s' from '%s' to '%s'", fieldType,
-                    field, fromString, toString));
+            log.warn("Invalid fieldtype {} for field '{}' from '{}' to '{}'", fieldType,
+                    field, fromString, toString);
         }
     }
 

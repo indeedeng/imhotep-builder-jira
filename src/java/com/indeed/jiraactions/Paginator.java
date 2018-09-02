@@ -4,8 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.indeed.jiraactions.api.response.issue.Issue;
-import com.indeed.util.logging.Loggers;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Paginator {
-    private static final Logger log = Logger.getLogger(Paginator.class);
+    private static final Logger log = LoggerFactory.getLogger(Paginator.class);
 
     private final PageProvider pageProvider;
     private final DateTime startDate;
@@ -82,7 +82,7 @@ public class Paginator {
                                 && !ignoreForEndDetection // Ignore out of order issues
                                 && !seenThisLoop.contains(issue.key) // Ignore if we see it and a few things push it down into our page
                              ) {
-                            Loggers.debug(log, "Saw no new actions for %s, stopping.", issue.key);
+                            log.debug("Saw no new actions for {}, stopping.", issue.key);
                             reFoundTheBeginning = true;
                             break;
                         }
@@ -91,12 +91,12 @@ public class Paginator {
                             firstIssue = false;
                         }
                     } catch (final Exception e) {
-                        log.error(String.format("Error parsing actions for issue %s.", issue.key), e);
+                        log.error("Error parsing actions for issue {}.", issue.key, e);
                     }
                 }
 
                 stopwatch.stop();
-                Loggers.trace(log, "%d ms to get actions from a set of issues.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+                log.trace("{} ms to get actions from a set of issues.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
                 // Otherwise we'd do another entire pass of the dataset
                 if(reFoundTheBeginning) {
