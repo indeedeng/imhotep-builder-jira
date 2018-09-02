@@ -103,13 +103,13 @@ public class ActionTest {
     @Test
     public void testAction_update_actor() throws ParseException, IOException {
         final String actor = "Test Actor";
-        author = ImmutableUser.builder()
+        history.author = ImmutableUser.builder()
                 .from(author)
                 .displayName(actor)
                 .build();
 
         final Action action = actionFactory.update(prevAction, history);
-        Assert.assertTrue(action.getActor().getDisplayName().equals(actor));
+        Assert.assertEquals(actor, action.getActor().getDisplayName());
     }
 
     @Test
@@ -118,6 +118,7 @@ public class ActionTest {
         item.setField("assignee");
         item.fromString = "old";
         item.toString = "new";
+        item.to = "new";
         history2.items = new Item[] { item };
 
         final Action action = actionFactory.update(prevAction, history2);
@@ -175,7 +176,7 @@ public class ActionTest {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).action("update").build();
 
         final Action action = actionFactory.comment(newPrevAction, comment);
-        Assert.assertEquals(timeDiffWithPrevAction, action.getIssueage());
+        Assert.assertEquals(commentCreated.getMillis()/1000-prevActionTimestamp.getMillis()/1000, action.getTimeinstate());
     }
 
     @Test
@@ -185,7 +186,7 @@ public class ActionTest {
                 .timeinstate(prevActionTimeinstate)
                 .build();
         final Action action = actionFactory.comment(newPrevAction, comment);
-        Assert.assertEquals(prevActionTimeinstate + timeDiffWithPrevAction, action.getIssueage());
+        Assert.assertEquals(commentCreated.getMillis()/1000-prevActionTimestamp.getMillis()/1000, action.getTimeinstate());
     }
 
     @Test
@@ -205,6 +206,6 @@ public class ActionTest {
         history2.items = new Item[] { item };
 
         final Action action = actionFactory.update(newPrevAction, history2);
-        Assert.assertEquals(history2.created.getMillis() - prevAction.getTimestamp().getMillis(), action.getTimeinstate());
+        Assert.assertEquals(history2.created.getMillis()/1000 - prevAction.getTimestamp().getMillis()/1000, action.getTimeinstate());
     }
 }
