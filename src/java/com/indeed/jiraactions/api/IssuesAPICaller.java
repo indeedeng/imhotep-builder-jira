@@ -5,7 +5,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 import com.indeed.jiraactions.JiraActionsUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  * @author soono
  */
 public class IssuesAPICaller {
-    private static final Logger log = Logger.getLogger(IssuesAPICaller.class);
+    private static final Logger log = LoggerFactory.getLogger(IssuesAPICaller.class);
     private static final String API_PATH = "/rest/api/2/search";
 
     private final String urlBase;
@@ -58,8 +59,8 @@ public class IssuesAPICaller {
                 return node;
             } catch (final IOException e) {
                 final long end = System.currentTimeMillis();
-                log.error(String.format("On try %d/5, caught IOException getting %d issues, after %d milliseconds.",
-                        tries, batchSize, end - start));
+                log.error("On try {}/5, caught IOException getting {} issues, after {} milliseconds.",
+                        tries, batchSize, end - start);
 
                 if(tries >= 5) {
                     log.error("Tried too many times to get issues and failed, aborting.", e);
@@ -117,9 +118,9 @@ public class IssuesAPICaller {
                 + "&" + getStartAtParam();
 
         if(log.isDebugEnabled()) {
-            log.debug(String.format("Trying URL: %s", url));
+            log.debug("Trying URL: {}", url);
         }
-        log.info(String.format("%f%% complete, %d/%d", (float)start*100/numTotal, start, numTotal));
+        log.info("{}% complete, {}/{}", (float)start*100/numTotal, start, numTotal);
 
         return url;
     }

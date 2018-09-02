@@ -9,7 +9,8 @@ import com.indeed.jiraactions.UserLookupService;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.util.core.nullsafety.ReturnValuesAreNonnullByDefault;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -22,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
 public class ApiUserLookupService implements UserLookupService {
-    private static final Logger log = Logger.getLogger(ApiUserLookupService.class);
+    private static final Logger log = LoggerFactory.getLogger(ApiUserLookupService.class);
     private static final String API_BASE = "/rest/api/2/user";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

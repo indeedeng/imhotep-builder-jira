@@ -5,16 +5,16 @@ import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
-import com.indeed.util.logging.Loggers;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import java.util.List;
 import java.util.function.Function;
 
 public class TSVSpecBuilder {
-    private static final Logger log = Logger.getLogger(TSVSpecBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(TSVSpecBuilder.class);
 
     private final ImmutableList.Builder<TSVColumnSpec> columnSpecs;
 
@@ -74,9 +74,8 @@ public class TSVSpecBuilder {
     private static List<String> getCustomFieldValue(final CustomFieldDefinition customField, final Action action) {
         final CustomFieldValue value = action.getCustomFieldValues().get(customField);
         if (value == null) {
-            Loggers.error(
-                    log,
-                    "No value found for custom field %s for issue %s",
+            log.error(
+                    "No value found for custom field {} for issue {}",
                     customField.getImhotepFieldName(),
                     action.getIssuekey()
             );

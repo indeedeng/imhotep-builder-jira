@@ -3,9 +3,9 @@ package com.indeed.jiraactions.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
-import com.indeed.util.logging.Loggers;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -20,7 +20,7 @@ import java.util.Objects;
 public class ApiCaller {
     protected final JiraActionsIndexBuilderConfig config;
 
-    private static final Logger log = Logger.getLogger(ApiCaller.class);
+    private static final Logger log = LoggerFactory.getLogger(ApiCaller.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String authentication;
     private String jsessionId = null;
@@ -64,12 +64,12 @@ public class ApiCaller {
                     }
                     setCookies();
                     pinnedNode = anodeId;
-                    Loggers.info(log, "Set JSESSION=%s;upstream=%s. Pinning to X-ANODEID=%s",
+                    log.info("Set JSESSION=%s;upstream=%s. Pinning to X-ANODEID=%s",
                             jsessionId, upstream, anodeId);
                 }
             }
             if(!Objects.equals(pinnedNode, anodeId)) {
-                Loggers.warn(log, "Expected X-ANODEID=%s but found %s", pinnedNode, anodeId);
+                log.warn("Expected X-ANODEID=%s but found %s", pinnedNode, anodeId);
             }
             return objectMapper.readTree(apiResults);
         } catch (final IOException e) {

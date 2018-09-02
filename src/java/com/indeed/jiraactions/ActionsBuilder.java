@@ -3,8 +3,8 @@ package com.indeed.jiraactions;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-import com.indeed.util.logging.Loggers;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActionsBuilder {
-    private static final Logger LOG = Logger.getLogger(ActionsBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActionsBuilder.class);
 
     private final Issue issue;
     private final DateTime startDate;
@@ -83,10 +83,10 @@ public class ActionsBuilder {
                      * on a ticket *before* that ticket was created.
                      */
                         if (comment.created.isBefore(actions.get(0).getTimestamp())) {
-                            Loggers.debug(LOG, "Skipping comment %s on %s because it's before the issue was created.",
+                            LOG.debug("Skipping comment {} on {} because it's before the issue was created.",
                                     comment.id, issue.key);
                         } else {
-                            Loggers.warn(LOG, "Unable to process comment %s by %s on issue %s, somehow doesn't fit in our timeline.",
+                            LOG.debug("Unable to process comment {} by {} on issue {}, somehow doesn't fit in our timeline.",
                                     comment.id, comment.author.getDisplayName(), issue.key, comment.author.getDisplayName());
                         }
                         currentActionIndex = 0;

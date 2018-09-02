@@ -9,7 +9,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 
 
 public class TsvFileWriter {
-    private static final Logger log = Logger.getLogger(TsvFileWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(TsvFileWriter.class);
 
     private final JiraActionsIndexBuilderConfig config;
     private final Map<DateMidnight, WriterData> writerDataMap;

@@ -1,9 +1,9 @@
 package com.indeed.jiraactions.api.links;
 
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
-import com.indeed.util.logging.Loggers;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LinkFactory {
-    private static final Logger log = Logger.getLogger(LinkFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(LinkFactory.class);
     private static final Pattern LINK_PATTERN = Pattern.compile("This issue ([A-Za-z ]+) ([A-Z0-9]+-[0-9]+)");
 
     protected Link makeLink(@Nonnull final String input) throws IOException {
@@ -42,7 +42,7 @@ public class LinkFactory {
                     final Link link = makeLink(item.fromString);
                     output.remove(link);
                 } catch(final IOException e) {
-                    Loggers.error(log, "Error when creating Link to remove from '%s'", item.fromString);
+                    log.error("Error when creating Link to remove from '{}'", item.fromString);
                 }
             }
             if(!StringUtils.isEmpty(item.toString)) {
@@ -50,7 +50,7 @@ public class LinkFactory {
                      final Link link = makeLink(item.toString);
                      output.add(link);
                  } catch(final IOException e) {
-                     Loggers.error(log, "Error when creating Link to add from '%s'", item.toString);
+                     log.error("Error when creating Link to add from '{}'", item.toString);
                  }
             }
         }
