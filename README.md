@@ -3,6 +3,9 @@ Each document in an index is a single action (create, update, or comment) taken 
 that could conceivably be part of the given time range, and decomposing that issue into a series of actions. Those actions are then written
 to a series of .tsv (tab-separated value) files that are uploaded to an Imhotep shardbuilder.
 
+**Build Status:**
+<br>[![Build Status](https://travis-ci.org/indeedeng/imhotep-builder-jira.svg?branch=master)](https://travis-ci.org/indeedeng/imhotep-builder-jira)
+
 # Architecture
 The Jira Actions Indexer runs in a loop over a series of batches. First it makes a single API call to see how many issues fall into its time
 period. It will break this up into batches (normally 25, but it will temporarily scale back batch sizes when it gets rate limited). For each
