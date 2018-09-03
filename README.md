@@ -83,6 +83,7 @@ different custom fields for different JIRA instances.
   ```
     git clone git@github.com:indeedeng/imhotep-builder-jira.git
     cd imhotep-builder-jira
+    mvn package test
   ```
 3. Invoke `com.indeed.jiraactions.JiraActionsIndexBuilderCommandLine` with arguments :
   ```
