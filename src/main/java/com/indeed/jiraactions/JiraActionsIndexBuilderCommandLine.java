@@ -24,14 +24,14 @@ import java.io.IOException;
  * @author kbinswanger
  * @author jack
  */
-public class JiraActionsIndexBuilderCommandLineTool {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JiraActionsIndexBuilderCommandLineTool.class);
+public class JiraActionsIndexBuilderCommandLine {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JiraActionsIndexBuilderCommandLine.class);
     private static final Joiner COMMA_JOINER = Joiner.on(',');
 
     private JiraActionsIndexBuilder indexBuilder;
 
     public static void main(final String[] args) {
-        final JiraActionsIndexBuilderCommandLineTool tool = new JiraActionsIndexBuilderCommandLineTool();
+        final JiraActionsIndexBuilderCommandLine tool = new JiraActionsIndexBuilderCommandLine();
         tool.initialize(args);
         tool.run();
     }
@@ -39,6 +39,10 @@ public class JiraActionsIndexBuilderCommandLineTool {
     private void initialize(String[] args) {
         final Options options = new Options()
                 .addOption(buildOption(
+                        "props",
+                        "path to imhotep-jira.properties file",
+                        "path"
+                )).addOption(buildOption(
                         "start",
                         "ISO-8601 formatted date string specifying the start date (inclusive)",
                         "YYYY-MM-DD"
@@ -67,8 +71,8 @@ public class JiraActionsIndexBuilderCommandLineTool {
             final String propFileName = commandLineArgs.getOptionValue("props");
             final PropertiesConfiguration config = new PropertiesConfiguration();
             config.load(propFileName);
-            final String jiraUsername = config.getString("jira.username.indexer");
-            final String jiraPassword = config.getString("jira.password.indexer");
+            final String jiraUsername = config.getString("jira.username");
+            final String jiraPassword = config.getString("jira.password");
             final String jiraBaseUrl = config.getString("jira.baseurl");
             final String[] jiraFieldArray = config.getStringArray("jira.fields");
             final String jiraFields = COMMA_JOINER.join(jiraFieldArray);
@@ -78,8 +82,8 @@ public class JiraActionsIndexBuilderCommandLineTool {
             final String[] excludedJiraProjectArray = config.getStringArray("jira.projectexcluded");
             final String excludedJiraProject = COMMA_JOINER.join(excludedJiraProjectArray);
             final String iuploadUrl = config.getString("iupload.url");
-            final String iuploadUsername = config.getString("iupload.username.indexer");
-            final String iuploadPassword = config.getString("iupload.password.indexer");
+            final String iuploadUsername = config.getString("iupload.username");
+            final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
 
             final String customFieldsPath = config.getString("customfieldsfile");
