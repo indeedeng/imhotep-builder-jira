@@ -76,7 +76,20 @@ different custom fields for different JIRA instances.
     * `iupload.password` (required): password for Imhotep iupload
     * `indexname` (required): name of Imhotep dataset to update (we used to call a dataset an "index")
     * `customfieldsfile` (optional): relative path to custom field definitions, e.g. `customfields/example-custom-fields.json`
-2. Invoke `com.indeed.jiraactions.JiraActionsIndexBuilderCommandLine` with arguments : <br>`--start <start time, for example 2016-09-21>`
-  <br>`--end <end time, for example 2016-09-22>`
-  <br>`--props <path to imhotep-jira.properties>`
-  <br>`--jiraBatchSize <batchSize, for example 10 or 25>`
+2. Build the source.
+  ```
+    git clone git@github.com:indeedeng/imhotep-builder-jira.git
+    cd imhotep-builder-jira
+  ```
+3. Invoke `com.indeed.jiraactions.JiraActionsIndexBuilderCommandLine` with arguments :
+  ```
+    --start <start time, for example 2016-09-21>
+    --end <end time, for example 2016-09-22>
+    --props <path to imhotep-jira.properties>
+    --jiraBatchSize <batchSize, for example 10 or 25>
+  ```
+  <br>The easiest way to invoke might be to use the Maven exec plugin for Java:
+  ```bash
+    mvn exec:java -Dexec.mainClass="com.indeed.jiraactions.JiraActionsIndexBuilderCommandLine" \
+      -Dexec.args="--props imhotep-jira.properties --start $START_DATE --end $END_DATE --jiraBatchSize=25"
+  ```

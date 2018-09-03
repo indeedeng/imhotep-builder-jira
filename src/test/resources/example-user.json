@@ -1,0 +1,46 @@
+{
+  "self": "https://***REMOVED***/rest/api/2/user?username=***REMOVED***",
+  "key": "***REMOVED***",
+  "name": "***REMOVED***",
+  "emailAddress": "***REMOVED***@indeed.com",
+  "avatarUrls": {
+    "48x48": "https://***REMOVED***/secure/useravatar?avatarId=10182",
+    "24x24": "https://***REMOVED***/secure/useravatar?size=small&avatarId=10182",
+    "16x16": "https://***REMOVED***/secure/useravatar?size=xsmall&avatarId=10182",
+    "32x32": "https://***REMOVED***/secure/useravatar?size=medium&avatarId=10182"
+  },
+  "displayName": "***REMOVED***",
+  "active": true,
+  "timeZone": "America/Chicago",
+  "locale": "en_US",
+  "groups": {
+    "size": 5,
+    "items": [
+      {
+        "name": "aggmanage",
+        "self": "https://***REMOVED***/rest/api/2/group?groupname=aggmanage"
+      },
+      {
+        "name": "engineering",
+        "self": "https://***REMOVED***/rest/api/2/group?groupname=engineering"
+      },
+      {
+        "name": "indeed-users",
+        "self": "https://***REMOVED***/rest/api/2/group?groupname=indeed-users"
+      },
+      {
+        "name": "jira-users",
+        "self": "https://***REMOVED***/rest/api/2/group?groupname=jira-users"
+      },
+      {
+        "name": "product-managers",
+        "self": "https://***REMOVED***/rest/api/2/group?groupname=product-managers"
+      }
+    ]
+  },
+  "applicationRoles": {
+    "size": 1,
+    "items": []
+  },
+  "expand": "groups,applicationRoles"
+}
