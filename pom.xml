@@ -104,31 +104,31 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>${http.version}</version>
+            <version>${httpcore.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>${http.version}</version>
+            <version>${httpmime.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-databind.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-annotations.version}</version>
         </dependency>
 
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-core.version}</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -151,21 +151,22 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- releases of our own projects to use -->
-        <!-- these should only be SNAPSHOTs when no release is available -->
-        <indeed-util.version>[1.0.0,1.1.0)</indeed-util.version>
+        <indeed-util.version>1.0.25</indeed-util.version>
 
-        <jodatime.version>[2.10.0,2.11.0)</jodatime.version>
-        <commons.io.version>[2.6.0,2.7.0)</commons.io.version>
-        <commons.lang.version>[2.6.0,2.7.0)</commons.lang.version>
-        <commons.cli.version>[1.4.0,1.5.0)</commons.cli.version>
-        <commons.configuration.version>[1.10.0,1.11.0)</commons.configuration.version>
-        <jsr305.version>[3.0.0,3.1.0)</jsr305.version>
-        <immutables.version>[2.7.0,2.8.0)</immutables.version>
-        <http.version>[4.4.0,4.5.0)</http.version>
-        <jackson.version>2.5.2</jackson.version>
-        <junit.version>[4.12.0,4.13.0)</junit.version>
-        <easymock.version>[3.6.0,3.7.0)</easymock.version>
-        <slf4j.version>[1.7.0,1.8.0)</slf4j.version>
+        <jodatime.version>2.10</jodatime.version>
+        <commons.io.version>1.4</commons.io.version>
+        <commons.lang.version>2.6</commons.lang.version>
+        <commons.cli.version>1.1</commons.cli.version>
+        <commons.configuration.version>1.10</commons.configuration.version>
+        <jsr305.version>1.3.9</jsr305.version>
+        <immutables.version>2.1.15</immutables.version>
+        <httpcore.version>4.3.3</httpcore.version>
+        <httpmime.version>4.3.3</httpmime.version>
+        <jackson-core.version>2.5.2</jackson-core.version>
+        <jackson-annotations.version>2.5.2</jackson-annotations.version>
+        <jackson-databind.version>2.5.2</jackson-databind.version>
+        <junit.version>4.12</junit.version>
+        <easymock.version>3.0</easymock.version>
+        <slf4j.version>1.7.25</slf4j.version>
     </properties>
 </project>
