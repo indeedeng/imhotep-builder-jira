@@ -5,10 +5,7 @@ target/
 build-transient-src/
 web-build/
 dist/
-build.properties
 out/
-clippy-lib/
-jirapassword.properties
-.ant-targets-build.xml
+imhotep-jira.properties
 *.orig
 *.swp

@@ -35,17 +35,31 @@ As an example, the Fields section might contain this:
 The History section might instead contain this:
 {"from": null, "fromString": "", "to": TODO, "toString": ""Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"}
 
-One of the things that makes this so complicated is that we've customized JIRA heavily for our usage. All the built-in JIRA fields are
-represented by POJOs matching the field names that come back from the API, to make parsing heavily. But there are artifacts of several
+This becomes complicated when you've heavily customized JIRA, as we have at Indeed. All the built-in JIRA fields are
+represented by POJOs matching the field names that come back from the API. But there are artifacts of several
 different attempts to handle custom fields. To make this more complicated, some custom fields are either parsed weirdly or transformed. It's
 not as simple as just taking a value from a field and put it somewhere else.
 
-The correct and best way to do this is to define these values in a .json file (for example indeed-bugs.json). It's a long term goal to clean
-up the older ways to use this approach instead. Creating a new, simple field should be as easy as including another definition in a .json file.
+The correct and best way to do this is to define these values in a .json file (see `src/main/resources/customfields/example-custom-fields.json`). We have some examples of older code-based ways of custom field handling in this codebase (TODO: reference examples). We should clean
+up the older ways to use the JSON approach instead. Creating a new, simple field should be as easy as including another definition in a .json file.
 More complicated fields may required defining new types of transformations. The principle value of this approach is that it lets us support
-different custom fields for Bugs and MechaBugs.
+different custom fields for different JIRA instances.
 
 # To Run Locally
-1. Create a file called "jirapassword.properties". It should have two fields: jira.username.indexer and jira.password.indexer. Set those to your JIRA account. This file is added to .gitignore, so you shouldn't able to accidentally commit it.
-2. Set VM Options: ```"-Dindeed.staging.level=dev -Dindeed.dc=dev -Dindeed.application=JiraActionsIndexBuilderCommandLineTool -Dindeed.instance=JiraActionsIndexBuilderCommandLineTool -Dindeed.product.group=jobsearch"```
-3. Set Program Options: ```"--start <start time, for example 2016-09-21> --end <end time, for example 2016-09-22> --props <path to jirapassword.properties from part 1, for example /home/kbinswanger/indeed/jiraactions/jirapassword.properties> --jiraBatchSize <batchSize, for example 10 or 25>"```
+1. Create a file called `imhotep-jira.properties` (see `imhotep-jira-template.properties` for the basic template). Properties are:
+    * `jira.username` (required): username for JIRA instance
+    * `jira.password` (required): password for JIRA instance
+    * `jira.baseurl` (required): Base URL for JIRA instance 
+    * `jira.fields` (required): Base fields to use from JIRA. Recommended: `assignee,comment,creator,issuetype,project,status,resolution,summary,reporter,created,category,fixVersions,duedate,components,labels,priority,updated` 
+    * `jira.expand` (required): Expand parameter for JIRA issues API. Recommended: `changelog`
+    * `jira.project` (optional): Comma-separated list of JIRA project keys to examine. Default of "" (blank) means all projects
+    * `jira.projectexcluded` (optional): Comma-separated list of JIRA project keys to omit.
+    * `iupload.url` (required): URL to Imhotep iupload instance.
+    * `iupload.username` (required): username for Imhotep iupload
+    * `iupload.password` (required): password for Imhotep iupload
+    * `indexname` (required): name of Imhotep dataset to update (we used to call a dataset an "index")
+    * `customfieldsfile` (optional): relative path to custom field definitions, e.g. `customfields/example-custom-fields.json`
+2. Invoke `com.indeed.jiraactions.JiraActionsIndexBuilderCommandLine` with arguments : <br>`--start <start time, for example 2016-09-21>`
+  <br>`--end <end time, for example 2016-09-22>`
+  <br>`--props <path to imhotep-jira.properties>`
+  <br>`--jiraBatchSize <batchSize, for example 10 or 25>`
