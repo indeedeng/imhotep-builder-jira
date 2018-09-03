@@ -10,7 +10,7 @@
     <groupId>com.indeed</groupId>
     <artifactId>imhotep-builder-jira</artifactId>
     <name>imhotep-builder-jira</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <description>
         Builder that uploads daily TSVs of JIRA activity to Imhotep
     </description>
