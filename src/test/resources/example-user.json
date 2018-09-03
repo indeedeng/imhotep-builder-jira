@@ -1,0 +1,46 @@
+{
+  "self": "https://mechabugs.indeed.com/rest/api/2/user?username=angelica",
+  "key": "angelica",
+  "name": "angelica",
+  "emailAddress": "angelica@indeed.com",
+  "avatarUrls": {
+    "48x48": "https://mechabugs.indeed.com/secure/useravatar?avatarId=10182",
+    "24x24": "https://mechabugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+    "16x16": "https://mechabugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+    "32x32": "https://mechabugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+  },
+  "displayName": "Angelica Vela",
+  "active": true,
+  "timeZone": "America/Chicago",
+  "locale": "en_US",
+  "groups": {
+    "size": 5,
+    "items": [
+      {
+        "name": "aggmanage",
+        "self": "https://mechabugs.indeed.com/rest/api/2/group?groupname=aggmanage"
+      },
+      {
+        "name": "engineering",
+        "self": "https://mechabugs.indeed.com/rest/api/2/group?groupname=engineering"
+      },
+      {
+        "name": "indeed-users",
+        "self": "https://mechabugs.indeed.com/rest/api/2/group?groupname=indeed-users"
+      },
+      {
+        "name": "jira-users",
+        "self": "https://mechabugs.indeed.com/rest/api/2/group?groupname=jira-users"
+      },
+      {
+        "name": "product-managers",
+        "self": "https://mechabugs.indeed.com/rest/api/2/group?groupname=product-managers"
+      }
+    ]
+  },
+  "applicationRoles": {
+    "size": 1,
+    "items": []
+  },
+  "expand": "groups,applicationRoles"
+}
