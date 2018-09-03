@@ -31,9 +31,26 @@ would have their own ID. So the To field would have the ID, and the ToString fie
 Indexer usually (but not always) wants the String representation of the field.
 
 As an example, the Fields section might contain this:
-{"self":"https://***REMOVED***/rest/api/2/customFieldOption/20661","value":"Misconfiguration","id":"20661","child":{"self":"https://***REMOVED***/rest/api/2/customFieldOption/20669","value":"App Config","id":"20669"}}
+```json
+{
+  "self": "https://***REMOVED***/rest/api/2/customFieldOption/20661",
+  "value": "Misconfiguration",
+  "id": "20661",
+  "child": {
+    "self": "https://***REMOVED***/rest/api/2/customFieldOption/20669",
+    "value": "App Config","id":"20669"
+  }
+}
+```
 The History section might instead contain this:
-{"from": null, "fromString": "", "to": TODO, "toString": ""Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"}
+```json
+{
+  "from": null, 
+  "fromString": "", 
+  "to": "TODO", 
+  "toString": "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"
+}
+```
 
 This becomes complicated when you've heavily customized JIRA, as we have at Indeed. All the built-in JIRA fields are
 represented by POJOs matching the field names that come back from the API. But there are artifacts of several
