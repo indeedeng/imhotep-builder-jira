@@ -1,0 +1,25 @@
+[
+  {
+    "name": "Epic Link",
+    "customfieldid": "customfield_12491",
+    "imhotepfieldname": "epiclink_key"
+  },
+  {
+    "name": "Story Points",
+    "customfieldid": "customfield_12090",
+    "imhotepfieldname": "millistorypoints",
+    "transformation": "multiply_by_thousand"
+  },
+  {
+    "name": "Verifier",
+    "customfieldid": "customfield_10003",
+    "imhotepfieldname": "verifier",
+    "multivaluefieldconfiguration": "username"
+  },
+  {
+    "name": "Countries",
+    "customfieldid": "customfield_15290",
+    "imhotepfieldname": "countries*|",
+    "separator": "|"
+  }
+]
