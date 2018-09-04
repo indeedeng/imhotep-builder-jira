@@ -36,11 +36,11 @@ Indexer usually (but not always) wants the String representation of the field.
 As an example, the Fields section might contain this:
 ```json
 {
-  "self": "https://***REMOVED***/rest/api/2/customFieldOption/20661",
+  "self": "https://jira.example.com/rest/api/2/customFieldOption/20661",
   "value": "Misconfiguration",
   "id": "20661",
   "child": {
-    "self": "https://***REMOVED***/rest/api/2/customFieldOption/20669",
+    "self": "https://jira.example.com/rest/api/2/customFieldOption/20669",
     "value": "App Config","id":"20669"
   }
 }

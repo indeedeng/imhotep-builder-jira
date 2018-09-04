@@ -93,12 +93,12 @@ public class TestCustomFieldValue {
 
     @Test
     public void testValueFromInitial() throws IOException {
-        testFromInitial(protestCountries, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/12062\",\"value\":\"User\",\"id\":\"12062\"}", "User");
+        testFromInitial(protestCountries, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/12062\",\"value\":\"User\",\"id\":\"12062\"}", "User");
     }
 
     @Test
     public void testSingleValueArrayOfValuesFromInitial() throws IOException {
-        testFromInitial(protestCountries, "[{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16473\",\"value\":\"en only\",\"id\":\"16473\"}]", "en only");
+        testFromInitial(protestCountries, "[{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/16473\",\"value\":\"en only\",\"id\":\"16473\"}]", "en only");
     }
 
     @Test
@@ -109,13 +109,13 @@ public class TestCustomFieldValue {
                 .imhotepFieldName("fake_protest_countries*")
                 .build();
 
-        testFromInitial(madeup, "[{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16473\",\"value\":\"en_only\",\"id\":\"16473\"},{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16475\",\"value\":\"worldwide\",\"id\":\"16475\"}]",
+        testFromInitial(madeup, "[{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/16473\",\"value\":\"en_only\",\"id\":\"16473\"},{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/16475\",\"value\":\"worldwide\",\"id\":\"16475\"}]",
                 "en_only worldwide");
     }
 
     @Test
     public void testArrayOfValuesFromInitialWithSeparator() throws IOException {
-        testFromInitial(protestCountries, "[{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16473\",\"value\":\"en only\",\"id\":\"16473\"},{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/16475\",\"value\":\"worldwide\",\"id\":\"16475\"}]",
+        testFromInitial(protestCountries, "[{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/16473\",\"value\":\"en only\",\"id\":\"16473\"},{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/16475\",\"value\":\"worldwide\",\"id\":\"16475\"}]",
                 "en only|worldwide");
     }
 
@@ -132,24 +132,24 @@ public class TestCustomFieldValue {
 
     @Test
     public void testExpandedWithChildFromInitial() throws IOException {
-        testFromInitial(directCause, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\",\"child\":{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20669\",\"value\":\"App Config\",\"id\":\"20669\"}}",
+        testFromInitial(directCause, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\",\"child\":{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20669\",\"value\":\"App Config\",\"id\":\"20669\"}}",
                 "Misconfiguration - App Config");
     }
 
     @Test
     public void testExpandedNoChildFromInitial() throws IOException {
-        testFromInitial(directCause, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\"}", "Misconfiguration");
+        testFromInitial(directCause, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20661\",\"value\":\"Misconfiguration\",\"id\":\"20661\"}", "Misconfiguration");
     }
 
     @Test
     public void testSeparateWithChildFromInitial() throws IOException {
-        testFromInitial(sysadCategories, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20781\",\"value\":\"Config\",\"id\":\"20781\",\"child\":{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20814\",\"value\":\"Other\",\"id\":\"20814\"}}",
+        testFromInitial(sysadCategories, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20781\",\"value\":\"Config\",\"id\":\"20781\",\"child\":{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20814\",\"value\":\"Other\",\"id\":\"20814\"}}",
                 "Config\tOther");
     }
 
     @Test
     public void testSeparateWithoutChildFromInitial() throws IOException {
-        testFromInitial(sysadCategories, "{\"self\":\"https://***REMOVED***/rest/api/2/customFieldOption/20787\",\"value\":\"DNS\",\"id\":\"20787\"}", "DNS\t");
+        testFromInitial(sysadCategories, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20787\",\"value\":\"DNS\",\"id\":\"20787\"}", "DNS\t");
     }
 
     @Test
@@ -160,8 +160,8 @@ public class TestCustomFieldValue {
 
     @Test
     public void testUserLookupFromInitial() throws IOException {
-        testFromInitial(verifier, "{\"self\":\"https://***REMOVED***/rest/api/2/user?username=***REMOVED***\",\"name\":\"***REMOVED***\",\"key\":\"***REMOVED***\",\"emailAddress\":\"***REMOVED***@indeed.com\",\"avatarUrls\":{\"48x48\":\"https://***REMOVED***/secure/useravatar?ownerId=***REMOVED***&avatarId=25105\",\"24x24\":\"https://***REMOVED***/secure/useravatar?size=small&ownerId=***REMOVED***&avatarId=25105\",\"16x16\":\"https://***REMOVED***/secure/useravatar?size=xsmall&ownerId=***REMOVED***&avatarId=25105\",\"32x32\":\"https://***REMOVED***/secure/useravatar?size=medium&ownerId=***REMOVED***&avatarId=25105\"},\"displayName\":\"***REMOVED***\",\"active\":true,\"timeZone\":\"America/Chicago\"}{\"self\":\"https://***REMOVED***/rest/api/2/user?username=***REMOVED***\",\"name\":\"***REMOVED***\",\"key\":\"***REMOVED***\",\"emailAddress\":\"***REMOVED***@indeed.com\",\"avatarUrls\":{\"48x48\":\"https://***REMOVED***/secure/useravatar?ownerId=***REMOVED***&avatarId=25105\",\"24x24\":\"https://***REMOVED***/secure/useravatar?size=small&ownerId=***REMOVED***&avatarId=25105\",\"16x16\":\"https://***REMOVED***/secure/useravatar?size=xsmall&ownerId=***REMOVED***&avatarId=25105\",\"32x32\":\"https://***REMOVED***/secure/useravatar?size=medium&ownerId=***REMOVED***&avatarId=25105\"},\"displayName\":\"***REMOVED***\",\"active\":true,\"timeZone\":\"America/Chicago\"}",
-                "***REMOVED***\t***REMOVED***");
+        testFromInitial(verifier, "{\"self\":\"https://jira.example.com/rest/api/2/user?username=johndoe\",\"name\":\"johndoe\",\"key\":\"johndoe\",\"emailAddress\":\"johndoe@example.com\",\"avatarUrls\":{\"48x48\":\"https://jira.example.com/secure/useravatar?ownerId=johndoe&avatarId=25105\",\"24x24\":\"https://jira.example.com/secure/useravatar?size=small&ownerId=johndoe&avatarId=25105\",\"16x16\":\"https://jira.example.com/secure/useravatar?size=xsmall&ownerId=johndoe&avatarId=25105\",\"32x32\":\"https://jira.example.com/secure/useravatar?size=medium&ownerId=johndoe&avatarId=25105\"},\"displayName\":\"John Doe\",\"active\":true,\"timeZone\":\"America/Chicago\"}{\"self\":\"https://jira.example.com/rest/api/2/user?username=johndoe\",\"name\":\"johndoe\",\"key\":\"johndoe\",\"emailAddress\":\"johndoe@example.com\",\"avatarUrls\":{\"48x48\":\"https://jira.example.com/secure/useravatar?ownerId=johndoe&avatarId=25105\",\"24x24\":\"https://jira.example.com/secure/useravatar?size=small&ownerId=johndoe&avatarId=25105\",\"16x16\":\"https://jira.example.com/secure/useravatar?size=xsmall&ownerId=johndoe&avatarId=25105\",\"32x32\":\"https://jira.example.com/secure/useravatar?size=medium&ownerId=johndoe&avatarId=25105\"},\"displayName\":\"John Doe\",\"active\":true,\"timeZone\":\"America/Chicago\"}",
+                "John Doe\tjohndoe");
     }
 
     @Test

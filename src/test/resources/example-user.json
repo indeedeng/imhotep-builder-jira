@@ -1,40 +1,36 @@
 {
-  "self": "https://***REMOVED***/rest/api/2/user?username=***REMOVED***",
-  "key": "***REMOVED***",
-  "name": "***REMOVED***",
-  "emailAddress": "***REMOVED***@indeed.com",
+  "self": "https://jira.example.com/rest/api/2/user?username=johndoe",
+  "key": "johndoe",
+  "name": "johndoe",
+  "emailAddress": "johndoe@example.com",
   "avatarUrls": {
-    "48x48": "https://***REMOVED***/secure/useravatar?avatarId=10182",
-    "24x24": "https://***REMOVED***/secure/useravatar?size=small&avatarId=10182",
-    "16x16": "https://***REMOVED***/secure/useravatar?size=xsmall&avatarId=10182",
-    "32x32": "https://***REMOVED***/secure/useravatar?size=medium&avatarId=10182"
+    "48x48": "https://jira.example.com/secure/useravatar?avatarId=10182",
+    "24x24": "https://jira.example.com/secure/useravatar?size=small&avatarId=10182",
+    "16x16": "https://jira.example.com/secure/useravatar?size=xsmall&avatarId=10182",
+    "32x32": "https://jira.example.com/secure/useravatar?size=medium&avatarId=10182"
   },
-  "displayName": "***REMOVED***",
+  "displayName": "John Doe",
   "active": true,
   "timeZone": "America/Chicago",
   "locale": "en_US",
   "groups": {
-    "size": 5,
+    "size": 4,
     "items": [
       {
-        "name": "aggmanage",
-        "self": "https://***REMOVED***/rest/api/2/group?groupname=aggmanage"
+        "name": "itsystems",
+        "self": "https://jira.example.com/rest/api/2/group?groupname=itsystems"
       },
       {
         "name": "engineering",
-        "self": "https://***REMOVED***/rest/api/2/group?groupname=engineering"
-      },
-      {
-        "name": "indeed-users",
-        "self": "https://***REMOVED***/rest/api/2/group?groupname=indeed-users"
+        "self": "https://jira.example.com/rest/api/2/group?groupname=engineering"
       },
       {
         "name": "jira-users",
-        "self": "https://***REMOVED***/rest/api/2/group?groupname=jira-users"
+        "self": "https://jira.example.com/rest/api/2/group?groupname=jira-users"
       },
       {
         "name": "product-managers",
-        "self": "https://***REMOVED***/rest/api/2/group?groupname=product-managers"
+        "self": "https://jira.example.com/rest/api/2/group?groupname=product-managers"
       }
     ]
   },

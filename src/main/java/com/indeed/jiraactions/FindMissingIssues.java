@@ -31,14 +31,14 @@ public class FindMissingIssues extends ApiCaller {
     }
 
     public static void main(final String[] args) throws IOException, EncoderException {
-        final File file = new File("***REMOVED***");
+        final File file = new File(args[0]);
         final Scanner scanner = new Scanner(file);
         final List<String> issues = new ArrayList<>();
         while(scanner.hasNextLine()) {
             issues.add(scanner.nextLine());
         }
-        final String BASE_URL = "https://***REMOVED***/rest/api/2/search?jql=issuekey=%s&fields=assignee,comment,creator,issuetype,project,status,resolution,summary,reporter,created,category,fixVersions,duedate,components,labels,priority,customfield_11790,customfield_11791,customfield_12994,customfield_15290,customfield_12492,customfield_12495,customfield_12491,customfield_12090,customfield_17591,customfield_11490,customfield_17490,customfield_17090,customfield_10002,customfield_10003,customfield_11590,customfield_17991,customfield_17992,customfield_17998,customfield_18002,customfield_18007,customfield_17993,customfield_17994,customfield_17995,customfield_17996,customfield_17997,customfield_18990,customfield_17999,customfield_18000,customfield_18001,customfield_18003,customfield_18004,customfield_18005,customfield_18006,customfield_18008,customfield_18009,customfield_19691,customfield_18790,customfield_18791,customfield_18890,customfield_19690,customfield_18891,customfield_18892,customfield_19693,customfield_18894,customfield_18895,customfield_18896,customfield_18897,customfield_18898,customfield_18899,customfield_18900,customfield_19692,customfield_18901,customfield_14026,customfield_19022,customfield_16591,customfield_20290,customfield_14090,customfield_19013&expand=changelog&maxResults=25&startAt=0";
-        final String BASE_UPSOURCE_URL = "https://***REMOVED***.indeed.com/~rpc/getReviewDetails?params={\"projectId\":\"%s\",\"reviewId\":\"%s\"}";
+        final String BASE_URL = args[1] + "/rest/api/2/search?jql=issuekey=%s&fields=assignee,comment,creator,issuetype,project,status,resolution,summary,reporter,created,category,fixVersions,duedate,components,labels,priority,customfield_11790,customfield_11791,customfield_12994,customfield_15290,customfield_12492,customfield_12495,customfield_12491,customfield_12090,customfield_17591,customfield_11490,customfield_17490,customfield_17090,customfield_10002,customfield_10003,customfield_11590,customfield_17991,customfield_17992,customfield_17998,customfield_18002,customfield_18007,customfield_17993,customfield_17994,customfield_17995,customfield_17996,customfield_17997,customfield_18990,customfield_17999,customfield_18000,customfield_18001,customfield_18003,customfield_18004,customfield_18005,customfield_18006,customfield_18008,customfield_18009,customfield_19691,customfield_18790,customfield_18791,customfield_18890,customfield_19690,customfield_18891,customfield_18892,customfield_19693,customfield_18894,customfield_18895,customfield_18896,customfield_18897,customfield_18898,customfield_18899,customfield_18900,customfield_19692,customfield_18901,customfield_14026,customfield_19022,customfield_16591,customfield_20290,customfield_14090,customfield_19013&expand=changelog&maxResults=25&startAt=0";
+        final String BASE_UPSOURCE_URL = args[2] + "/~rpc/getReviewDetails?params={\"projectId\":\"%s\",\"reviewId\":\"%s\"}";
         final ObjectMapper objectMapper = new ObjectMapper();
 
         final JiraActionsIndexBuilderConfig config = new JiraActionsIndexBuilderConfig() {
@@ -151,13 +151,13 @@ public class FindMissingIssues extends ApiCaller {
                         final int responseCode = connection.getResponseCode();
                         if(responseCode != 200) {
                             System.err.println(String.format("Issue %s has missing review %s (response code: %d), verify at url: '%s'",
-                                    issue.key, review, responseCode, String.format("https://***REMOVED***.indeed.com/%s/review/%s", repo.toLowerCase(), review)));
+                                    issue.key, review, responseCode, String.format("%s/%s/review/%s", args[2], repo.toLowerCase(), review)));
                         } else {
                             final String response = new BufferedReader(new InputStreamReader(connection.getInputStream())).readLine();
                             final String title = objectMapper.readTree(response).get("result").get("title").asText();
                             if(!title.contains(issuekey)) {
                                 System.err.println(String.format("Issue %s potentially has overwritten review %s. Title is '%s', verify at url: '%s'",
-                                        issue.key, review, title, String.format("https://***REMOVED***.indeed.com/%s/review/%s", repo.toLowerCase(), review)));
+                                        issue.key, review, title, String.format("%s/%s/review/%s", args[2], repo.toLowerCase(), review)));
                             }
                         }
                     }
