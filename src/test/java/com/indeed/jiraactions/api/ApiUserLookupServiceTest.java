@@ -16,10 +16,10 @@ public class ApiUserLookupServiceTest {
         final JsonNode node = new ObjectMapper().readTree(new File("src/test/resources/example-user.json"));
         final User user = ApiUserLookupService.parseUser(node);
         final User expectedUser = ImmutableUser.builder()
-                .displayName("***REMOVED***")
-                .name("***REMOVED***")
-                .key("***REMOVED***")
-                .addGroups("aggmanage", "engineering", "indeed-users", "jira-users", "product-managers")
+                .displayName("John Doe")
+                .name("johndoe")
+                .key("johndoe")
+                .addGroups("itsystems", "engineering", "jira-users", "product-managers")
                 .build();
         Assert.assertEquals(expectedUser, user);
     }
