@@ -87,8 +87,8 @@ different custom fields for different JIRA instances.
   ```
 3. Invoke `com.indeed.jiraactions.JiraActionsIndexBuilderCommandLine` with arguments :
   ```
-    --start <start time, for example 2016-09-21>
-    --end <end time, for example 2016-09-22>
+    --start <start time (ISO-8601), for example 2016-09-21>
+    --end <end time (ISO-8601), for example 2016-09-22>
     --props <path to imhotep-jira.properties>
     --jiraBatchSize <batchSize, for example 10 or 25>
   ```
