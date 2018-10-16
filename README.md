@@ -1,4 +1,4 @@
-The Jira Actions Indexer is a command line tool designed to create an Imhotep index from actions taken in an instance of JIRA.
+The Jira Actions Imhotep Builder is a command line tool designed to create an Imhotep index from actions taken in an instance of JIRA.
 Each document in an index is a single action (create, update, or comment) taken on an issue. It does this by asking the API for each issue
 that could conceivably be part of the given time range, and decomposing that issue into a series of actions. Those actions are then written
 to a series of .tsv (tab-separated value) files that are uploaded to an Imhotep shardbuilder.
@@ -7,14 +7,14 @@ to a series of .tsv (tab-separated value) files that are uploaded to an Imhotep 
 <br>[![Build Status](https://travis-ci.org/indeedeng/imhotep-builder-jira.svg?branch=master)](https://travis-ci.org/indeedeng/imhotep-builder-jira)
 
 # Architecture
-The Jira Actions Indexer runs in a loop over a series of batches. First it makes a single API call to see how many issues fall into its time
+The builder runs in a loop over a series of batches. First it makes a single API call to see how many issues fall into its time
 period. It will break this up into batches (normally 25, but it will temporarily scale back batch sizes when it gets rate limited). For each
 batch, it will make an API call to get the JSON representation of the issues, decompose them into a series of actions, filter out actions
 that don't fall within the period, and write the correct actions to the TSV file for that date. Then it will repeat on the next batch. When
 the last batch finishes, it will upload all the TSV files that have data to the Imhotep IUpload URL.
 
 We can't know definitively which issues were modified during a specific time period. There are two values we can use to calibrate: the
-create date and the last modified date. So the indexer has to consume many many more issues than it actually needs in order to guarantee it
+create date and the last modified date. So the builder has to consume many many more issues than it actually needs in order to guarantee it
 finds every issue that was actually modified during the period. It will exclude issues that were created after the end date or last modified
 before the start date. These are the only issues we know *can't* be modified during the period.
 
@@ -30,8 +30,7 @@ These two sections are represented totally differently. The Fields section is fo
 of the field. The History section, by contrast, will use the internal representation (customfield_XXXXX). The History section just has a From,
 a string representation of that From, and corresponding To and string representation of that To. The To and To String (or From and From String)
 are JIRA's way of handling things like Primary Keys. Imagine a field with a limited number of options (like country). Each of those countries
-would have their own ID. So the To field would have the ID, and the ToString field would contain the name of the country. The Jira Actions
-Indexer usually (but not always) wants the String representation of the field.
+would have their own ID. So the To field would have the ID, and the ToString field would contain the name of the country. The builder usually (but not always) wants the String representation of the field.
 
 As an example, the Fields section might contain this:
 ```json
