@@ -64,12 +64,12 @@ public class ApiCaller {
                     }
                     setCookies();
                     pinnedNode = anodeId;
-                    log.info("Set JSESSION=%s;upstream=%s. Pinning to X-ANODEID=%s",
+                    log.info("Set JSESSION={};upstream={}. Pinning to X-ANODEID={}",
                             jsessionId, upstream, anodeId);
                 }
             }
             if(!Objects.equals(pinnedNode, anodeId)) {
-                log.warn("Expected X-ANODEID=%s but found %s", pinnedNode, anodeId);
+                log.warn("Expected X-ANODEID={} but found {}", pinnedNode, anodeId);
             }
             return objectMapper.readTree(apiResults);
         } catch (final IOException e) {
