@@ -2,7 +2,6 @@ package com.indeed.jiraactions.api.links;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -10,11 +9,7 @@ import java.util.List;
 
 public class TestLinkFactory {
     private final LinkFactory factory = new LinkFactory();
-
-    @Before
-    public void setup() {
-    }
-
+    
     @Test
     public void testNewLink() throws IOException {
         final String issuekey = "ABC-123";
@@ -27,6 +22,9 @@ public class TestLinkFactory {
                 .add("incorporates")
                 .add("is depended on by")
                 .add("depends upon")
+                .add("Child-issue")
+                .add("link that looks like an issuekey ABC-234")
+                .add("!@!@()*!#()*")
                 .build();
 
         for(final String type : types) {

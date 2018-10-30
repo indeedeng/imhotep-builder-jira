@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class LinkFactory {
     private static final Logger log = LoggerFactory.getLogger(LinkFactory.class);
-    private static final Pattern LINK_PATTERN = Pattern.compile("This issue ([A-Za-z ]+) ([A-Z0-9]+-[0-9]+)");
+    private static final Pattern LINK_PATTERN = Pattern.compile("This issue (.*) ([A-Z0-9]+-[0-9]+)");
 
     protected Link makeLink(@Nonnull final String input) throws IOException {
         final Matcher matcher = LINK_PATTERN.matcher(input);
