@@ -1,7 +1,6 @@
 package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -9,11 +8,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,11 +30,14 @@ public class TsvFileWriter {
     private final JiraActionsIndexBuilderConfig config;
     private final Map<DateMidnight, WriterData> writerDataMap;
     private final List<TSVColumnSpec> columnSpecs;
+    private final DateTimeParser dateTimeParser;
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes,
+                         final DateTimeParser dateTimeParser) {
         this.config = config;
-        final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
-                JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
+        this.dateTimeParser = dateTimeParser;
+        final int days = Days.daysBetween(dateTimeParser.parseDateTime(config.getStartDate()),
+                dateTimeParser.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
         this.columnSpecs = createColumnSpecs(linkTypes);
     }
@@ -46,8 +48,8 @@ public class TsvFileWriter {
     }
 
     public void createFileAndWriteHeaders() throws IOException {
-        final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
-        for(DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
+        final DateTime endDate = dateTimeParser.parseDateTime(config.getEndDate());
+        for(DateTime date = dateTimeParser.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
             createFileAndWriteHeaders(date);
         }
     }
@@ -63,7 +65,7 @@ public class TsvFileWriter {
                 .addColumn("components*|", Action::getComponents)
                 .addColumn("createdate", Action::getCreatedDate)
                 .addColumn("duedate", Action::getDueDate)
-                .addTimeColumn("int duedate_time", Action::getDueDateTime)
+                .addTimeColumn("int duedate_time", action -> action.getDueDateTime(config.getIndexTimeZone()))
                 .addColumn("fieldschanged*", Action::getFieldschanged)
                 .addColumn("fixversion*|", Action::getFixversions)
                 .addLongColumn("issueage", Action::getIssueage)

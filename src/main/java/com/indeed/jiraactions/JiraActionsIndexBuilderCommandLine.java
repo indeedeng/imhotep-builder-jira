@@ -1,9 +1,9 @@
 package com.indeed.jiraactions;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinitionParser;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -14,6 +14,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class JiraActionsIndexBuilderCommandLine {
         tool.run();
     }
 
-    private void initialize(String[] args) {
+    private void initialize(final String[] args) {
         final Options options = new Options()
                 .addOption(buildOption(
                         "props",
@@ -85,6 +86,8 @@ public class JiraActionsIndexBuilderCommandLine {
             final String iuploadUsername = config.getString("iupload.username");
             final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
+            final DateTimeZone indexTimeZone = getDateTimeZone(config, "indextimezone");
+            final DateTimeZone jiraTimeZone = getDateTimeZone(config, "jiratimezone");
 
             final String customFieldsPath = config.getString("customfieldsfile");
             if(StringUtils.isEmpty(customFieldsPath)) {
@@ -108,6 +111,8 @@ public class JiraActionsIndexBuilderCommandLine {
                     .endDate(endDate)
                     .jiraBatchSize(jiraBatchSize)
                     .indexName(indexName)
+                    .indexTimeZone(indexTimeZone)
+                    .jiraTimeZone(jiraTimeZone)
                     .customFields(customFieldDefinitions)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);
@@ -115,6 +120,16 @@ public class JiraActionsIndexBuilderCommandLine {
         } catch (final ParseException|ConfigurationException|IOException e) {
             LOGGER.error("Failed to initialize builder", e);
             System.exit(-1);
+        }
+    }
+
+    @VisibleForTesting
+    static DateTimeZone getDateTimeZone(final PropertiesConfiguration config, final String key) {
+        final String timeZoneString = config.getString(key);
+        if(StringUtils.isEmpty(timeZoneString)) {
+            return DateTimeZone.UTC;
+        } else {
+            return DateTimeZone.forID(timeZoneString);
         }
     }
 

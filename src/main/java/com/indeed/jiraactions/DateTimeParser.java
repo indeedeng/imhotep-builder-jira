@@ -8,19 +8,31 @@ import org.joda.time.Period;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class JiraActionsUtil {
-    private JiraActionsUtil() { /* No */ }
+public class DateTimeParser {
+    private final DateTimeZone dateTimeZone;
 
-    public static final DateTimeZone RAMSES_TIME = DateTimeZone.forOffsetHours(-6);
+    public DateTimeParser(final DateTimeZone dateTimeZone) {
+        this.dateTimeZone = dateTimeZone;
+
+        /* This is a hack. The JSON deserialization expects to convert Strings to DateTime objects. They don't know
+         * at that point what time zone we've chosen. So set it as the default. Ideally we would do this a better way,
+         * perhaps with a custom Deserializer.
+         */
+        DateTimeZone.setDefault(dateTimeZone);
+    }
+
+    public DateTime parseDateTime(final String arg) {
+        return parseDateTime(arg, dateTimeZone);
+    }
 
     // copied from imhotep-builders
     @SuppressWarnings("Duplicates")
     @Nonnull
-    public static DateTime parseDateTime(final String arg) {
+    public static DateTime parseDateTime(final String arg, final DateTimeZone dateTimeZone) {
         try {
-            return new DateTime(arg.trim().replace(" ", "T"), RAMSES_TIME);
+            return new DateTime(arg.trim().replace(" ", "T"), dateTimeZone);
         } catch (final IllegalArgumentException ignored) { }
-        final DateTime now = new DateTime(RAMSES_TIME);
+        final DateTime now = new DateTime(dateTimeZone);
 
         switch (arg) {
             case "now":
@@ -37,7 +49,7 @@ public abstract class JiraActionsUtil {
 
         final Period p = PeriodParser.parseString(arg);
         if (p != null) {
-            DateTime basePoint = new DateTime(RAMSES_TIME);
+            DateTime basePoint = new DateTime(dateTimeZone);
             final Duration duration = p.toDurationTo(basePoint);
 
             if(duration.isLongerThan(Duration.standardHours(1))) {

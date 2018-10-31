@@ -72,11 +72,13 @@ different custom fields for different JIRA instances.
     * `jira.fields` (required): Base fields to use from JIRA. Recommended: `assignee,comment,creator,issuetype,project,status,resolution,summary,reporter,created,category,fixVersions,duedate,components,labels,priority,updated` 
     * `jira.expand` (required): Expand parameter for JIRA issues API. Recommended: `changelog`
     * `jira.project` (optional): Comma-separated list of JIRA project keys to examine. Default of "" (blank) means all projects
-    * `jira.projectexcluded` (optional): Comma-separated list of JIRA project keys to omit.
-    * `iupload.url` (required): URL to Imhotep iupload instance.
+    * `jira.projectexcluded` (optional): Comma-separated list of JIRA project keys to omit
+    * `iupload.url` (required): URL to Imhotep iupload instance
     * `iupload.username` (required): username for Imhotep iupload
     * `iupload.password` (required): password for Imhotep iupload
     * `indexname` (required): name of Imhotep dataset to update (we used to call a dataset an "index")
+    * `indextimezone` (optional): the time zone to use when parsing dates. Defaults to UTC so as to avoid daylight savings issues. Can be specified as an ID or an integer; see DateTimeZone.forID()
+    * `jiratimezone` (optiona): the time zone to use when converting from indextimezone to issue filters in JIRA. Defaults to UTC. Can be specified as an ID or an integer; see DateTimeZone.forID()
     * `customfieldsfile` (optional): relative path to custom field definitions, e.g. `customfields/example-custom-fields.json`
 2. Build the source.
   ```

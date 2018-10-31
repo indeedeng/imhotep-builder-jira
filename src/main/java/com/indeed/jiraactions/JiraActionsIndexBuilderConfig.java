@@ -3,6 +3,7 @@ package com.indeed.jiraactions;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 
 import org.immutables.value.Value;
+import org.joda.time.DateTimeZone;
 
 @Value.Immutable
 public interface JiraActionsIndexBuilderConfig {
@@ -21,4 +22,6 @@ public interface JiraActionsIndexBuilderConfig {
     int getJiraBatchSize();
     String getIndexName();
     CustomFieldDefinition[] getCustomFields();
+    DateTimeZone getIndexTimeZone();
+    DateTimeZone getJiraTimeZone();
 }

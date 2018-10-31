@@ -2,9 +2,10 @@ package com.indeed.jiraactions.api.response.issue.fields.comment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.indeed.jiraactions.JiraActionsUtil;
+import com.indeed.jiraactions.DateTimeParser;
 import com.indeed.jiraactions.api.response.issue.User;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * @author soono
@@ -24,6 +25,6 @@ public class Comment {
 
     @JsonProperty("created")
     public void setCreate(final String created) {
-        this.created = JiraActionsUtil.parseDateTime(created);
+        this.created = DateTimeParser.parseDateTime(created, DateTimeZone.getDefault());
     }
 }
