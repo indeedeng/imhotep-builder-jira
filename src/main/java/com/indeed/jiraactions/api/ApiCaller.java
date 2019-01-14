@@ -26,7 +26,7 @@ public class ApiCaller {
     private String jsessionId = null;
     private String upstream = null;
     private String cookies = "";
-    private String pinnedNode = "";
+    private String pinnedNode = null;
 
     public ApiCaller(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
@@ -47,29 +47,31 @@ public class ApiCaller {
 
             final String anodeId = urlConnection.getHeaderField("X-ANODEID");
 
-            if(jsessionId == null || upstream == null) {
+            if(!Objects.equals(pinnedNode, anodeId)) {
+                if(pinnedNode != null) {
+                    log.warn("Expected X-ANODEID={} but found {}", pinnedNode, anodeId);
+                }
                 final Map<String, List<String>> responseHeaders = urlConnection.getHeaderFields();
                 final List<String> cookies = responseHeaders.get("Set-Cookie");
                 if(cookies != null) {
-                    for(final String cookie : cookies) {
-                        if(cookie.startsWith("JSESSIONID=")) {
+                    for (final String cookie : cookies) {
+                        if (cookie.startsWith("JSESSIONID=")) {
                             final int start = "JSESSIONID=".length();
                             final int end = cookie.contains(";") ? cookie.indexOf(";") : cookie.length();
                             jsessionId = cookie.substring(start, end);
-                        } else if(cookie.startsWith("upstream")) {
+                        } else if (cookie.startsWith("upstream")) {
                             final int start = "upstream=".length();
                             final int end = cookie.contains(";") ? cookie.indexOf(";") : cookie.length();
                             upstream = cookie.substring(start, end);
                         }
                     }
-                    setCookies();
-                    pinnedNode = anodeId;
-                    log.info("Set JSESSION={};upstream={}. Pinning to X-ANODEID={}",
-                            jsessionId, upstream, anodeId);
+                    if (jsessionId != null || upstream != null) {
+                        setCookies();
+                        pinnedNode = anodeId;
+                        log.info("Set JSESSION={};upstream={}. Pinning to X-ANODEID={}",
+                                jsessionId, upstream, anodeId);
+                    }
                 }
-            }
-            if(!Objects.equals(pinnedNode, anodeId)) {
-                log.warn("Expected X-ANODEID={} but found {}", pinnedNode, anodeId);
             }
             return objectMapper.readTree(apiResults);
         } catch (final IOException e) {
