@@ -26,4 +26,8 @@ public class Comment {
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);
     }
+
+    public boolean isBefore(final DateTime date) {
+        return date.compareTo(created) >= 0;
+    }
 }

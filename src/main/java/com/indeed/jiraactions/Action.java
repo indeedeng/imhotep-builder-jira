@@ -10,28 +10,25 @@ import org.immutables.value.Value;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Set;
 
 @Value.Immutable
 public interface Action {
-    String getAction();
+    String getIssuekey();
     User getActor();
     User getAssignee();
-    String getFieldschanged();
     long getIssueage();
-    String getIssuekey();
     String getIssuetype();
     String getProject();
     String getProjectkey();
-    String getPrevstatus();
     User getReporter();
     String getResolution();
     String getStatus();
     String getSummary();
-    long getTimeinstate();
-    long getTimesinceaction();
     DateTime getTimestamp();
+    long getTimeinstatus();
     String getCategory();
     String getFixversions();
     String getDueDate();
@@ -39,6 +36,9 @@ public interface Action {
     String getLabels();
     String getCreatedDate();
     String getPriority();
+    int getComments();
+    String getDateResolved();
+    String getDateClosed();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
 
@@ -55,5 +55,9 @@ public interface Action {
     @Value.Derived
     default boolean isInRange(final DateTime start, final DateTime end) {
         return start.compareTo(getTimestamp()) <= 0 && end.compareTo(getTimestamp()) > 0;
+    }
+    @Value.Derived
+    default boolean isBefore(final DateTime date) {
+        return date.compareTo(getTimestamp()) >= 0;
     }
 }

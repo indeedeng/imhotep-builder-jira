@@ -5,6 +5,7 @@ import com.google.common.base.Stopwatch;
 import com.indeed.jiraactions.api.IssueAPIParser;
 import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
+import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,9 +69,7 @@ public class ApiPageProvider implements PageProvider {
     }
 
     @Override
-    public boolean hasPage() {
-        return issuesAPICaller.currentPageExist();
-    }
+    public boolean hasPage() { return issuesAPICaller.currentPageExist(); }
 
     @Override
     public JsonNode getRawPage() throws InterruptedException {
@@ -111,24 +110,23 @@ public class ApiPageProvider implements PageProvider {
         return issue;
     }
 
+    
     @Override
-    public List<Action> getActions(final Issue issue) throws IOException {
+    public Action getAction(final Issue issue) throws IOException {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
-        final List<Action> actions = actionsBuilder.buildActions();
+        final Action action = actionsBuilder.buildActions();
         stopwatch.stop();
 
         processTime += stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
-        actions.stream()
-                .map(action -> action.getCustomFieldValues().entrySet())
-                .flatMap(Set::stream)
+        action.getCustomFieldValues().entrySet().stream()
                 .filter(v -> !v.getValue().isEmpty())
                 .map(Map.Entry::getKey)
                 .forEach(customFieldsSeen::add);
-
-        return actions;
+        return action;
     }
+
 
     @Override
     public void writeActions(final List<Action> actions) throws IOException {

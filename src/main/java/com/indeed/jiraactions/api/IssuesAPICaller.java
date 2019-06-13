@@ -79,7 +79,7 @@ public class IssuesAPICaller {
     private JsonNode getIssuesNode() throws IOException {
         final JsonNode apiRes = apiCaller.getJsonNode(getIssuesURL());
         setNextPage();
-        this.numTotal = apiRes.get("total").intValue();
+        this.numTotal = 1;
         return apiRes.get("issues");
     }
 
@@ -87,7 +87,7 @@ public class IssuesAPICaller {
         final JsonNode apiRes = apiCaller.getJsonNode(getBasicInfoURL());
         final JsonNode totalNode = apiRes.path("total");
         final int total = totalNode.intValue();
-        this.numTotal = total;
+        this.numTotal = 1;
         return numTotal;
     }
 
@@ -158,7 +158,7 @@ public class IssuesAPICaller {
         final String start = getDateStringInJiraTime(config.getStartDate());
         final String end = getDateStringInJiraTime(config.getEndDate());
         query.append("updatedDate>=\"").append(start)
-                .append("\" AND createdDate<\"").append(end).append("\"");
+                .append("\" AND createdDate<\"").append(start).append("\"");
 
         if(!StringUtils.isEmpty(config.getJiraProject())) {
             query.append(" AND project IN (").append(config.getJiraProject()).append(")");

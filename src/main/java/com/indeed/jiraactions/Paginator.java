@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,9 +70,12 @@ public class Paginator {
                 log.debug(String.join(", ", issues.stream().map(x -> x.key).collect(Collectors.toList())));
                 for(final Issue issue : issues) {
                     try {
-                        final List<Action> preFilteredActions = pageProvider.getActions(issue);
+                        final Action preFilteredAction = pageProvider.getAction(issue);
+                        final List<Action> preFilteredActions = new ArrayList<>();
+                        preFilteredActions.add(preFilteredAction);
                         final List<Action> actions = getActionsFilterByLastSeen(seenIssues, issue, preFilteredActions);
-                        final List<Action> filteredActions = actions.stream().filter(a -> a.isInRange(startDate, endDate)).collect(Collectors.toList());
+                        final List<Action> filteredActions = actions.stream().filter(a -> a.isBefore(startDate)).collect(Collectors.toList());
+                        log.debug("Action: {}", filteredActions);
                         pageProvider.writeActions(filteredActions);
 
 
@@ -103,9 +107,10 @@ public class Paginator {
                     break;
                 }
             }
-            pageProvider.reset();
-            firstPass = false;
-            log.info("Starting over to pick up lost issues.");
+            break;
+            //pageProvider.reset();
+            //firstPass = false;
+            //log.info("Starting over to pick up lost issues.");
         }
     }
 

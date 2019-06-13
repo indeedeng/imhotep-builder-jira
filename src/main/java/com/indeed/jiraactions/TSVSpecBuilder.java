@@ -48,6 +48,11 @@ public class TSVSpecBuilder {
         return this;
     }
 
+    public TSVSpecBuilder addIntColumn(final String header, final Function<Action, Integer> intExtractor) {
+        addColumn(header, action -> String.valueOf(intExtractor.apply(action)));
+        return this;
+    }
+
     public TSVSpecBuilder addCustomFieldColumns(final CustomFieldDefinition customField) {
         final List<String> headers = customField.getHeaders();
         final Function<Action, List<String>> valueExtractor = action -> getCustomFieldValue(customField, action);

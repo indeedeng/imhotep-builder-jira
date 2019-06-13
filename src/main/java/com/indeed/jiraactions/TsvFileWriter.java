@@ -56,7 +56,6 @@ public class TsvFileWriter {
         final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
         specBuilder
                 .addColumn("issuekey", Action::getIssuekey)
-                .addColumn("action", Action::getAction)
                 .addUserColumns("actor", Action::getActor)
                 .addUserColumns("assignee", Action::getAssignee)
                 .addColumn("category", Action::getCategory)
@@ -64,22 +63,22 @@ public class TsvFileWriter {
                 .addColumn("createdate", Action::getCreatedDate)
                 .addColumn("duedate", Action::getDueDate)
                 .addTimeColumn("int duedate_time", Action::getDueDateTime)
-                .addColumn("fieldschanged*", Action::getFieldschanged)
                 .addColumn("fixversion*|", Action::getFixversions)
                 .addLongColumn("issueage", Action::getIssueage)
+                .addLongColumn("timeinstatus", Action::getTimeinstatus)
                 .addColumn("issuetype", Action::getIssuetype)
                 .addColumn("labels*", Action::getLabels)
                 .addColumn("priority", Action::getPriority)
                 .addColumn("project", Action::getProject)
                 .addColumn("projectkey", Action::getProjectkey)
-                .addColumn("prevstatus", Action::getPrevstatus)
                 .addUserColumns("reporter", Action::getReporter)
                 .addColumn("resolution", Action::getResolution)
                 .addColumn("status", Action::getStatus)
                 .addColumn("summary", Action::getSummary)
-                .addLongColumn("timeinstate", Action::getTimeinstate)
-                .addLongColumn("timesinceaction", Action::getTimesinceaction)
                 .addTimeColumn("time", Action::getTimestamp)
+                .addIntColumn("comments", Action::getComments)
+                .addColumn("dateclosed", Action::getDateClosed)
+                .addColumn("dateresovled", Action::getDateResolved)
                 .addLinkColumns(linkTypes);
 
         for (final CustomFieldDefinition customField : config.getCustomFields()) {
@@ -117,7 +116,8 @@ public class TsvFileWriter {
         }
 
         for (final Action action : actions) {
-            final WriterData writerData = writerDataMap.get(action.getTimestamp().toDateMidnight());
+            DateTime day = JiraActionsUtil.parseDateTime(config.getStartDate());
+            final WriterData writerData = writerDataMap.get(day.toDateMidnight());
             final BufferedWriter bw = writerData.getBufferedWriter();
             writerData.setWritten();
             writerData.setDirty(true);

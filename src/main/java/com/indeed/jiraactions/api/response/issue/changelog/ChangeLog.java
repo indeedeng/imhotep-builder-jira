@@ -15,7 +15,10 @@ import javax.annotation.Nullable;
 
 public class ChangeLog {
     public History[] histories;
+    public History history;
 
+
+    // Able to sort histories here to give all latest
     @Nullable
     public Item getFirstHistoryItem(final boolean acceptCustom, final String... fields) {
         for (final History history : histories) {
