@@ -33,7 +33,6 @@ public class ApiPageProvider implements PageProvider {
     @SuppressWarnings("FieldCanBeLocal")
 
     private final JiraActionsIndexBuilderConfig config;
-    private final DateTime endDate;
     private final Set<CustomFieldDefinition> customFieldsSeen;
 
     private long apiTime = 0;
@@ -48,7 +47,6 @@ public class ApiPageProvider implements PageProvider {
         this.tsvFileWriter = tsvFileWriter;
 
         this.startDate = JiraActionsUtil.parseDateTime(config.getStartDate());
-        this.endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
         this.customFieldsSeen = new HashSet<>(config.getCustomFields().length);
     }
 
@@ -112,20 +110,24 @@ public class ApiPageProvider implements PageProvider {
 
     
     @Override
-    public Action getAction(final Issue issue) throws IOException {
+    public List<Action> getActions(final Issue issue) throws IOException {
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
-        final Action action = actionsBuilder.buildActions();
+        final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate);
+        final List<Action> actions = actionsBuilder.buildActions();
         stopwatch.stop();
 
         processTime += stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
-        action.getCustomFieldValues().entrySet().stream()
+        actions.stream()
+                .map(action -> action.getCustomFieldValues().entrySet())
+                .flatMap(Set::stream)
                 .filter(v -> !v.getValue().isEmpty())
                 .map(Map.Entry::getKey)
                 .forEach(customFieldsSeen::add);
-        return action;
+
+        return actions;
     }
+
 
 
     @Override

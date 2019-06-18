@@ -19,7 +19,7 @@ public interface PageProvider {
 
     Iterable<Issue> getPage() throws InterruptedException;
 
-    Action getAction(final Issue issue) throws IOException;
+    List<Action> getActions(final Issue issue) throws IOException;
 
     void writeActions(final List<Action> actions) throws IOException;
 }

@@ -6,6 +6,7 @@ import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
 
+import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -53,6 +54,12 @@ public class TSVSpecBuilder {
         return this;
     }
 
+    public TSVSpecBuilder addStatusTimeColumns(final String header) {
+        final Function<Action, String> valueExtractor = TSVSpecBuilder::getStatusTimesValue;
+        addColumn(header, valueExtractor);
+        return this;
+    }
+
     public TSVSpecBuilder addCustomFieldColumns(final CustomFieldDefinition customField) {
         final List<String> headers = customField.getHeaders();
         final Function<Action, List<String>> valueExtractor = action -> getCustomFieldValue(customField, action);
@@ -62,6 +69,7 @@ public class TSVSpecBuilder {
         }
         return this;
     }
+
 
     public TSVSpecBuilder addLinkColumns(final List<String> linkTypes) {
         for(final String type : linkTypes) {
@@ -104,4 +112,13 @@ public class TSVSpecBuilder {
 
         return String.join(" ", values);
     }
+
+    private static String getStatusTimesValue(final Action action) {
+        final Iterable<String> values = action.getStatustimes().stream()
+                .map(StatusTime::getStatusTime)::iterator;
+
+        return String.join(",", values);
+    }
+
+
 }

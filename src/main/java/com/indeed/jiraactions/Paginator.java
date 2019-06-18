@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,12 +21,10 @@ public class Paginator {
 
     private final PageProvider pageProvider;
     private final DateTime startDate;
-    private final DateTime endDate;
 
-    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate) {
+    public Paginator(final PageProvider pageProvider, final DateTime startDate) {
         this.pageProvider = pageProvider;
         this.startDate = startDate;
-        this.endDate = endDate;
     }
 
     /*
@@ -70,12 +67,10 @@ public class Paginator {
                 log.debug(String.join(", ", issues.stream().map(x -> x.key).collect(Collectors.toList())));
                 for(final Issue issue : issues) {
                     try {
-                        final Action preFilteredAction = pageProvider.getAction(issue);
-                        final List<Action> preFilteredActions = new ArrayList<>();
-                        preFilteredActions.add(preFilteredAction);
+                        final List<Action> preFilteredActions = pageProvider.getActions(issue);
                         final List<Action> actions = getActionsFilterByLastSeen(seenIssues, issue, preFilteredActions);
                         final List<Action> filteredActions = actions.stream().filter(a -> a.isBefore(startDate)).collect(Collectors.toList());
-                        log.debug("Action: {}", filteredActions);
+                        log.debug(String.valueOf(filteredActions));
                         pageProvider.writeActions(filteredActions);
 
 
@@ -108,9 +103,9 @@ public class Paginator {
                 }
             }
             break;
-            //pageProvider.reset();
-            //firstPass = false;
-            //log.info("Starting over to pick up lost issues.");
+//            pageProvider.reset();
+//            firstPass = false;
+//            log.info("Starting over to pick up lost issues.");
         }
     }
 
@@ -119,7 +114,7 @@ public class Paginator {
      * could happen because there's an update that's not visible (for example, a restricted visibility comment) or
      * because an existing action was modified (for example, editing a comment).
      * We retrieve the list of issues from Jira in descending updatedDate order. A comment with an action we can't
-     * see could cause us to prematuerly think we've finished processing all the new updates. To avoid this, we should
+     * see could cause us to prematurely think we've finished processing all the new updates. To avoid this, we should
      * ignore things that have an updatedDate later than the last action.
      * not updates.
      *

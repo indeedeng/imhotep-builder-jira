@@ -21,30 +21,29 @@ public class ActionsBuilder {
 
     private final Issue issue;
     private final DateTime startDate;
-    private final DateTime endDate;
     private final ActionFactory actionFactory;
     private final List<History> histories;
     private final List<Comment> comments;
-    private Action action;
+    private final List<Action> actions;
 
 
-    public ActionsBuilder(final ActionFactory actionFactory, final Issue issue, final DateTime startDate, final DateTime endDate) {
+    public ActionsBuilder(final ActionFactory actionFactory, final Issue issue, final DateTime startDate) {
         this.actionFactory = actionFactory;
         this.issue = issue;
         this.startDate = startDate;
-        this.endDate = endDate;
 
-        action = null;
+        actions = new ArrayList<>(issue.changelog.histories.length + issue.fields.comment.comments.length);
         histories = sortLatestHistories(issue);
         comments = sortLatestComments(issue);
     }
 
     @Nonnull
-    public Action buildActions() throws IOException {
+    public List<Action> buildActions() throws IOException {
         setCreateAction();
+        commentCheck();
         compare();
         setActionToCurrent();
-        return action;
+        return actions;
     }
 
     //
@@ -52,7 +51,7 @@ public class ActionsBuilder {
     //
 
     private void setCreateAction() throws IOException {
-        action = actionFactory.create(issue);
+        actions.add(actionFactory.create(issue));
     }
 
     //
@@ -60,7 +59,7 @@ public class ActionsBuilder {
     //
 
     private void setUpdateActions(int index) {
-        action = actionFactory.update(action, histories.get(index));
+        actions.set(0, actionFactory.update(actions.get(0), histories.get(index)));
     }
 
     //
@@ -68,7 +67,7 @@ public class ActionsBuilder {
     //
 
     private void setCommentActions(int index) {
-        action = actionFactory.comment(action, comments.get(index));
+        actions.set(0, actionFactory.comment(actions.get(0), comments.get(index)));
     }
 
     //
@@ -76,7 +75,7 @@ public class ActionsBuilder {
     //
 
     private void setActionToCurrent() {
-        action = actionFactory.toCurrent(action);
+        actions.set(0, actionFactory.toCurrent(actions.get(0)));
     }
 
     private void compare() {
@@ -121,6 +120,16 @@ public class ActionsBuilder {
         final List<Comment> listComments = new ArrayList<>(comments.length);
         listComments.addAll(Arrays.asList(comments));
         return listComments.stream().filter(a -> a.isBefore(startDate)).collect(Collectors.toList());
+    }
+
+    private void commentCheck() {
+        final List<Comment> model = comments;
+        for(Comment comment : model) {
+           if (comment.isBefore(actions.get(0).getTimestamp())) {
+               LOG.debug("Skipping comment {} on {} because it's before the issue was created.", comment.id, issue.key);
+               comments.remove(comment);
+           }
+        }
     }
 
 }

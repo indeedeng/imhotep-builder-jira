@@ -2,6 +2,7 @@ package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 
+import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -34,8 +35,7 @@ public class TsvFileWriter {
 
     public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes) {
         this.config = config;
-        final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
-                JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
+        final int days = 1;
         writerDataMap = new HashMap<>(days);
         this.columnSpecs = createColumnSpecs(linkTypes);
     }
@@ -46,10 +46,8 @@ public class TsvFileWriter {
     }
 
     public void createFileAndWriteHeaders() throws IOException {
-        final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
-        for(DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
-            createFileAndWriteHeaders(date);
-        }
+        final DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate());
+        createFileAndWriteHeaders(date);
     }
 
     private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
@@ -65,7 +63,6 @@ public class TsvFileWriter {
                 .addTimeColumn("int duedate_time", Action::getDueDateTime)
                 .addColumn("fixversion*|", Action::getFixversions)
                 .addLongColumn("issueage", Action::getIssueage)
-                .addLongColumn("timeinstatus", Action::getTimeinstatus)
                 .addColumn("issuetype", Action::getIssuetype)
                 .addColumn("labels*", Action::getLabels)
                 .addColumn("priority", Action::getPriority)
@@ -79,6 +76,7 @@ public class TsvFileWriter {
                 .addIntColumn("comments", Action::getComments)
                 .addColumn("dateclosed", Action::getDateClosed)
                 .addColumn("dateresovled", Action::getDateResolved)
+                .addStatusTimeColumns("statustimes")
                 .addLinkColumns(linkTypes);
 
         for (final CustomFieldDefinition customField : config.getCustomFields()) {

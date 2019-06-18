@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
+import com.indeed.jiraactions.api.statustimes.StatusTime;
 import com.indeed.jiraactions.api.response.issue.User;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
@@ -13,6 +14,7 @@ import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 @Value.Immutable
 public interface Action {
@@ -28,7 +30,7 @@ public interface Action {
     String getStatus();
     String getSummary();
     DateTime getTimestamp();
-    long getTimeinstatus();
+    List<StatusTime> getStatustimes();
     String getCategory();
     String getFixversions();
     String getDueDate();

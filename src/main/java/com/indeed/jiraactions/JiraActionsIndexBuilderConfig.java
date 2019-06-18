@@ -17,7 +17,6 @@ public interface JiraActionsIndexBuilderConfig {
     String getIuploadUsername();
     String getIuploadPassword();
     String getStartDate();
-    String getEndDate();
     int getJiraBatchSize();
     String getIndexName();
     CustomFieldDefinition[] getCustomFields();

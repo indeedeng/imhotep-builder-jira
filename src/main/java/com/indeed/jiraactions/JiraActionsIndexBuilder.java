@@ -49,11 +49,6 @@ public class JiraActionsIndexBuilder {
             long fileTime = 0;
 
             final DateTime startDate = JiraActionsUtil.parseDateTime(config.getStartDate());
-            final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
-
-            if (!startDate.isBefore(endDate)) {
-                log.error("Invalid start date '{}' not before end date '{}'", startDate, endDate);
-            }
 
             final LinkTypesApiCaller linkTypesApiCaller = new LinkTypesApiCaller(config, apiCaller);
             final List<String> linkTypes = linkTypesApiCaller.getLinkTypes();
@@ -65,7 +60,7 @@ public class JiraActionsIndexBuilder {
             fileTime += headerStopwatch.elapsed(TimeUnit.MILLISECONDS);
 
             final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
-            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate);
+            final Paginator paginator = new Paginator(apiPageProvider, startDate);
 
             paginator.process();
             fileTime += apiPageProvider.getFileWritingTime();
