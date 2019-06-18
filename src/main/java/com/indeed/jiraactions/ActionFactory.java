@@ -147,7 +147,7 @@ public class ActionFactory {
     }
 
     private String dateClosed(final Action prevAction, final History history) {
-        String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getResolution();
+        String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus();
         if (status.equals("Closed")){
             return history.created.toDateTimeISO().toString();
         }

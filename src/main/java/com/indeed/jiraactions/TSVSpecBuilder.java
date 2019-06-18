@@ -117,7 +117,7 @@ public class TSVSpecBuilder {
         final Iterable<String> values = action.getStatustimes().stream()
                 .map(StatusTime::getStatusTime)::iterator;
 
-        return String.join(",", values);
+        return String.join(", ", values);
     }
 
 
