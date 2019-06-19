@@ -40,7 +40,6 @@ public class ActionsBuilder {
     @Nonnull
     public List<Action> buildActions() throws IOException {
         setCreateAction();
-        commentCheck();
         compare();
         setActionToCurrent();
         return actions;
@@ -81,6 +80,12 @@ public class ActionsBuilder {
     private void compare() {
         int historyIndex = 0;
         int commentIndex = 0;
+        for(Comment comment : comments) {
+            if (comment.isBefore(actions.get(0).getTimestamp())) {
+                LOG.debug("Skipping comment {} on {} because it's before the issue was created.", comment.id, issue.key);
+                commentIndex++;
+            }
+        }
         while (true) {
             if (historyIndex >= histories.size() || commentIndex >= comments.size()) {
                 if (commentIndex >= comments.size()) {
@@ -120,16 +125,6 @@ public class ActionsBuilder {
         final List<Comment> listComments = new ArrayList<>(comments.length);
         listComments.addAll(Arrays.asList(comments));
         return listComments.stream().filter(a -> a.isBefore(startDate)).collect(Collectors.toList());
-    }
-
-    private void commentCheck() {
-        final List<Comment> model = comments;
-        for(Comment comment : model) {
-           if (comment.isBefore(actions.get(0).getTimestamp())) {
-               LOG.debug("Skipping comment {} on {} because it's before the issue was created.", comment.id, issue.key);
-               comments.remove(comment);
-           }
-        }
     }
 
 }

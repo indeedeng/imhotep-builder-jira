@@ -54,12 +54,6 @@ public class TSVSpecBuilder {
         return this;
     }
 
-    public TSVSpecBuilder addStatusTimeColumns(final String header) {
-        final Function<Action, String> valueExtractor = TSVSpecBuilder::getStatusTimesValue;
-        addColumn(header, valueExtractor);
-        return this;
-    }
-
     public TSVSpecBuilder addCustomFieldColumns(final CustomFieldDefinition customField) {
         final List<String> headers = customField.getHeaders();
         final Function<Action, List<String>> valueExtractor = action -> getCustomFieldValue(customField, action);
@@ -70,6 +64,23 @@ public class TSVSpecBuilder {
         return this;
     }
 
+    public TSVSpecBuilder addStatusTimeColumns(final List<String> statusTypes) {
+        for(final String type : statusTypes) {
+            final Function<Action, Long> valueExtractor = action -> getStatusTime(type, action);
+            addLongColumn(
+                    String.format("%s_time", type.toLowerCase()
+                            .replace(" ", "_")
+                            .replace("-", "_")
+                            .replace("(", "")
+                            .replace(")", "")
+                            .replace("&", "and")
+                            .replace("/", "_")), valueExtractor);
+        }
+        final Function<Action, String> valueExtractor = TSVSpecBuilder::getAllStatuses;
+        addColumn("statushistory", valueExtractor);
+
+        return this;
+    }
 
     public TSVSpecBuilder addLinkColumns(final List<String> linkTypes) {
         for(final String type : linkTypes) {
@@ -113,11 +124,22 @@ public class TSVSpecBuilder {
         return String.join(" ", values);
     }
 
-    private static String getStatusTimesValue(final Action action) {
-        final Iterable<String> values = action.getStatustimes().stream()
-                .map(StatusTime::getStatusTime)::iterator;
+    private static long getStatusTime(final String statusType, final Action action) {
+        final List<StatusTime> st = action.getStatustimes();
+        long output = 0;
+        for(StatusTime statusTime : st) {
+            if (statusTime.getStatus().equals(statusType)) {
+                output = statusTime.getTime();
+            }
+        }
+        return output;
+    }
 
-        return String.join(", ", values);
+    private static String getAllStatuses(final Action action) {
+        final Iterable<String> values = action.getStatustimes().stream()
+                .map(StatusTime::getStatus)::iterator;
+
+        return String.join(" ", values);
     }
 
 

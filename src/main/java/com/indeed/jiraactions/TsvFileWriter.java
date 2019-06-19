@@ -33,11 +33,11 @@ public class TsvFileWriter {
     private final Map<DateMidnight, WriterData> writerDataMap;
     private final List<TSVColumnSpec> columnSpecs;
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes, final List<String> statusTypes) {
         this.config = config;
         final int days = 1;
         writerDataMap = new HashMap<>(days);
-        this.columnSpecs = createColumnSpecs(linkTypes);
+        this.columnSpecs = createColumnSpecs(linkTypes, statusTypes);
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
@@ -50,7 +50,7 @@ public class TsvFileWriter {
         createFileAndWriteHeaders(date);
     }
 
-    private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
+    private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes, final List<String> statusTypes) {
         final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
         specBuilder
                 .addColumn("issuekey", Action::getIssuekey)
@@ -76,7 +76,7 @@ public class TsvFileWriter {
                 .addIntColumn("comments", Action::getComments)
                 .addColumn("dateclosed", Action::getDateClosed)
                 .addColumn("dateresovled", Action::getDateResolved)
-                .addStatusTimeColumns("statustimes")
+                .addStatusTimeColumns(statusTypes)
                 .addLinkColumns(linkTypes);
 
         for (final CustomFieldDefinition customField : config.getCustomFields()) {

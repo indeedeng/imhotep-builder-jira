@@ -9,6 +9,7 @@ import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.links.LinkTypesApiCaller;
+import com.indeed.jiraactions.api.statustimes.StatusTypesApiCaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -52,8 +53,10 @@ public class JiraActionsIndexBuilder {
 
             final LinkTypesApiCaller linkTypesApiCaller = new LinkTypesApiCaller(config, apiCaller);
             final List<String> linkTypes = linkTypesApiCaller.getLinkTypes();
+            final StatusTypesApiCaller statusTypesApiCaller = new StatusTypesApiCaller(config, apiCaller);
+            final List<String> statusTypes = statusTypesApiCaller.getStatusTypes();
 
-            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes);
+            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes, statusTypes);
             final Stopwatch headerStopwatch = Stopwatch.createStarted();
             writer.createFileAndWriteHeaders();
             headerStopwatch.stop();
