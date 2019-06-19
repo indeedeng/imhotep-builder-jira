@@ -29,7 +29,6 @@ public class ActionFactory {
     private final JiraActionsIndexBuilderConfig config;
     private final LinkFactory linkFactory = new LinkFactory();
     private final StatusTimeFactory statusTimeFactory = new StatusTimeFactory();
-    private List<StatusTime> statusTime = new ArrayList<>();
 
     @SuppressWarnings("WeakerAccess")
     public ActionFactory(final UserLookupService userLookupService,
@@ -163,7 +162,19 @@ public class ActionFactory {
         String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus();
         st.set(st.size()-1, statusTimeFactory.updateStatus(st.get(st.size()-1), getTimeDiff(prevAction.getTimestamp(), history.created)));
         if (!status.equals(prevAction.getStatus())) {
-            st.add(statusTimeFactory.addStatus(status));
+            boolean first = true;
+            for(int i = 0; i < st.size(); i++) {
+                if (st.get(i).getStatus().equals(status)) {
+                    st.set(i, statusTimeFactory.updateTimeToLast(st.get(i)));
+                    first = false;
+                }
+            }
+            if (first) {
+                st.add(statusTimeFactory.addStatus(status, prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created), prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created)));
+            } else {
+                st.add(statusTimeFactory.addStatus(status, 0, prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created)));
+            }
+
         }
         return st;
     }
