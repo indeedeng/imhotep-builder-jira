@@ -1,14 +1,13 @@
 # Jira Actions Imhotep Builder
 
-![Lifecycle](https://img.shields.io/osslifecycle/indeedeng/imhotep-builder-jira.svg)
-
 The Jira Actions Imhotep Builder is a command line tool designed to create an Imhotep index from actions taken in an instance of JIRA.
 Each document in an index is a single action (create, update, or comment) taken on an issue. It does this by asking the API for each issue
 that could conceivably be part of the given time range, and decomposing that issue into a series of actions. Those actions are then written
 to a series of .tsv (tab-separated value) files that are uploaded to an Imhotep shardbuilder.
 
-**Build Status:**
+**Status:**
 <br>[![Build Status](https://travis-ci.org/indeedeng/imhotep-builder-jira.svg?branch=master)](https://travis-ci.org/indeedeng/imhotep-builder-jira)
+![Lifecycle](https://img.shields.io/osslifecycle/indeedeng/imhotep-builder-jira.svg)
 
 # Architecture
 The builder runs in a loop over a series of batches. First it makes a single API call to see how many issues fall into its time
