@@ -1,10 +1,13 @@
+# Jira Actions Imhotep Builder
+
 The Jira Actions Imhotep Builder is a command line tool designed to create an Imhotep index from actions taken in an instance of JIRA.
 Each document in an index is a single action (create, update, or comment) taken on an issue. It does this by asking the API for each issue
 that could conceivably be part of the given time range, and decomposing that issue into a series of actions. Those actions are then written
 to a series of .tsv (tab-separated value) files that are uploaded to an Imhotep shardbuilder.
 
-**Build Status:**
+**Status:**
 <br>[![Build Status](https://travis-ci.org/indeedeng/imhotep-builder-jira.svg?branch=master)](https://travis-ci.org/indeedeng/imhotep-builder-jira)
+![Lifecycle](https://img.shields.io/osslifecycle/indeedeng/imhotep-builder-jira.svg)
 
 # Architecture
 The builder runs in a loop over a series of batches. First it makes a single API call to see how many issues fall into its time
@@ -47,9 +50,9 @@ As an example, the Fields section might contain this:
 The History section might instead contain this:
 ```json
 {
-  "from": null, 
-  "fromString": "", 
-  "to": "TODO", 
+  "from": null,
+  "fromString": "",
+  "to": "TODO",
   "toString": "Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)"
 }
 ```
@@ -68,8 +71,8 @@ different custom fields for different JIRA instances.
 1. Create a file called `imhotep-jira.properties` (see `imhotep-jira-template.properties` for the basic template). Properties are:
     * `jira.username` (required): username for JIRA instance
     * `jira.password` (required): password for JIRA instance
-    * `jira.baseurl` (required): Base URL for JIRA instance 
-    * `jira.fields` (required): Base fields to use from JIRA. Recommended: `assignee,comment,creator,issuetype,project,status,resolution,summary,reporter,created,category,fixVersions,duedate,components,labels,priority,updated` 
+    * `jira.baseurl` (required): Base URL for JIRA instance
+    * `jira.fields` (required): Base fields to use from JIRA. Recommended: `assignee,comment,creator,issuetype,project,status,resolution,summary,reporter,created,category,fixVersions,duedate,components,labels,priority,updated`
     * `jira.expand` (required): Expand parameter for JIRA issues API. Recommended: `changelog`
     * `jira.project` (optional): Comma-separated list of JIRA project keys to examine. Default of "" (blank) means all projects
     * `jira.projectexcluded` (optional): Comma-separated list of JIRA project keys to omit.
@@ -96,3 +99,9 @@ different custom fields for different JIRA instances.
     mvn exec:java -Dexec.mainClass="com.indeed.jiraactions.JiraActionsIndexBuilderCommandLine" \
       -Dexec.args="--props imhotep-jira.properties --start $START_DATE --end $END_DATE --jiraBatchSize=25"
   ```
+
+# Code of Conduct
+This project is governed by the [Contributor Covenant v 1.4.1](CODE_OF_CONDUCT.md)
+
+# License
+[Apache License Version 2.0](LICENSE)
