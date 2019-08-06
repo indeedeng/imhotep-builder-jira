@@ -24,23 +24,32 @@ public class CustomFieldValue {
     private final CustomFieldDefinition definition;
     private final String value;
     private final String childValue;
+    private final String groupsValue;
 
     protected CustomFieldValue(final CustomFieldDefinition definition, final String value) {
-        this(definition, value, "");
+        this(definition, value, "", "");
+    }
+
+    protected CustomFieldValue(final CustomFieldDefinition definition, final String value, final String childValue, final String groupsValue) {
+        this.definition = definition;
+        this.value = value;
+        this.childValue = childValue;
+        this.groupsValue = groupsValue;
     }
 
     protected CustomFieldValue(final CustomFieldDefinition definition, final String value, final String childValue) {
         this.definition = definition;
         this.value = value;
         this.childValue = childValue;
+        this.groupsValue = "";
     }
 
     protected CustomFieldValue(final CustomFieldDefinition definition) {
-        this(definition, "", "");
+        this(definition, "", "", "");
     }
 
     protected CustomFieldValue(final CustomFieldValue value) {
-        this(value.definition, value.value, value.childValue);
+        this(value.definition, value.value, value.childValue, value.groupsValue);
     }
 
     public static CustomFieldValue emptyCustomField(final CustomFieldDefinition definition) {
@@ -69,7 +78,7 @@ public class CustomFieldValue {
                 // Intentional fall-through
             case SEPARATE:
             case USERNAME:
-                return ImmutableList.of(sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue)));
+                return ImmutableList.of(sanitize(getTransformedValue(value)), sanitize(getTransformedValue(childValue)), sanitize(getTransformedValue(groupsValue)));
         }
     }
 

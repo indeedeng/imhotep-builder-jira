@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -127,18 +128,23 @@ public class CustomFieldApiParser {
             }
         } else if(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME.equals(definition.getMultiValueFieldConfiguration())) {
             final String usernames;
+            final String groups;
             if (shouldSplit) {
                 final ImmutableList.Builder<String> usernameList = ImmutableList.builder();
+                final List<String> groupsList = new ArrayList<>();
                 for (final String userKey : Splitter.on(definition.getSeparator()).split(splitValueString)) {
                     final User user = userLookupService.getUser(userKey);
                     usernameList.add(user.getName());
+                    groupsList.add(String.join("|", user.getGroups()));
                 }
                 usernames = Joiner.on(definition.getSeparator()).join(usernameList.build());
+                groups = String.join("|", groupsList);
             } else {
                 final User user = userLookupService.getUser(value);
                 usernames = user.getName();
+                groups = String.join("|", user.getGroups());
             }
-            return new CustomFieldValue(definition, splitValueString, usernames);
+            return new CustomFieldValue(definition, splitValueString, usernames, groups);
         } else {
 
             if (valueStringIsEmpty) {
@@ -170,7 +176,8 @@ public class CustomFieldApiParser {
             final String username = getValueFromNode(definition, json.get("key"));
             final String displayName = getValueFromNode(definition, json.get("displayName"));
             final User user = userLookupService.getUser(username);
-            return new CustomFieldValue(definition, displayName, user.getName());
+            final String groups = String.join("|", user.getGroups());
+            return new CustomFieldValue(definition, displayName, user.getName(), groups);
         } else {
             final String value = getValueFromNode(definition, json);
             final JsonNode child = json.get("child");

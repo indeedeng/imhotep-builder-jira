@@ -144,12 +144,12 @@ public class TestCustomFieldValue {
     @Test
     public void testSeparateWithChildFromInitial() throws IOException {
         testFromInitial(sysadCategories, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20781\",\"value\":\"Config\",\"id\":\"20781\",\"child\":{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20814\",\"value\":\"Other\",\"id\":\"20814\"}}",
-                "Config\tOther");
+                "Config\tOther\t");
     }
 
     @Test
     public void testSeparateWithoutChildFromInitial() throws IOException {
-        testFromInitial(sysadCategories, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20787\",\"value\":\"DNS\",\"id\":\"20787\"}", "DNS\t");
+        testFromInitial(sysadCategories, "{\"self\":\"https://jira.example.com/rest/api/2/customFieldOption/20787\",\"value\":\"DNS\",\"id\":\"20787\"}", "DNS\t\t");
     }
 
     @Test
@@ -161,7 +161,7 @@ public class TestCustomFieldValue {
     @Test
     public void testUserLookupFromInitial() throws IOException {
         testFromInitial(verifier, "{\"self\":\"https://jira.example.com/rest/api/2/user?username=johndoe\",\"name\":\"johndoe\",\"key\":\"johndoe\",\"emailAddress\":\"johndoe@example.com\",\"avatarUrls\":{\"48x48\":\"https://jira.example.com/secure/useravatar?ownerId=johndoe&avatarId=25105\",\"24x24\":\"https://jira.example.com/secure/useravatar?size=small&ownerId=johndoe&avatarId=25105\",\"16x16\":\"https://jira.example.com/secure/useravatar?size=xsmall&ownerId=johndoe&avatarId=25105\",\"32x32\":\"https://jira.example.com/secure/useravatar?size=medium&ownerId=johndoe&avatarId=25105\"},\"displayName\":\"John Doe\",\"active\":true,\"timeZone\":\"America/Chicago\"}{\"self\":\"https://jira.example.com/rest/api/2/user?username=johndoe\",\"name\":\"johndoe\",\"key\":\"johndoe\",\"emailAddress\":\"johndoe@example.com\",\"avatarUrls\":{\"48x48\":\"https://jira.example.com/secure/useravatar?ownerId=johndoe&avatarId=25105\",\"24x24\":\"https://jira.example.com/secure/useravatar?size=small&ownerId=johndoe&avatarId=25105\",\"16x16\":\"https://jira.example.com/secure/useravatar?size=xsmall&ownerId=johndoe&avatarId=25105\",\"32x32\":\"https://jira.example.com/secure/useravatar?size=medium&ownerId=johndoe&avatarId=25105\"},\"displayName\":\"John Doe\",\"active\":true,\"timeZone\":\"America/Chicago\"}",
-                "John Doe\tjohndoe");
+                "John Doe\tjohndoe\t");
     }
 
     @Test
@@ -199,7 +199,7 @@ public class TestCustomFieldValue {
         final String value = "Parent values: Misconfiguration(20661)Level 1 values: App Config(20669)";
         final CustomFieldValue field = apiParser.customFieldValueFromChangelog(sysadCategories, "", value);
 
-        assertEquals(field, "Misconfiguration\tApp Config");
+        assertEquals(field, "Misconfiguration\tApp Config\t");
     }
 
     @Test
@@ -207,14 +207,14 @@ public class TestCustomFieldValue {
         final String value = "Parent values: Misconfiguration(20661)";
         final CustomFieldValue field = apiParser.customFieldValueFromChangelog(sysadCategories, "", value);
 
-        // This tab is important because we need the empty space for the field that isn't present
-        assertEquals(field, "Misconfiguration\t");
+        // These tabs are important because we need the empty space for the fields that aren't present
+        assertEquals(field, "Misconfiguration\t\t");
     }
 
     @Test
     public void testUserLookupFromChangelog() throws IOException {
         final CustomFieldValue field = apiParser.customFieldValueFromChangelog(verifier, "aaldridge", "Andreas Aldridge");
-        assertEquals(field, "Andreas Aldridge\taaldridge");
+        assertEquals(field, "Andreas Aldridge\taaldridge\t");
     }
 
     @Test
@@ -229,7 +229,7 @@ public class TestCustomFieldValue {
         final String value = "Parent values: 99(32767)Level 1 values: .5(86753)";
         final CustomFieldValue field = apiParser.customFieldValueFromChangelog(definition, "", value);
 
-        assertEquals(field, "99000\t500");
+        assertEquals(field, "99000\t500\t");
     }
 
     @Test

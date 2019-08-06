@@ -94,7 +94,7 @@ public interface CustomFieldDefinition {
             case SEPARATE:
                 return ImmutableList.of(getImhotepFieldName() + "1", getImhotepFieldName() + "2");
             case USERNAME:
-                return ImmutableList.of(getImhotepFieldName(), getImhotepFieldName() + "username");
+                return ImmutableList.of(getImhotepFieldName(), getImhotepFieldName() + "username", getImhotepFieldName() + "groups*|");
             case EXPANDED:
             default:
                 return ImmutableList.of(getImhotepFieldName());

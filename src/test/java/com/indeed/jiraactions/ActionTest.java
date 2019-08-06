@@ -102,14 +102,8 @@ public class ActionTest {
 
     @Test
     public void testAction_update_actor() throws ParseException, IOException {
-        final String actor = "Test Actor";
-        history.author = ImmutableUser.builder()
-                .from(author)
-                .displayName(actor)
-                .build();
-
         final Action action = actionFactory.update(prevAction, history);
-        Assert.assertEquals(actor, action.getActor().getDisplayName());
+        Assert.assertEquals(userLookupService.getUser(history.author.getKey()), action.getActor());
     }
 
     @Test
