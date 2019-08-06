@@ -58,6 +58,7 @@ public class Field {
 
     public String getStringValue(final String attribute) throws IOException {
         switch (attribute) {
+            case "key": return "";
             case "assignee": return assignee == null ? "" : assignee.getDisplayName();
             case "assigneekey": return assignee == null ? "" : assignee.getKey();
             case "creator": return creator == null ? "" : creator.getDisplayName();
