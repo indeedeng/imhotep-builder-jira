@@ -17,6 +17,7 @@ import java.util.Map;
 
 @SuppressWarnings("CanBeFinal")
 public class Field {
+    public String key;
     public User assignee;
     public CommentCollection comment;
     public DateTime created;
@@ -58,6 +59,7 @@ public class Field {
 
     public String getStringValue(final String attribute) throws IOException {
         switch (attribute) {
+            case "key": return key == null ? "" : key;
             case "assignee": return assignee == null ? "" : assignee.getDisplayName();
             case "assigneekey": return assignee == null ? "" : assignee.getKey();
             case "creator": return creator == null ? "" : creator.getDisplayName();
