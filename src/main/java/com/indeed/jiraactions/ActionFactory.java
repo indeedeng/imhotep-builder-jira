@@ -54,7 +54,7 @@ public class ActionFactory {
                 .category(issue.initialValue("category"))
                 .fixversions(issue.initialValue("fixversions"))
                 .dueDate(issue.initialValue("duedate"))
-                .components(issue.initialValue("components"))
+                .components(issue.initialValue("component"))
                 .labels(issue.initialValue("labels"))
                 .createdDate(issue.fields.created.toString("yyyy-MM-dd"))
                 .links(Collections.emptySet());
@@ -95,7 +95,7 @@ public class ActionFactory {
                 .category(history.itemExist("category") ? history.getItemLastValue("category") : prevAction.getCategory())
                 .fixversions(history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.getFixversions())
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate").replace(" 00:00:00.0", "") : prevAction.getDueDate())
-                .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
+                .components(history.itemExist("component") ? history.getItemLastValue("component") : prevAction.getComponents())
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate())
                 .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")));
