@@ -8,6 +8,7 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 
+import com.indeed.jiraactions.api.statustimes.StatusTimeFactory;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -16,6 +17,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 
 /**
  * @author soono
@@ -37,6 +39,7 @@ public class ActionTest {
 
     private final UserLookupService userLookupService = new FriendlyUserLookupService();
     private ActionFactory actionFactory;
+    private StatusTimeFactory statusTimeFactory;
 
     @Before
     public void initialize() {
@@ -45,6 +48,7 @@ public class ActionTest {
         EasyMock.replay(config);
 
         actionFactory = new ActionFactory(userLookupService, new CustomFieldApiParser(userLookupService), config);
+        statusTimeFactory = new StatusTimeFactory();
 
         author = ImmutableUser.builder()
                 .displayName("Author")
@@ -61,6 +65,7 @@ public class ActionTest {
                 .timestamp(prevActionTimestamp)
                 .prevstatus("")
                 .status("Pending Triage")
+                .statustimes(statusTimeFactory.firstStatusTime("Pending Triage"))
                 .build();
 
         history = new History();

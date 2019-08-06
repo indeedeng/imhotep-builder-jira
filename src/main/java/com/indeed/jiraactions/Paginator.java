@@ -22,11 +22,13 @@ public class Paginator {
     private final PageProvider pageProvider;
     private final DateTime startDate;
     private final DateTime endDate;
+    private final boolean jiraIssues;
 
-    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate) {
+    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate, final boolean jiraIssues) {
         this.pageProvider = pageProvider;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.jiraIssues = jiraIssues;
     }
 
     /*
@@ -72,6 +74,11 @@ public class Paginator {
                         final List<Action> preFilteredActions = pageProvider.getActions(issue);
                         final List<Action> actions = getActionsFilterByLastSeen(seenIssues, issue, preFilteredActions);
                         final List<Action> filteredActions = actions.stream().filter(a -> a.isInRange(startDate, endDate)).collect(Collectors.toList());
+
+                        if(this.jiraIssues && !filteredActions.isEmpty()) {
+                            final Action action = pageProvider.getJiraissues(filteredActions.get(filteredActions.size()-1), issue);
+                            pageProvider.writeIssue(action);
+                        }
                         pageProvider.writeActions(filteredActions);
 
 

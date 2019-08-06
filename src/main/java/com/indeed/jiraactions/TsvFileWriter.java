@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +32,16 @@ public class TsvFileWriter {
     private final JiraActionsIndexBuilderConfig config;
     private final Map<DateMidnight, WriterData> writerDataMap;
     private final List<TSVColumnSpec> columnSpecs;
+    private final List<TSVColumnSpec> columnSpecsJiraissues;
+    private final List<String[]> issues = new ArrayList<>();
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes, final List<String> statusTypes) {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
         this.columnSpecs = createColumnSpecs(linkTypes);
+        this.columnSpecsJiraissues = createColumnSpecsJiraissues(linkTypes, statusTypes);
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
@@ -49,7 +53,12 @@ public class TsvFileWriter {
         final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
         for(DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
             createFileAndWriteHeaders(date);
+            setJiraissuesHeaders();
         }
+    }
+
+    public List<String[]> getIssues() {
+        return issues;
     }
 
     private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
@@ -80,6 +89,43 @@ public class TsvFileWriter {
                 .addLongColumn("timeinstate", Action::getTimeinstate)
                 .addLongColumn("timesinceaction", Action::getTimesinceaction)
                 .addTimeColumn("time", Action::getTimestamp)
+                .addLinkColumns(linkTypes);
+
+        for (final CustomFieldDefinition customField : config.getCustomFields()) {
+            specBuilder.addCustomFieldColumns(customField);
+        }
+        return specBuilder.build();
+    }
+
+    private List<TSVColumnSpec> createColumnSpecsJiraissues(final List<String> linkTypes, final List<String> statusTypes) {
+        final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
+        specBuilder
+                .addColumn("issuekey", Action::getIssuekey)
+                .addUserColumns("actor", Action::getActor)
+                .addUserColumns("assignee", Action::getAssignee)
+                .addColumn("category", Action::getCategory)
+                .addColumn("components*|", Action::getComponents)
+                .addIntColumn("createdate", Action::getCreatedDateInt)
+                .addColumn("duedate", Action::getDueDate)
+                .addTimeColumn("int duedate_time", Action::getDueDateTime)
+                .addColumn("fixversion*|", Action::getFixversions)
+                .addLongColumn("issueage", Action::getIssueage)
+                .addColumn("issuetype", Action::getIssuetype)
+                .addColumn("labels*", Action::getLabels)
+                .addColumn("priority", Action::getPriority)
+                .addColumn("project", Action::getProject)
+                .addColumn("projectkey", Action::getProjectkey)
+                .addUserColumns("reporter", Action::getReporter)
+                .addColumn("resolution", Action::getResolution)
+                .addColumn("status", Action::getStatus)
+                .addColumn("summary", Action::getSummary)
+                .addTimeColumn("time", Action::getTimestamp)
+                .addIntColumn("comments", Action::getComments)
+                .addIntColumn("closedate", Action::getClosedDate)
+                .addIntColumn("resolvedate", Action::getResolvedDate)
+                .addIntColumn("lastupdated", Action::getLastUpdated)
+                .addLongColumn("dlt", Action::getDlt)
+                .addStatusTimeColumns(statusTypes)
                 .addLinkColumns(linkTypes);
 
         for (final CustomFieldDefinition customField : config.getCustomFields()) {
@@ -140,6 +186,26 @@ public class TsvFileWriter {
                 log.error("Failed to flush.", e);
             }
         });
+    }
+
+    private void setJiraissuesHeaders() {
+        final String[] headerLine = columnSpecsJiraissues.stream()
+                .map(TSVColumnSpec::getHeader)
+                .toArray(String[]::new);
+        issues.add(headerLine);
+    }
+
+    public void writeIssue(final Action action) throws IOException {
+        if(action == null) {
+            return;
+        }
+        final String[] line = columnSpecsJiraissues.stream()
+                .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
+                .map(rawValue -> rawValue.replace("\t", "\\t"))
+                .map(rawValue -> rawValue.replace("\n", "\\n"))
+                .map(rawValue -> rawValue.replace("\r", "\\r"))
+                .toArray(String[]::new);
+        issues.add(line);
     }
 
     private static final int NUM_RETRIES = 5;

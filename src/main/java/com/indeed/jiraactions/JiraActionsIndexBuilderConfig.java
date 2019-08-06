@@ -20,5 +20,6 @@ public interface JiraActionsIndexBuilderConfig {
     String getEndDate();
     int getJiraBatchSize();
     String getIndexName();
+    boolean getJiraissues();
     CustomFieldDefinition[] getCustomFields();
 }

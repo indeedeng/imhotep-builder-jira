@@ -7,10 +7,13 @@ import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
+import com.indeed.jiraactions.api.statustimes.StatusTime;
+import com.indeed.jiraactions.api.statustimes.StatusTimeFactory;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class ActionFactory {
@@ -19,6 +22,7 @@ public class ActionFactory {
     private final CustomFieldApiParser customFieldParser;
     private final JiraActionsIndexBuilderConfig config;
     private final LinkFactory linkFactory = new LinkFactory();
+    private final StatusTimeFactory statusTimeFactory = new StatusTimeFactory();
 
     @SuppressWarnings("WeakerAccess")
     public ActionFactory(final UserLookupService userLookupService,
@@ -57,6 +61,13 @@ public class ActionFactory {
                 .components(issue.initialValue("components"))
                 .labels(issue.initialValue("labels"))
                 .createdDate(issue.fields.created.toString("yyyy-MM-dd"))
+                .createdDateInt(Integer.parseInt(issue.fields.created.toString("yyyyMMdd")))
+                .lastUpdated(0)
+                .closedDate(0)
+                .resolvedDate(0)
+                .comments(0)
+                .dlt(0)
+                .statustimes(statusTimeFactory.firstStatusTime(issue.initialValue("status")))
                 .links(Collections.emptySet());
 
             for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
@@ -98,7 +109,14 @@ public class ActionFactory {
                 .components(history.itemExist("components") ? history.getItemLastValue("components") : prevAction.getComponents())
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate())
-                .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")));
+                .createdDateInt(prevAction.getCreatedDateInt())
+                .closedDate(getDateClosed(prevAction, history))
+                .resolvedDate(getDateResolved(prevAction, history))
+                .lastUpdated(0)
+                .comments(prevAction.getComments())
+                .dlt(0)
+                .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")))
+                .statustimes(statusTimeFactory.getStatusTimeUpdate(prevAction.getStatustimes(), history, prevAction));
 
         for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
@@ -117,6 +135,19 @@ public class ActionFactory {
                 .timeinstate(timeInState(prevAction, comment))
                 .timesinceaction(getTimeDiff(prevAction.getTimestamp(), comment.created))
                 .timestamp(comment.created)
+                .comments(prevAction.getComments()+1)
+                .statustimes(statusTimeFactory.getStatusTimeComment(prevAction.getStatustimes(), comment, prevAction))
+                .build();
+    }
+
+    public Action toCurrent(final Action prevAction) {
+        return ImmutableAction.builder()
+                .from(prevAction)
+                .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), JiraActionsUtil.parseDateTime(config.getEndDate())))
+                .timestamp(JiraActionsUtil.parseDateTime(config.getStartDate()))
+                .lastUpdated(Integer.parseInt(prevAction.getTimestamp().toString("yyyyMMdd")))
+                .statustimes(statusTimeFactory.getStatusTimeCurrent(prevAction.getStatustimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())))
+                .dlt(getDlt(statusTimeFactory.getStatusTimeCurrent(prevAction.getStatustimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())), prevAction))
                 .build();
     }
 
@@ -136,8 +167,62 @@ public class ActionFactory {
         return getTimeDiff(prevAction.getTimestamp(), changeTimestamp) + prevAction.getTimeinstate();
     }
 
+    private int getDateResolved(final Action prevAction, final History history) {
+        final String resolution = history.itemExist("resolution") ? history.getItemLastValue("resolution") : prevAction.getResolution();
+        if (!resolution.isEmpty()){
+            if(!prevAction.getResolution().isEmpty()) {
+                return prevAction.getResolvedDate();
+            }
+            return Integer.parseInt(history.created.toDateTimeISO().toString("yyyyMMdd"));
+        }
+        return 0;
+    }
+
+    private int getDateClosed(final Action prevAction, final History history) {
+        final String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus();
+        if (status.equals("Closed")){
+            if (status.equals(prevAction.getStatus())) {
+                return prevAction.getClosedDate();
+            }
+            return Integer.parseInt(history.created.toDateTimeISO().toString("yyyyMMdd"));
+        }
+        return 0;
+    }
+
     private long getTimeDiff(final DateTime before, final DateTime after) {
         return (after.getMillis() - before.getMillis()) / 1000;
+    }
+
+    private long getDlt(final List<StatusTime> statusTimes, final Action prevAction) {
+        if
+        (prevAction.getStatus().equals("Closed") &&
+        (prevAction.getResolution().equals("Fixed") || prevAction.getResolution().equals("Done")) &&
+        (prevAction.getIssuetype().equals("Bug") || prevAction.getIssuetype().equals("Improvement") || prevAction.getIssuetype().equals("New Feature"))) {
+            long dlt = 0;
+            final String[] statusArray = {
+                    // In Progress
+                    "Accepted", "In Progress", "Reopened", "In Development", "In Dev Blocked",
+                    // Pending Review
+                    "Pending Review", "Pending Code Review", "Pending Dependencies",
+                    // Pending Merge
+                    "Pending Merge", "Pending QA Release", "Conflict",
+                    // Pending Verification
+                    "Pending Verification", "In QA", "Final Verification", "QA Ready",
+                    // Pending Closure
+                    "Pending Closure", "Pending Prod Release", "In Production"
+            };
+
+            for(StatusTime statusTime : statusTimes) {
+                for(String state : statusArray) {
+                    if (statusTime.getStatus().equals(state)) {
+                        dlt += statusTime.getTimeinstatus();
+                        break;
+                    }
+                }
+            }
+            return dlt;
+        }
+        return 0;
     }
 
 }

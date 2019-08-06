@@ -5,6 +5,7 @@ import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
+import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
@@ -12,6 +13,7 @@ import org.joda.time.DateTime;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 @Value.Immutable
 public interface Action {
@@ -38,7 +40,14 @@ public interface Action {
     String getComponents();
     String getLabels();
     String getCreatedDate();
+    int getCreatedDateInt();
+    int getClosedDate();
+    int getResolvedDate();
+    int getLastUpdated();
+    long getDlt();
     String getPriority();
+    int getComments();
+    List<StatusTime> getStatustimes();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
 
