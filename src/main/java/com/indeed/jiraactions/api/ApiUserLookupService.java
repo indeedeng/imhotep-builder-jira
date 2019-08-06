@@ -43,6 +43,9 @@ public class ApiUserLookupService implements UserLookupService {
         if(StringUtils.isEmpty(key)) {
             return User.NOBODY;
         }
+        if(key.equals("nouser")) {
+            return User.INVALID_USER;
+        }
 
         if(!users.containsKey(key)) {
             final User user = lookupUser(key);
