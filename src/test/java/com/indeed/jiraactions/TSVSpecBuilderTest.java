@@ -119,11 +119,11 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
                 .multiValueFieldConfiguration(MultiValueFieldConfiguration.USERNAME)
                 .build();
         builder.addCustomFieldColumns(fieldDefinition);
-        final CustomFieldValue value = newCustomFieldValue(ImmutableList.of("user", "username"));
+        final CustomFieldValue value = newCustomFieldValue(ImmutableList.of("user", "username", "usergroups*|"));
         EasyMock.expect(action.getCustomFieldValues()).andReturn(ImmutableMap.of(fieldDefinition, value)).anyTimes();
         verifyHeadersAndValues(
-                ImmutableList.of("custom", "customusername"),
-                ImmutableList.of("user", "username")
+                ImmutableList.of("custom", "customusername", "customgroups*|"),
+                ImmutableList.of("user", "username", "usergroups*|")
         );
     }
 

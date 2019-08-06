@@ -177,7 +177,7 @@ public class TestCustomFieldDefinitionParser {
                 .imhotepFieldName("verifier")
                 .multiValueFieldConfiguration(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME)
                 .build();
-        assertComparison(definition, "verifier\tverifierusername", VERIFIER);
+        assertComparison(definition, "verifier\tverifierusername\tverifiergroups*|", VERIFIER);
     }
 
     private void assertComparison(final CustomFieldDefinition expected, final String expectedHeader, final String input) throws IOException {
