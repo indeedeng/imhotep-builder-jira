@@ -20,12 +20,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class ApiCaller {
     protected final JiraActionsIndexBuilderConfig config;
 
-    private static final Logger log = LoggerFactory.getLogger(IssuesAPICaller.class);
+    private static final Logger log = LoggerFactory.getLogger(ApiCaller.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final CookieJar cookieJar = setupCookieJar();
     private final OkHttpClient client;
@@ -49,6 +50,7 @@ public class ApiCaller {
                 .build();
         final Response response = client.newCall(request).execute();
 
+        log.debug(""+cookieJar.loadForRequest(HttpUrl.parse(url)));
         final String anodeId = response.header("X-ANODEID");
 
         if(!Objects.equals(pinnedNode, anodeId)) {
@@ -114,18 +116,18 @@ public class ApiCaller {
 
     private static CookieJar setupCookieJar() {
         return new CookieJar() {
-            private List<Cookie> cookies = new ArrayList<>();
-
+            private final Map<String, Cookie> cookies = new HashMap<>();
             @Override
             public void saveFromResponse(final HttpUrl url, final List<Cookie> cookies) {
-                if(!cookies.equals(this.cookies)) {
-                    this.cookies = cookies;
-                }
+                cookies.forEach(cookie -> {
+                    this.cookies.remove(cookie.name());
+                    this.cookies.put(cookie.name(), cookie);
+                });
             }
 
             @Override
-            public List<Cookie> loadForRequest(HttpUrl url) {
-                return cookies != null ? cookies : new ArrayList<>();
+            public List<Cookie> loadForRequest(final HttpUrl url) {
+                return new ArrayList<>(cookies.values());
             }
         };
     }
