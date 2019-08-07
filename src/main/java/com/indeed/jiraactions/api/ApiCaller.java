@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 
-import okhttp3.ConnectionPool;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -15,42 +17,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ApiCaller {
     protected final JiraActionsIndexBuilderConfig config;
 
-    private static final Logger log = LoggerFactory.getLogger(ApiCaller.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private OkHttpClient client;
+    private static final CookieJar cookieJar = setupCookieJar();
+    private final OkHttpClient client;
     private final String authentication;
 
     public ApiCaller(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
         this.authentication = getBasicAuth();
         this.client = new OkHttpClient.Builder()
-                .connectionPool(new ConnectionPool())
-                .connectTimeout(2, TimeUnit.MINUTES)
-                .readTimeout(20000, TimeUnit.MILLISECONDS)
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .cookieJar(cookieJar)
                 .build();
     }
 
     public JsonNode getJsonNode(final String url) throws IOException {
-        final OkHttpClient newClient = client.newBuilder().build();
         final Request request = new Request.Builder()
                 .header("Authorization", this.authentication)
                 .header("Cache-Control", "no-store")
                 .url(url)
                 .build();
-        final Response response = newClient.newCall(request).execute();
-        try (ResponseBody responseBody = response.body()){
+        final Response response = client.newCall(request).execute();
+        try (final ResponseBody responseBody = response.body()){
 
             if (!response.isSuccessful()) {
                 final StringBuilder sb = new StringBuilder();
-                Headers requestHeaders = request.headers();
-                Headers responseHeaders = response.headers();
+                final Headers requestHeaders = request.headers();
+                final Headers responseHeaders = response.headers();
 
-                sb.append("{");
+                sb.append('{');
                 sb.append("\"Request\": {");
                 sb.append("\"URL\": \"").append(url).append("\",");
 
@@ -65,8 +69,8 @@ public class ApiCaller {
                     }
                     sb.append("\"").append(key).append("\": \"").append(value).append("\",");
                 }
-                sb.append("}");
-                sb.append("}");
+                sb.append('}');
+                sb.append('}');
 
                 sb.append(", \"Response\": {");
                 for (int i = 0, size = responseHeaders.size(); i < size; i++) {
@@ -82,9 +86,8 @@ public class ApiCaller {
                 sb.append("\"Code\": ").append(response.code()).append(",");
                 sb.append("\"Message\": \"").append(response.message()).append("\",");
                 sb.append("\"Error Body\": \"").append(responseBody.string()).append("\"");
-                sb.append("}");
-                sb.append("}");
-                log.debug("Encountered connection error: " + sb);
+                sb.append('}');
+                sb.append('}');
                 throw new IOException(String.valueOf(response));
             }
             return objectMapper.readTree(responseBody.string());
@@ -98,4 +101,22 @@ public class ApiCaller {
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
     }
+
+    private static CookieJar setupCookieJar() {
+        return new CookieJar() {
+            private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
+
+            @Override
+            public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+                cookieStore.put(url.host(), cookies);
+            }
+
+            @Override
+            public List<Cookie> loadForRequest(HttpUrl url) {
+                List<Cookie> cookies = cookieStore.get(url.host());
+                return cookies != null ? cookies : new ArrayList<Cookie>();
+            }
+        };
+    }
+
 }
