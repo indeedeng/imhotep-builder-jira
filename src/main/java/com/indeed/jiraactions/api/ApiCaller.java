@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 
-import okhttp3.Cookie;
-import okhttp3.CookieJar;
 import okhttp3.Headers;
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -17,18 +14,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class ApiCaller {
     protected final JiraActionsIndexBuilderConfig config;
 
+    private static final Logger log = LoggerFactory.getLogger(IssuesAPICaller.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final CookieJar cookieJar = setupCookieJar();
     private final OkHttpClient client;
     private final String authentication;
+
+    private String cookies = "";
+    private String pinnedNode = null;
 
     public ApiCaller(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
@@ -36,7 +34,6 @@ public class ApiCaller {
         this.client = new OkHttpClient.Builder()
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.SECONDS)
-                .cookieJar(cookieJar)
                 .build();
     }
 
@@ -44,9 +41,20 @@ public class ApiCaller {
         final Request request = new Request.Builder()
                 .header("Authorization", this.authentication)
                 .header("Cache-Control", "no-store")
+                .header("Cookie", cookies)
                 .url(url)
                 .build();
         final Response response = client.newCall(request).execute();
+
+        final String anodeId = response.header("X-ANODEID");
+
+        if(!Objects.equals(pinnedNode, anodeId)) {
+            if (pinnedNode != null) {
+                log.warn("Expected X-ANODEID={} but found {}", pinnedNode, anodeId);
+            }
+            cookies = String.join(";", response.headers("Set-Cookie"));
+            pinnedNode = anodeId;
+        }
         try (final ResponseBody responseBody = response.body()){
 
             if (!response.isSuccessful()) {
@@ -100,23 +108,6 @@ public class ApiCaller {
         final String userPass = config.getJiraUsername() + ":" + config.getJiraPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         return basicAuth;
-    }
-
-    private static CookieJar setupCookieJar() {
-        return new CookieJar() {
-            private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
-
-            @Override
-            public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-                cookieStore.put(url.host(), cookies);
-            }
-
-            @Override
-            public List<Cookie> loadForRequest(HttpUrl url) {
-                List<Cookie> cookies = cookieStore.get(url.host());
-                return cookies != null ? cookies : new ArrayList<Cookie>();
-            }
-        };
     }
 
 }
