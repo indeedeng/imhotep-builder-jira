@@ -31,10 +31,7 @@ public class ApiCaller {
     public ApiCaller(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
         this.authentication = getBasicAuth();
-        this.client = new OkHttpClient.Builder()
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(20, TimeUnit.SECONDS)
-                .build();
+        this.client = new OkHttpClient.Builder().build();
     }
 
     public JsonNode getJsonNode(final String url) throws IOException {
