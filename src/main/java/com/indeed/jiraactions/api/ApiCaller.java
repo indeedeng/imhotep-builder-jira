@@ -28,7 +28,6 @@ public class ApiCaller {
 
     private static final Logger log = LoggerFactory.getLogger(ApiCaller.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final CookieJar cookieJar = setupCookieJar();
     private final OkHttpClient client;
     private final String authentication;
 
@@ -38,7 +37,7 @@ public class ApiCaller {
         this.config = config;
         this.authentication = getBasicAuth();
         this.client = new OkHttpClient.Builder()
-                .cookieJar(cookieJar)
+                .cookieJar(setupCookieJar())
                 .build();
     }
 
@@ -50,17 +49,16 @@ public class ApiCaller {
                 .build();
         final Response response = client.newCall(request).execute();
 
-        log.debug(""+cookieJar.loadForRequest(HttpUrl.parse(url)));
-        final String anodeId = response.header("X-ANODEID");
+        try (final ResponseBody responseBody = response.body()) {
+            
+            final String anodeId = response.header("X-ANODEID");
 
-        if(!Objects.equals(pinnedNode, anodeId)) {
-            if (pinnedNode != null) {
-                log.warn("Expected X-ANODEID={} but found {}", pinnedNode, anodeId);
+            if(!Objects.equals(pinnedNode, anodeId)) {
+                if (pinnedNode != null) {
+                    log.warn("Expected X-ANODEID={} but found {}", pinnedNode, anodeId);
+                }
+                pinnedNode = anodeId;
             }
-            pinnedNode = anodeId;
-        }
-        try (final ResponseBody responseBody = response.body()){
-
             if (!response.isSuccessful()) {
                 final StringBuilder sb = new StringBuilder();
                 final Headers requestHeaders = request.headers();
@@ -97,14 +95,12 @@ public class ApiCaller {
                 }
                 sb.append("\"Code\": ").append(response.code()).append(",");
                 sb.append("\"Message\": \"").append(response.message()).append("\",");
-                sb.append("\"Error Body\": \"").append(responseBody.string()).append("\"");
+                sb.append("\"Error Body\": \"").append(response.body().string()).append("\"");
                 sb.append('}');
                 sb.append('}');
-                throw new IOException(String.valueOf(response));
+                log.error("Encountered connection error: " + sb);
             }
             return objectMapper.readTree(responseBody.string());
-        } catch (IOException e) {
-            throw e;
         }
     }
 
@@ -120,7 +116,6 @@ public class ApiCaller {
             @Override
             public void saveFromResponse(final HttpUrl url, final List<Cookie> cookies) {
                 cookies.forEach(cookie -> {
-                    this.cookies.remove(cookie.name());
                     this.cookies.put(cookie.name(), cookie);
                 });
             }
