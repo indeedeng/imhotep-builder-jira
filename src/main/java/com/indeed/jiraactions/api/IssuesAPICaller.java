@@ -2,15 +2,14 @@ package com.indeed.jiraactions.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.indeed.jiraactions.DateTimeParser;
 import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
-import com.indeed.jiraactions.JiraActionsUtil;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -28,6 +27,7 @@ public class IssuesAPICaller {
     private final String urlBase;
     private final ApiCaller apiCaller;
     private final JiraActionsIndexBuilderConfig config;
+    private final DateTimeParser dateTimeParser;
 
     // For Pagination
     private final int maxPerPage; // Max number of issues per page
@@ -37,9 +37,11 @@ public class IssuesAPICaller {
 
     private int backoff = 10_000;
 
-    public IssuesAPICaller(final JiraActionsIndexBuilderConfig config, final ApiCaller apiCaller) throws UnsupportedEncodingException {
+    public IssuesAPICaller(final JiraActionsIndexBuilderConfig config, final ApiCaller apiCaller,
+                           final DateTimeParser dateTimeParser) throws UnsupportedEncodingException {
         this.config = config;
         this.apiCaller = apiCaller;
+        this.dateTimeParser = dateTimeParser;
 
         maxPerPage = config.getJiraBatchSize()*2;
         batchSize = config.getJiraBatchSize();
@@ -132,7 +134,6 @@ public class IssuesAPICaller {
         return url;
     }
 
-    protected static final DateTimeZone JIRA_TIME_ZONE = DateTimeZone.forID("America/Chicago");
     private static final DateTimeFormatter JIRA_TIME_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
     /**
      * Imhotep builders always runs in UTC-6, regardless of DST. However, Jira observes daylight savings time.
@@ -140,9 +141,9 @@ public class IssuesAPICaller {
      * "2018-04-01T01:00:00" to "2018-04-02T01:00:00"
      */
     @VisibleForTesting
-    protected static String getDateStringInJiraTime(final String dateString) {
-        final DateTime date = JiraActionsUtil.parseDateTime(dateString);
-        final DateTime adjusted = date.toDateTime(JIRA_TIME_ZONE);
+    protected String getDateStringInJiraTime(final String dateString) {
+        final DateTime date = dateTimeParser.parseDateTime(dateString);
+        final DateTime adjusted = date.toDateTime(config.getJiraTimeZone());
         return JIRA_TIME_FORMAT.print(adjusted);
     }
 

@@ -39,7 +39,7 @@ public class TSVSpecBuilder {
     }
 
     public TSVSpecBuilder addTimeColumn(final String header, final Function<Action, DateTime> timeExtractor) {
-        addColumn(header, action -> JiraActionsUtil.getUnixTimestamp(timeExtractor.apply(action)));
+        addColumn(header, action -> DateTimeParser.getUnixTimestamp(timeExtractor.apply(action)));
         return this;
     }
 

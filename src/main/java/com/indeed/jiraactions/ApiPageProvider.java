@@ -40,14 +40,15 @@ public class ApiPageProvider implements PageProvider {
     private long fileTime = 0;
 
     public ApiPageProvider(final IssuesAPICaller issuesAPICaller, final ActionFactory actionFactory,
-                           final JiraActionsIndexBuilderConfig config, final TsvFileWriter tsvFileWriter) {
+                           final JiraActionsIndexBuilderConfig config, final TsvFileWriter tsvFileWriter,
+                           final DateTimeParser dateTimeParser) {
         this.issuesAPICaller = issuesAPICaller;
         this.actionFactory = actionFactory;
         this.config = config;
         this.tsvFileWriter = tsvFileWriter;
 
-        this.startDate = JiraActionsUtil.parseDateTime(config.getStartDate());
-        this.endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
+        this.startDate = dateTimeParser.parseDateTime(config.getStartDate());
+        this.endDate = dateTimeParser.parseDateTime(config.getEndDate());
         this.customFieldsSeen = new HashSet<>(config.getCustomFields().length);
     }
 

@@ -2,11 +2,13 @@ package com.indeed.jiraactions.api.response.issue.changelog.histories;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Joiner;
-import com.indeed.jiraactions.JiraActionsUtil;
+import com.indeed.jiraactions.DateTimeParser;
 import com.indeed.jiraactions.api.response.issue.User;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,7 +22,6 @@ import java.util.stream.Collectors;
 /**
  * @author soono
  */
-
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class History {
     public User author;
@@ -28,8 +29,9 @@ public class History {
     public Item[] items;
 
     @JsonProperty("created")
+    @JsonDeserialize
     public void setCreate(final String created) {
-        this.created = JiraActionsUtil.parseDateTime(created);
+        this.created = DateTimeParser.parseDateTime(created, DateTimeZone.getDefault());
     }
 
     public String getChangedFields() {

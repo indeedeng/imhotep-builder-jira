@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
-import com.indeed.jiraactions.JiraActionsUtil;
+import com.indeed.jiraactions.DateTimeParser;
 import com.indeed.jiraactions.api.response.issue.Priority;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -37,12 +38,12 @@ public class Field {
 
     @JsonProperty("created")
     public void setCreate(final String created) {
-        this.created = JiraActionsUtil.parseDateTime(created);
+        this.created = DateTimeParser.parseDateTime(created, DateTimeZone.getDefault());
     }
 
     @JsonProperty("updated")
     public void setUpdated(final String updated) {
-        this.updated = JiraActionsUtil.parseDateTime(updated);
+        this.updated = DateTimeParser.parseDateTime(updated, DateTimeZone.getDefault());
     }
 
     @SuppressWarnings("unused")

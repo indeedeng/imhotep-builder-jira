@@ -11,27 +11,26 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.Field;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.jiraactions.api.response.issue.fields.comment.CommentCollection;
-
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ActionsBuilderTest {
     private Issue issue;
-    private static final DateTime startDate = JiraActionsUtil.parseDateTime("2016-08-01 00:00:00");
-    private static final DateTime endDate = JiraActionsUtil.parseDateTime("2016-08-07 00:00:00");
+    private static final DateTime startDate = DateTimeParser.parseDateTime("2016-08-01 00:00:00", DateTimeZone.getDefault());
+    private static final DateTime endDate = DateTimeParser.parseDateTime("2016-08-07 00:00:00", DateTimeZone.getDefault());
     private final UserLookupService userLookupService = new FriendlyUserLookupService();
     private ActionFactory actionFactory;
 
     @Before
-    public void initialize() throws ParseException {
+    public void initialize() {
         final JiraActionsIndexBuilderConfig config = EasyMock.createNiceMock(JiraActionsIndexBuilderConfig.class);
         EasyMock.expect(config.getCustomFields()).andReturn(new CustomFieldDefinition[0]).anyTimes();
         EasyMock.replay(config);
@@ -70,7 +69,7 @@ public class ActionsBuilderTest {
         final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final List<Action> actions = actionsBuilder.buildActions();
 
-        Assert.assertTrue("create".equals(actions.get(0).getAction()));
+        Assert.assertEquals("create", actions.get(0).getAction());
     }
 
     @Test
@@ -132,7 +131,7 @@ public class ActionsBuilderTest {
 
         final List<History> tempHistories = new ArrayList<>(Arrays.asList(issue.changelog.histories));
         tempHistories.add(history);
-        final History[] histories = tempHistories.toArray(new History[tempHistories.size()]);
+        final History[] histories = tempHistories.toArray(new History[0]);
         issue.changelog.histories = histories;
     }
 

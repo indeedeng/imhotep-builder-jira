@@ -8,6 +8,7 @@ import com.indeed.jiraactions.api.response.issue.User;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -45,11 +46,11 @@ public interface Action {
     @Nullable
     @VisibleForTesting
     @Value.Derived
-    default DateTime getDueDateTime() {
+    default DateTime getDueDateTime(final DateTimeZone dateTimeZone) {
         if (StringUtils.isEmpty(getDueDate())) {
             return null;
         }
-        return JiraActionsUtil.parseDateTime(getDueDate()).plusDays(1).withTimeAtStartOfDay();
+        return DateTimeParser.parseDateTime(getDueDate(), dateTimeZone).plusDays(1).withTimeAtStartOfDay();
     }
 
     @Value.Derived

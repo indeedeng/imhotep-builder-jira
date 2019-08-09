@@ -1,26 +1,23 @@
 package com.indeed.jiraactions.api.response.issue.changelog;
 
-import com.indeed.jiraactions.JiraActionsUtil;
+import com.indeed.jiraactions.DateTimeParser;
 import com.indeed.jiraactions.api.response.issue.ImmutableUser;
-import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
-
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.text.ParseException;
-
 public class TestChangeLog {
     @Test
-    public void testSort() throws ParseException {
+    public void testSort() {
         final History a = new History();
         a.author = ImmutableUser.builder()
                 .displayName("authorA")
                 .name("authorA")
                 .key("authorA")
                 .build();
-        a.created = JiraActionsUtil.parseDateTime("2017-01-01 00:00:00");
+        a.created = DateTimeParser.parseDateTime("2017-01-01 00:00:00", DateTimeZone.getDefault());
         final Item changeA = new Item();
         changeA.field = "fixVersion";
         changeA.fromString = "";
@@ -33,7 +30,7 @@ public class TestChangeLog {
                 .name("authorB")
                 .key("authorB")
                 .build();
-        b.created = JiraActionsUtil.parseDateTime("2017-01-02 01:00:00");
+        b.created = DateTimeParser.parseDateTime("2017-01-02 01:00:00", DateTimeZone.getDefault());
         final Item changeB = new Item();
         changeB.field = "fixVersion";
         changeB.fromString = "End of Week 2017-01-06";
@@ -46,7 +43,7 @@ public class TestChangeLog {
                 .name("authorC")
                 .key("authorC")
                 .build();
-        c.created = JiraActionsUtil.parseDateTime("2017-01-02 12:00:00");
+        c.created = DateTimeParser.parseDateTime("2017-01-02 12:00:00", DateTimeZone.getDefault());
         final Item changeC = new Item();
         changeC.field = "fixVersion";
         changeC.fromString = "End of Week 2017-01-12";
@@ -59,7 +56,7 @@ public class TestChangeLog {
                 .name("authorD")
                 .key("authorD")
                 .build();
-        d.created = JiraActionsUtil.parseDateTime("2017-02-01 12:00:00");
+        d.created = DateTimeParser.parseDateTime("2017-02-01 12:00:00", DateTimeZone.getDefault());
         final Item changeD = new Item();
         changeD.field = "fixVersion";
         changeD.fromString = "NEXT_DEPLOY";

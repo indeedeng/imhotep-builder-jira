@@ -9,9 +9,9 @@ import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.links.LinkTypesApiCaller;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,9 +23,11 @@ public class JiraActionsIndexBuilder {
     private static final Logger log = LoggerFactory.getLogger(JiraActionsIndexBuilder.class);
 
     private final JiraActionsIndexBuilderConfig config;
+    private final DateTimeParser dateTimeParser;
 
     public JiraActionsIndexBuilder(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
+        this.dateTimeParser = new DateTimeParser(config.getIndexTimeZone());
     }
 
     public void run() throws Exception {
@@ -38,7 +40,7 @@ public class JiraActionsIndexBuilder {
             final CustomFieldApiParser customFieldApiParser = new CustomFieldApiParser(userLookupService);
             final ActionFactory actionFactory = new ActionFactory(userLookupService, customFieldApiParser, config);
 
-            final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config, apiCaller);
+            final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config, apiCaller, dateTimeParser);
             initializeIssuesApiCaller(issuesAPICaller);
 
             if(!issuesAPICaller.currentPageExist()) {
@@ -48,8 +50,8 @@ public class JiraActionsIndexBuilder {
 
             long fileTime = 0;
 
-            final DateTime startDate = JiraActionsUtil.parseDateTime(config.getStartDate());
-            final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
+            final DateTime startDate = dateTimeParser.parseDateTime(config.getStartDate());
+            final DateTime endDate = dateTimeParser.parseDateTime(config.getEndDate());
 
             if (!startDate.isBefore(endDate)) {
                 log.error("Invalid start date '{}' not before end date '{}'", startDate, endDate);
@@ -58,13 +60,14 @@ public class JiraActionsIndexBuilder {
             final LinkTypesApiCaller linkTypesApiCaller = new LinkTypesApiCaller(config, apiCaller);
             final List<String> linkTypes = linkTypesApiCaller.getLinkTypes();
 
-            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes);
+            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes, dateTimeParser);
             final Stopwatch headerStopwatch = Stopwatch.createStarted();
             writer.createFileAndWriteHeaders();
             headerStopwatch.stop();
             fileTime += headerStopwatch.elapsed(TimeUnit.MILLISECONDS);
 
-            final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
+            final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer,
+                    dateTimeParser);
             final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate);
 
             paginator.process();
@@ -83,7 +86,7 @@ public class JiraActionsIndexBuilder {
                     .map(CustomFieldDefinition::getName)
                     .collect(Collectors.toList());
 
-            log.debug("No values seen for these custom fields: " + missedFields);
+            log.debug("No values seen for these custom fields: {}", missedFields);
 
             final Stopwatch fileUploadStopwatch = Stopwatch.createStarted();
             writer.uploadTsvFile();

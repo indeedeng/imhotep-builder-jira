@@ -7,15 +7,12 @@ import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.text.ParseException;
 
 /**
  * @author soono
@@ -29,10 +26,10 @@ public class ActionTest {
 
     // default values
     private static final long prevActionTimeinstate = 50;
-    private static final DateTime prevActionTimestamp = JiraActionsUtil.parseDateTime("2016-09-02T01:00:00");
-    private static final DateTime historyCreated = JiraActionsUtil.parseDateTime("2016-09-02T01:00:10");
-    private static final DateTime historyCreated2 = JiraActionsUtil.parseDateTime("2016-09-02T01:00:20"); // diff with prevAction is 10s.
-    private static final DateTime commentCreated = JiraActionsUtil.parseDateTime("2016-09-02T01:00:30"); // diff with prevAction is 10s.
+    private static final DateTime prevActionTimestamp = DateTimeParser.parseDateTime("2016-09-02T01:00:00", DateTimeZone.getDefault());
+    private static final DateTime historyCreated = DateTimeParser.parseDateTime("2016-09-02T01:00:10", DateTimeZone.getDefault());
+    private static final DateTime historyCreated2 = DateTimeParser.parseDateTime("2016-09-02T01:00:20", DateTimeZone.getDefault()); // diff with prevAction is 10s.
+    private static final DateTime commentCreated = DateTimeParser.parseDateTime("2016-09-02T01:00:30", DateTimeZone.getDefault()); // diff with prevAction is 10s.
     private static final long timeDiffWithPrevAction = 10;
 
     private final UserLookupService userLookupService = new FriendlyUserLookupService();
@@ -95,13 +92,13 @@ public class ActionTest {
     //
 
     @Test
-    public void testAction_update_action() throws ParseException, IOException {
+    public void testAction_update_action() {
         final Action action = actionFactory.update(prevAction, history);
-        Assert.assertTrue("update".equals(action.getAction()));
+        Assert.assertEquals("update", action.getAction());
     }
 
     @Test
-    public void testAction_update_actor() throws ParseException, IOException {
+    public void testAction_update_actor() {
         final String actor = "Test Actor";
         history.author = ImmutableUser.builder()
                 .from(author)
@@ -113,7 +110,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_update_assignee_whenAssigneeChanged() throws ParseException, IOException {
+    public void testAction_update_assignee_whenAssigneeChanged() {
         final Item item = new Item();
         item.setField("assignee");
         item.fromString = "old";
@@ -127,7 +124,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_update_assignee_whenAssigneeNotChanged() throws ParseException, IOException {
+    public void testAction_update_assignee_whenAssigneeNotChanged() {
         final User assignee = ImmutableUser.builder()
                 .displayName("Test Assignee")
                 .name("Test Assignee")
@@ -136,11 +133,11 @@ public class ActionTest {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).assignee(assignee).build();
 
         final Action action = actionFactory.update(newPrevAction, history);
-        Assert.assertTrue(action.getAssignee().equals(assignee));
+        Assert.assertEquals(action.getAssignee(), assignee);
     }
 
     @Test
-    public void testAction_updatenotstate_timing() throws ParseException, IOException {
+    public void testAction_updatenotstate_timing() {
         final Action action = actionFactory.update(prevAction, history);
         Assert.assertEquals(timeDiffWithPrevAction, action.getIssueage());
         Assert.assertEquals(timeDiffWithPrevAction, action.getTimeinstate());
@@ -148,7 +145,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_update_timeinstate() throws ParseException, IOException {
+    public void testAction_update_timeinstate() {
         final Action action = actionFactory.update(prevAction, history);
 
         final Action action2 = actionFactory.update(action, history2);
@@ -162,7 +159,7 @@ public class ActionTest {
     //
 
     @Test
-    public void testAction_comment_issueage() throws ParseException, IOException {
+    public void testAction_comment_issueage() {
         final Action action = actionFactory.update(prevAction, history);
 
         final Action action2 = actionFactory.comment(action, comment);
@@ -172,7 +169,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_comment_timeinstate_afterUpdate() throws ParseException {
+    public void testAction_comment_timeinstate_afterUpdate() {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).action("update").build();
 
         final Action action = actionFactory.comment(newPrevAction, comment);
@@ -180,7 +177,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_comment_timeinstate_afterComment() throws ParseException {
+    public void testAction_comment_timeinstate_afterComment() {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction)
                 .action("comment")
                 .timeinstate(prevActionTimeinstate)
@@ -190,7 +187,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testChangeStatusAndChangeBack() throws IOException {
+    public void testChangeStatusAndChangeBack() {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction)
                 .action("update")
                 .fieldschanged("status")
