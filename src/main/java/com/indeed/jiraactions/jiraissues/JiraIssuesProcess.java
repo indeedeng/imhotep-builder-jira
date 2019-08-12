@@ -27,13 +27,13 @@ public class JiraIssuesProcess {
     }
 
     public void convertToMap() {
-        for(int issue = 1; issue < newIssues.size(); issue++) {
+        for (int issue = 1; issue < newIssues.size(); issue++) {
             final Map<String, String> mappedLine = new LinkedHashMap<>(newFields.size());
             final String[] line = newIssues.get(issue);
-            if(line == null) {
+            if (line == null) {
                 break;
             } else {
-                for(int i = 0; i < line.length; i++) {
+                for (int i = 0; i < line.length; i++) {
                     mappedLine.put(newFields.get(i), line[i]);
                 }
                 newIssuesMapped.add(mappedLine);
@@ -49,17 +49,17 @@ public class JiraIssuesProcess {
         final int filter = Integer.parseInt(startDate.minusMonths(monthRange).toString("yyyyMMdd"));
         final Map<String, String> mappedLine = new LinkedHashMap<>();
         // Changes the issue from a String[] to a Map<String, String>
-        for(int i = 0; i < issue.length; i++) {
+        for (int i = 0; i < issue.length; i++) {
             mappedLine.put(oldFields.get(i), issue[i]);
         }
         // Filters issues to the jiraissues range (in months)
-        if(mappedLine.containsKey("lastupdated")) {
-            if(Integer.parseInt(mappedLine.get("lastupdated")) < filter) {
+        if (mappedLine.containsKey("lastupdated")) {
+            if (Integer.parseInt(mappedLine.get("lastupdated")) < filter) {
                 return null;
             }
         }
 
-        for(Map<String, String> updatedIssue: newIssuesMapped) {
+        for (Map<String, String> updatedIssue: newIssuesMapped) {
             if (mappedLine.get("issuekey").equals(updatedIssue.get("issuekey"))) {
                 newIssuesMapped.remove(updatedIssue);
                 return updatedIssue;  // Replace
@@ -83,7 +83,7 @@ public class JiraIssuesProcess {
         try {
             mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + DAY));
             mappedLine.replace("time", String.valueOf(startDate.getMillis()/1000));
-            if(!mappedLine.containsKey("totaltime_" + status)) {
+            if (!mappedLine.containsKey("totaltime_" + status)) {
                 nonApiStatuses.add(mappedLine.get("status"));
             } else {
                 mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + DAY));
@@ -94,9 +94,9 @@ public class JiraIssuesProcess {
 
         // This part is very important in making sure that the previous TSV will conform to the new fields
         final Map<String, String> mappedLineNewFields = new LinkedHashMap<>();
-        for(String field : newFields) {
-            if(!mappedLine.containsKey(field)) {
-                if(field.startsWith("totaltime") || field.startsWith("timetofirst") || field.startsWith("timetolast")) {
+        for (String field : newFields) {
+            if (!mappedLine.containsKey(field)) {
+                if (field.startsWith("totaltime") || field.startsWith("timetofirst") || field.startsWith("timetolast")) {
                     mappedLineNewFields.put(field, "0");
                 } else {
                     mappedLineNewFields.put(field, "");

@@ -39,7 +39,7 @@ public class ActionsBuilder {
     }
 
     @Nonnull
-    public Action buildJiraIssues(Action action) throws IOException {
+    public Action buildJiraIssues(final Action action) throws IOException {
         return setUpdateToCurrent(action);
     }
 
@@ -102,7 +102,7 @@ public class ActionsBuilder {
         }
     }
 
-    private Action setUpdateToCurrent(Action prevAction) {
+    private Action setUpdateToCurrent(final Action prevAction) {
         return actionFactory.toCurrent(prevAction);
     }
 

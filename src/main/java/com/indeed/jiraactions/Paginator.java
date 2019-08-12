@@ -22,13 +22,13 @@ public class Paginator {
     private final PageProvider pageProvider;
     private final DateTime startDate;
     private final DateTime endDate;
-    private final boolean jiraIssues;
+    private final boolean buildJiraIssues;
 
-    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate, final boolean jiraIssues) {
+    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate, final boolean buildJiraIssues) {
         this.pageProvider = pageProvider;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.jiraIssues = jiraIssues;
+        this.buildJiraIssues = buildJiraIssues;
     }
 
     /*
@@ -69,21 +69,21 @@ public class Paginator {
                 final Stopwatch stopwatch = Stopwatch.createStarted();
                 final List<Issue> issues = Lists.newArrayList(pageProvider.getPage());
                 log.debug(String.join(", ", issues.stream().map(x -> x.key).collect(Collectors.toList())));
-                for(final Issue issue : issues) {
+                for (final Issue issue : issues) {
                     try {
                         final List<Action> preFilteredActions = pageProvider.getActions(issue);
                         final List<Action> actions = getActionsFilterByLastSeen(seenIssues, issue, preFilteredActions);
                         final List<Action> filteredActions = actions.stream().filter(a -> a.isInRange(startDate, endDate)).collect(Collectors.toList());
 
-                        if(this.jiraIssues && !filteredActions.isEmpty()) {
-                            final Action action = pageProvider.getJiraissues(filteredActions.get(filteredActions.size()-1), issue);
+                        if (buildJiraIssues && !filteredActions.isEmpty()) {
+                            final Action action = pageProvider.getJiraissues(filteredActions.get(filteredActions.size() - 1), issue);
                             pageProvider.writeIssue(action);
                         }
                         pageProvider.writeActions(filteredActions);
 
 
                         final boolean ignoreForEndDetection = ignoreUpdatedDate(issue, preFilteredActions);
-                        if(!firstPass // Don't bail out the first time through
+                        if (!firstPass // Don't bail out the first time through
                                 && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered
                                 && actions.size() == 0// There is nothing new since the last time we saw it
                                 && !ignoreForEndDetection // Ignore out of order issues
@@ -94,7 +94,7 @@ public class Paginator {
                             break;
                         }
                         seenThisLoop.add(issue.key);
-                        if(preFilteredActions.size() > 0 && !ignoreForEndDetection) {
+                        if (preFilteredActions.size() > 0 && !ignoreForEndDetection) {
                             firstIssue = false;
                         }
                     } catch (final Exception e) {
@@ -106,7 +106,7 @@ public class Paginator {
                 log.trace("{} ms to get actions from a set of issues.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
                 // Otherwise we'd do another entire pass of the dataset
-                if(reFoundTheBeginning) {
+                if (reFoundTheBeginning) {
                     break;
                 }
             }
@@ -142,12 +142,12 @@ public class Paginator {
     @VisibleForTesting
     protected static List<Action> getActionsFilterByLastSeen(final Map<String, DateTime> seenIssues, final Issue issue,
                                                              final List<Action> actions) {
-        if(actions.size() == 0) {
+        if (actions.size() == 0) {
             return actions;
         }
 
         final List<Action> output;
-        if(!seenIssues.containsKey(issue.key)) {
+        if (!seenIssues.containsKey(issue.key)) {
             output = actions;
         } else {
             final DateTime lastActionTime = seenIssues.remove(issue.key); // Need to change its ordering in the map

@@ -51,7 +51,7 @@ public class TSVSpecBuilder {
     }
 
     public TSVSpecBuilder addStatusTimeColumns(final List<String> statusTypes) {
-        for(final String type : statusTypes) {
+        for (final String type : statusTypes) {
             final Function<Action, Long> totalStatusTime = action -> getTotalStatusTime(type, action.getStatusTimes());
             final Function<Action, Long> timeToFirst = action -> getTimeToFirst(type, action.getStatusTimes());
             final Function<Action, Long> timeToLast = action -> getTimeToLast(type, action.getStatusTimes());
@@ -83,7 +83,7 @@ public class TSVSpecBuilder {
     }
 
     public TSVSpecBuilder addLinkColumns(final List<String> linkTypes) {
-        for(final String type : linkTypes) {
+        for (final String type : linkTypes) {
             final Function<Action, String> valueExtractor = action -> getLinkValue(type, action);
             addColumn(
                     String.format("link_%s*", type.replace(" ", "_")), valueExtractor);
@@ -125,27 +125,24 @@ public class TSVSpecBuilder {
     }
 
     private static long getTotalStatusTime(final String statusType, final Map<String, StatusTime> statusTimeMap) {
-        long output = 0;
-        if(statusTimeMap.containsKey(statusType)) {
-            output = statusTimeMap.get(statusType).getTimeinstatus();
+        if (statusTimeMap.containsKey(statusType)) {
+            return statusTimeMap.get(statusType).getTimeinstatus();
         }
-        return output;
+        return 0;
     }
 
     private static long getTimeToFirst(final String statusType, final Map<String, StatusTime> statusTimeMap) {
-        long output = 0;
-        if(statusTimeMap.containsKey(statusType)) {
-            output = statusTimeMap.get(statusType).getTimetofirst();
+        if (statusTimeMap.containsKey(statusType)) {
+            return statusTimeMap.get(statusType).getTimetofirst();
         }
-        return output;
+        return 0;
     }
 
     private static long getTimeToLast(final String statusType, final Map<String, StatusTime> statusTimeMap) {
-        long output = 0;
-        if(statusTimeMap.containsKey(statusType)) {
-            output = statusTimeMap.get(statusType).getTimetolast();
+        if (statusTimeMap.containsKey(statusType)) {
+            return statusTimeMap.get(statusType).getTimetolast();
         }
-        return output;
+        return 0;
     }
 
     private static String getAllStatuses(final Action action) {

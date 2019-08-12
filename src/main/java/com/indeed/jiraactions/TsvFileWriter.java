@@ -51,7 +51,7 @@ public class TsvFileWriter {
 
     public void createFileAndWriteHeaders() throws IOException {
         final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
-        for(DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
+        for (DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
             createFileAndWriteHeaders(date);
             setJiraissuesHeaders();
         }
@@ -158,7 +158,7 @@ public class TsvFileWriter {
     }
 
     public void writeActions(final List<Action> actions) throws IOException {
-        if(actions.isEmpty()) {
+        if (actions.isEmpty()) {
             return;
         }
 
@@ -196,7 +196,7 @@ public class TsvFileWriter {
     }
 
     public void writeIssue(final Action action) throws IOException {
-        if(action == null) {
+        if (action == null) {
             return;
         }
         final String[] line = columnSpecsJiraissues.stream()
@@ -237,14 +237,13 @@ public class TsvFileWriter {
                         .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
                         .build());
 
-                for(int i = 0; i < NUM_RETRIES; i++) {
+                for (int i = 0; i < NUM_RETRIES; i++) {
                     try {
                         final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
                         log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
-                        if(response.getStatusLine().getStatusCode() != 200) {
-                            continue;
+                        if (response.getStatusLine().getStatusCode() == 200) {
+                            return;
                         }
-                        return;
                     } catch (final IOException e) {
                         log.warn("Failed to upload file: " + wd.file.getName() + ".", e);
                     }

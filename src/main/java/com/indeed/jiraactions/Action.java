@@ -44,7 +44,7 @@ public interface Action {
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
 
-    // Jiraissues Fields - Building these fields alongside the jiraactions fields do not affect the jiraactions TSV unless they are added into its headers through TsvFileWriter
+    // Jiraissues Fields - Building these fields alongside the jiraactions fields does not affect the jiraactions TSV unless they are added into its headers through TsvFileWriter
     long getCreatedDateLong();
     long getClosedDate();
     long getResolutionDate();

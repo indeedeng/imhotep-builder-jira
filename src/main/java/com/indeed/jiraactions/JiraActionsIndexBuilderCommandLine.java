@@ -85,10 +85,10 @@ public class JiraActionsIndexBuilderCommandLine {
             final String iuploadUsername = config.getString("iupload.username");
             final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
-            final boolean buildjiraissues = config.getBoolean("buildjiraissues");
-            final int jiraissuesrange = config.getInt("jiraissuesrange");
-            final String[] deliveryleadtimefieldarray = config.getStringArray("deliveryleadtimefields");
-            final String deliveryleadtimefields = COMMA_JOINER.join(deliveryleadtimefieldarray);
+            final boolean buildJiraIssues = config.getBoolean("buildjiraissues");
+            final int jiraIssuesRange = config.getInt("jiraissuesrange");
+            final String[] deliveryLeadTimeFieldArray = config.getStringArray("deliveryleadtimefields");
+            final String deliveryLeadTimeFields = COMMA_JOINER.join(deliveryLeadTimeFieldArray);
 
             final String customFieldsPath = config.getString("customfieldsfile");
             if(StringUtils.isEmpty(customFieldsPath)) {
@@ -112,9 +112,9 @@ public class JiraActionsIndexBuilderCommandLine {
                     .endDate(endDate)
                     .jiraBatchSize(jiraBatchSize)
                     .indexName(indexName)
-                    .buildJiraIssues(buildjiraissues)
-                    .jiraIssuesRange(jiraissuesrange)
-                    .deliveryLeadTimeFields(deliveryleadtimefields)
+                    .buildJiraIssues(buildJiraIssues)
+                    .jiraIssuesRange(jiraIssuesRange)
+                    .deliveryLeadTimeFields(deliveryLeadTimeFields)
                     .customFields(customFieldDefinitions)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);

@@ -43,7 +43,7 @@ public class JiraActionsIndexBuilder {
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config, apiCaller);
             initializeIssuesApiCaller(issuesAPICaller);
 
-            if(!issuesAPICaller.currentPageExist()) {
+            if (!issuesAPICaller.currentPageExist()) {
                 log.warn("No issues found for this time range.");
                 return;
             }
@@ -69,13 +69,12 @@ public class JiraActionsIndexBuilder {
             fileTime += headerStopwatch.elapsed(TimeUnit.MILLISECONDS);
 
             final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
-            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate, config.getBuildJiraIssues());
+            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate, config.buildJiraIssues());
 
             paginator.process();
             fileTime += apiPageProvider.getFileWritingTime();
             final long apiTime = apiPageProvider.getApiTime();
             final long processTime = apiPageProvider.getProcessingTime();
-
 
             log.debug("Had to look up {} users.", userLookupService.numLookups());
 
@@ -92,7 +91,7 @@ public class JiraActionsIndexBuilder {
 
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
             final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getIssues());
-            if(config.getBuildJiraIssues()) {
+            if (config.buildJiraIssues()) {
                 log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
                 jiraIssuesIndexBuilder.run();
             } else {
@@ -109,10 +108,10 @@ public class JiraActionsIndexBuilder {
 
             final long apiUserTime = userLookupService.getUserLookupTotalTime();
 
-            log.info("{} ms to build Jiraactions.", stopwatch.elapsed(TimeUnit.MILLISECONDS)-jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
+            log.info("{} ms to build Jiraactions.", stopwatch.elapsed(TimeUnit.MILLISECONDS) - jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
             log.info("Jiraactions:{apiTime: {} ms, processTime: {} ms, fileTime: {} ms, userLookupTime: {} ms}",
                     apiTime-apiUserTime, processTime, fileTime, apiUserTime);
-            if(config.getBuildJiraIssues()) {
+            if (config.buildJiraIssues()) {
                 log.info("{} ms to build Jiraissues.", jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
                 log.info("Jiraissues:{downloadTime: {} ms, processTime: {} ms, uploadTime: {} ms}",
                         jiraIssuesIndexBuilder.getDownloadTime(), jiraIssuesIndexBuilder.getProcessTime(), jiraIssuesIndexBuilder.getUploadTime());

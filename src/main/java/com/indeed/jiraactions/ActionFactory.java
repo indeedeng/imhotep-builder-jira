@@ -1,5 +1,6 @@
 package com.indeed.jiraactions;
 
+import com.google.common.collect.ImmutableList;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.links.LinkFactory;
@@ -19,13 +20,13 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ActionFactory {
+    final private static List<String> DLT_RESOLUTIONS = ImmutableList.of("Fixed", "Done");
+    final private static List<String> DLT_ISSUES = ImmutableList.of("Bug", "Improvement", "New Feature");
 
     private final UserLookupService userLookupService;
     private final CustomFieldApiParser customFieldParser;
     private final JiraActionsIndexBuilderConfig config;
     private final LinkFactory linkFactory = new LinkFactory();
-    private final StatusTimeFactory statusTimeFactory = new StatusTimeFactory();
-
     private final String[] dltStatuses;
 
     @SuppressWarnings("WeakerAccess")
@@ -72,11 +73,11 @@ public class ActionFactory {
                 .resolutionDate(getDateResolved(issue.initialValue("resolutiondate")))
                 .comments(0)
                 .deliveryLeadTime(0)
-                .statusTimes(statusTimeFactory.firstStatusTime(issue.initialValue("status")))
+                .statusTimes(StatusTimeFactory.firstStatusTime(issue.initialValue("status")))
                 .statusHistory(createStatusHistory(issue.initialValue("status")))
                 .links(Collections.emptySet());
 
-            for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
+            for (final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
                 builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseInitialValue(customFieldDefinition, issue));
             }
 
@@ -118,13 +119,13 @@ public class ActionFactory {
                 .createdDateLong(prevAction.getCreatedDateLong())
                 .closedDate(getDateClosed(prevAction, history))
                 .resolutionDate(history.itemExist("resolutiondate") ? getDateResolved(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDate())
-                .lastUpdated(0)
+                .lastUpdated(0) // This field is used internally to filter issues longer than 6 months. It's only used by jiraissues so it will always go through the toCurrent() method where it takes the date of the previous action.
                 .comments(prevAction.getComments())
                 .deliveryLeadTime(0)
                 .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")))
-                .statusTimes(statusTimeFactory.getStatusTimeUpdate(prevAction.getStatusTimes(), history, prevAction))
+                .statusTimes(StatusTimeFactory.getStatusTimeUpdate(prevAction.getStatusTimes(), history, prevAction))
                 .statusHistory(addStatusHistory(prevAction.getStatusHistory(), prevAction, history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus()));
-        for(final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
+        for (final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
         }
 
@@ -141,8 +142,8 @@ public class ActionFactory {
                 .timeinstate(timeInState(prevAction, comment))
                 .timesinceaction(getTimeDiff(prevAction.getTimestamp(), comment.created))
                 .timestamp(comment.created)
-                .comments(prevAction.getComments()+1)
-                .statusTimes(statusTimeFactory.getStatusTimeComment(prevAction.getStatusTimes(), comment, prevAction))
+                .comments(prevAction.getComments() + 1)
+                .statusTimes(StatusTimeFactory.getStatusTimeComment(prevAction.getStatusTimes(), comment, prevAction))
                 .build();
     }
 
@@ -152,8 +153,8 @@ public class ActionFactory {
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), JiraActionsUtil.parseDateTime(config.getEndDate())))
                 .timestamp(JiraActionsUtil.parseDateTime(config.getStartDate()))
                 .lastUpdated(Integer.parseInt(prevAction.getTimestamp().toString("yyyyMMdd")))
-                .statusTimes(statusTimeFactory.getStatusTimeCurrent(prevAction.getStatusTimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())))
-                .deliveryLeadTime(getDeliveryLeadTime(statusTimeFactory.getStatusTimeCurrent(prevAction.getStatusTimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())), prevAction))
+                .statusTimes(StatusTimeFactory.getStatusTimeCurrent(prevAction.getStatusTimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())))
+                .deliveryLeadTime(getDeliveryLeadTime(StatusTimeFactory.getStatusTimeCurrent(prevAction.getStatusTimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())), prevAction))
                 .build();
     }
 
@@ -166,7 +167,7 @@ public class ActionFactory {
     }
 
     private long timeInState(final Action prevAction, final DateTime changeTimestamp) {
-        if(!Objects.equals(prevAction.getPrevstatus(), prevAction.getStatus())) {
+        if (!Objects.equals(prevAction.getPrevstatus(), prevAction.getStatus())) {
             return getTimeDiff(prevAction.getTimestamp(), changeTimestamp);
         }
 
@@ -174,7 +175,7 @@ public class ActionFactory {
     }
 
     private long getDateResolved(final String resolutionDate) {
-        if(resolutionDate == null || resolutionDate.equals("")) {
+        if (resolutionDate == null || resolutionDate.equals("")) {
             return 0;
         } else {
             return Long.parseLong(resolutionDate.split("T")[0].replaceAll("[^\\d]", ""));
@@ -183,8 +184,8 @@ public class ActionFactory {
 
     private long getDateClosed(final Action prevAction, final History history) {
         final String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus();
-        if (status.equals("Closed")){
-            if (status.equals(prevAction.getStatus())) {
+        if (status.equals("Closed")) {
+            if (prevAction.getStatus().equals(status)) {
                 return prevAction.getClosedDate();
             }
             return Integer.parseInt(history.created.toDateTimeISO().toString("yyyyMMdd"));
@@ -197,27 +198,26 @@ public class ActionFactory {
     }
 
     private List<String> createStatusHistory(final String status) {
-        List<String> statusHistory = new ArrayList<>();
+        final List<String> statusHistory = new ArrayList<>();
         statusHistory.add(status);
         return statusHistory;
     }
 
     private List<String> addStatusHistory(final List<String> prevHistory, final Action prevAction, final String status) {
-        List<String> statusHistory = new ArrayList<>(prevHistory);
-        if(!status.equals(prevAction.getStatus())) {
+        final List<String> statusHistory = new ArrayList<>(prevHistory);
+        if (!status.equals(prevAction.getStatus())) {
             statusHistory.add(status);
         }
         return statusHistory;
     }
 
     private long getDeliveryLeadTime(final Map<String, StatusTime> statusTimes, final Action action) {
-        if
-        (action.getStatus().equals("Closed") &&
-        (action.getResolution().equals("Fixed") || action.getResolution().equals("Done")) &&
-        (action.getIssuetype().equals("Bug") || action.getIssuetype().equals("Improvement") || action.getIssuetype().equals("New Feature"))) {
+        if (action.getStatus().equals("Closed") &&
+        (DLT_RESOLUTIONS.contains(action.getResolution()) &&
+        (DLT_ISSUES.contains(action.getIssuetype())))) {
             long deliveryLeadTime = 0;
-            for(String status : dltStatuses) {
-                if(statusTimes.containsKey(status)) {
+            for (final String status : dltStatuses) {
+                if (statusTimes.containsKey(status)) {
                     deliveryLeadTime += statusTimes.get(status).getTimeinstatus();
                 }
             }

@@ -28,19 +28,18 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class JiraIssuesFileWriter {
-    private static final Logger log = LoggerFactory.getLogger(JiraIssuesIndexBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(JiraIssuesFileWriter.class);
+    private static final int NUM_RETRIES = 5;
 
     private final JiraActionsIndexBuilderConfig config;
 
     private WriterData writerData;
     private List<String> fields = new ArrayList<>();
 
-
-    public JiraIssuesFileWriter(JiraActionsIndexBuilderConfig config) {
+    public JiraIssuesFileWriter(final JiraActionsIndexBuilderConfig config) {
         this.config = config;
     }
 
-    private static final int NUM_RETRIES = 5;
     public void downloadTsv() throws IOException, InterruptedException {
         int backoff = 10000;
         final DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate());
@@ -53,7 +52,7 @@ public class JiraIssuesFileWriter {
         file.deleteOnExit();
         final FileOutputStream stream = new FileOutputStream(file);
 
-        for(int tries = 1; tries <= NUM_RETRIES; tries++) {
+        for (int tries = 1; tries <= NUM_RETRIES; tries++) {
             backoff = Math.max(backoff / 2, 10000);
             URL url = new URL("https://squall.indeed.com/iupload/repository/qa/index/jiraissues/file/indexed/jiraissues_" + formattedDate + ".tsv.gz/");
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -72,7 +71,6 @@ public class JiraIssuesFileWriter {
                 }
                 log.info("Successfully downloaded file with {}.", url);
                 stream.close();
-                in.close();
             } catch (final IOException e) {
                 log.error("Failed on try {}/5.", tries);
                 if (tries == 5) {
@@ -105,19 +103,18 @@ public class JiraIssuesFileWriter {
                     .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
                     .build());
 
-            for(int i = 0; i < NUM_RETRIES; i++) {
+            for (int i = 0; i < NUM_RETRIES; i++) {
                 try {
                     final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
                     log.info("Http response: " + response.getStatusLine().toString() + ": " + file.getName() + ".");
-                    if(response.getStatusLine().getStatusCode() != 200) {
-                        continue;
-                    }
-                    return;
+                    if (response.getStatusLine().getStatusCode() == 200) {
+                        return;
+                    }remote: Resolving deltas: 100% (15/15), completed with 15 local objects
                 } catch (final IOException e) {
                     log.warn("Failed to upload file: " + file.getName() + ".", e);
                 }
             }
-            log.error("Retries expired, unable to upload file: " +file.getName() + ".");
+            log.error("Retries expired, unable to upload file: " + file.getName() + ".");
         }
     }
 
@@ -138,7 +135,7 @@ public class JiraIssuesFileWriter {
     public void compressGzip() throws IOException {
         final byte[] buffer = new byte[1024];
         final File gzip = new File(writerData.getFile().getName() + ".gz");
-//        gzip.deleteOnExit();
+        gzip.deleteOnExit();
         try {
             final FileInputStream in = new FileInputStream(writerData.getFile());
             final GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzip));
