@@ -18,10 +18,12 @@ public class JiraIssuesProcess {
     private List<String> newFields; // Fields from jiraaction's updated issues.
     private List<String> oldFields; // Fields from previous TSV
 
-    public final DateTime startDate;
+    private final DateTime startDate;
+    private final int monthRange;
 
-    public JiraIssuesProcess(final DateTime startDate) {
+    public JiraIssuesProcess(final DateTime startDate, final int monthRange) {
         this.startDate = startDate;
+        this.monthRange = monthRange;
     }
 
     public void convertToMap() {
@@ -44,13 +46,13 @@ public class JiraIssuesProcess {
      * Issues from jiraactions are removed when they get replaced meaning that the ones remaining are new issues and are therefore added.
      */
     public Map<String, String> compareAndUpdate(final String[] issue) {
-        final int filter = Integer.parseInt(startDate.minusMonths(6).toString("yyyyMMdd"));
+        final int filter = Integer.parseInt(startDate.minusMonths(monthRange).toString("yyyyMMdd"));
         final Map<String, String> mappedLine = new LinkedHashMap<>();
         // Changes the issue from a String[] to a Map<String, String>
         for(int i = 0; i < issue.length; i++) {
             mappedLine.put(oldFields.get(i), issue[i]);
         }
-        // Filters issues to last updated 6 months ago
+        // Filters issues to the jiraissues range (in months)
         if(mappedLine.containsKey("lastupdated")) {
             if(Integer.parseInt(mappedLine.get("lastupdated")) < filter) {
                 return null;
@@ -79,7 +81,7 @@ public class JiraIssuesProcess {
         final long DAY = (startDate.getMillis()/1000) - Long.parseLong(mappedLine.get("time"));
         final String status = formatStatus(mappedLine.get("status"));
         try {
-            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage"))) + DAY);
+            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + DAY));
             mappedLine.replace("time", String.valueOf(startDate.getMillis()/1000));
             if(!mappedLine.containsKey("totaltime_" + status)) {
                 nonApiStatuses.add(mappedLine.get("status"));

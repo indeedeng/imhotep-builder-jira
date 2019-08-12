@@ -47,7 +47,7 @@ public interface Action {
     // Jiraissues Fields - Building these fields alongside the jiraactions fields do not affect the jiraactions TSV unless they are added into its headers through TsvFileWriter
     long getCreatedDateLong();
     long getClosedDate();
-    long getResolvedDate();
+    long getResolutionDate();
     long getLastUpdated();
     long getDeliveryLeadTime();
     long getComments();

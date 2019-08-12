@@ -26,6 +26,8 @@ public class ActionFactory {
     private final LinkFactory linkFactory = new LinkFactory();
     private final StatusTimeFactory statusTimeFactory = new StatusTimeFactory();
 
+    private final String[] dltStatuses;
+
     @SuppressWarnings("WeakerAccess")
     public ActionFactory(final UserLookupService userLookupService,
                          final CustomFieldApiParser customFieldApiParser,
@@ -33,6 +35,7 @@ public class ActionFactory {
         this.userLookupService = userLookupService;
         this.customFieldParser = customFieldApiParser;
         this.config = config;
+        this.dltStatuses = config.getDeliveryLeadTimeFields().split(",");
     }
 
     public Action create(final Issue issue) throws IOException {
@@ -66,7 +69,7 @@ public class ActionFactory {
                 .createdDateLong(Long.parseLong(issue.fields.created.toString("yyyyMMdd")))
                 .lastUpdated(0)
                 .closedDate(0)
-                .resolvedDate(0)
+                .resolutionDate(getDateResolved(issue.initialValue("resolutiondate")))
                 .comments(0)
                 .deliveryLeadTime(0)
                 .statusTimes(statusTimeFactory.firstStatusTime(issue.initialValue("status")))
@@ -114,7 +117,7 @@ public class ActionFactory {
                 .createdDate(prevAction.getCreatedDate())
                 .createdDateLong(prevAction.getCreatedDateLong())
                 .closedDate(getDateClosed(prevAction, history))
-                .resolvedDate(getDateResolved(prevAction, history))
+                .resolutionDate(history.itemExist("resolutiondate") ? getDateResolved(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDate())
                 .lastUpdated(0)
                 .comments(prevAction.getComments())
                 .deliveryLeadTime(0)
@@ -170,15 +173,12 @@ public class ActionFactory {
         return getTimeDiff(prevAction.getTimestamp(), changeTimestamp) + prevAction.getTimeinstate();
     }
 
-    private long getDateResolved(final Action prevAction, final History history) {
-        final String resolution = history.itemExist("resolution") ? history.getItemLastValue("resolution") : prevAction.getResolution();
-        if (!resolution.isEmpty()){
-            if(!prevAction.getResolution().isEmpty()) {
-                return prevAction.getResolvedDate();
-            }
-            return Integer.parseInt(history.created.toDateTimeISO().toString("yyyyMMdd"));
+    private long getDateResolved(final String resolutionDate) {
+        if(resolutionDate == null || resolutionDate.equals("")) {
+            return 0;
+        } else {
+            return Long.parseLong(resolutionDate.split("T")[0].replaceAll("[^\\d]", ""));
         }
-        return 0;
     }
 
     private long getDateClosed(final Action prevAction, final History history) {
@@ -210,25 +210,13 @@ public class ActionFactory {
         return statusHistory;
     }
 
-    private final static String[] DLT_STATUSES = {
-            // In Progress
-            "Accepted", "In Progress", "Reopened", "In Development", "In Dev Blocked",
-            // Pending Review
-            "Pending Review", "Pending Code Review", "Pending Dependencies",
-            // Pending Merge
-            "Pending Merge", "Pending QA Release", "Conflict",
-            // Pending Verification
-            "Pending Verification", "In QA", "Final Verification", "QA Ready",
-            // Pending Closure
-            "Pending Closure", "Pending Prod Release", "In Production"
-    };
     private long getDeliveryLeadTime(final Map<String, StatusTime> statusTimes, final Action action) {
         if
         (action.getStatus().equals("Closed") &&
         (action.getResolution().equals("Fixed") || action.getResolution().equals("Done")) &&
         (action.getIssuetype().equals("Bug") || action.getIssuetype().equals("Improvement") || action.getIssuetype().equals("New Feature"))) {
             long deliveryLeadTime = 0;
-            for(String status : DLT_STATUSES) {
+            for(String status : dltStatuses) {
                 if(statusTimes.containsKey(status)) {
                     deliveryLeadTime += statusTimes.get(status).getTimeinstatus();
                 }

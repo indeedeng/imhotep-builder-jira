@@ -21,5 +21,7 @@ public interface JiraActionsIndexBuilderConfig {
     int getJiraBatchSize();
     String getIndexName();
     boolean getBuildJiraIssues();
+    int getJiraIssuesRange();
+    String getDeliveryLeadTimeFields();
     CustomFieldDefinition[] getCustomFields();
 }

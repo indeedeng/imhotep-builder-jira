@@ -86,6 +86,9 @@ public class JiraActionsIndexBuilderCommandLine {
             final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
             final boolean buildjiraissues = config.getBoolean("buildjiraissues");
+            final int jiraissuesrange = config.getInt("jiraissuesrange");
+            final String[] deliveryleadtimefieldarray = config.getStringArray("deliveryleadtimefields");
+            final String deliveryleadtimefields = COMMA_JOINER.join(deliveryleadtimefieldarray);
 
             final String customFieldsPath = config.getString("customfieldsfile");
             if(StringUtils.isEmpty(customFieldsPath)) {
@@ -110,6 +113,8 @@ public class JiraActionsIndexBuilderCommandLine {
                     .jiraBatchSize(jiraBatchSize)
                     .indexName(indexName)
                     .buildJiraIssues(buildjiraissues)
+                    .jiraIssuesRange(jiraissuesrange)
+                    .deliveryLeadTimeFields(deliveryleadtimefields)
                     .customFields(customFieldDefinitions)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);

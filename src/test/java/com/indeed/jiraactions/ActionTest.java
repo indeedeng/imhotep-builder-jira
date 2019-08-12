@@ -201,6 +201,7 @@ public class ActionTest {
                 .prevstatus("On Backlog")
                 .status("Accepted")
                 .timeinstate(100)
+                .statusTimes(statusTimeFactory.firstStatusTime("Accepted"))
                 .build();
 
         final Item item = new Item();

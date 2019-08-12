@@ -21,7 +21,7 @@ public class JiraIssuesIndexBuilder {
 
     public JiraIssuesIndexBuilder(final JiraActionsIndexBuilderConfig config, final List<String[]> issues) {
         fileWriter = new JiraIssuesFileWriter(config);
-        process = new JiraIssuesProcess(JiraActionsUtil.parseDateTime(config.getStartDate()));
+        process = new JiraIssuesProcess(JiraActionsUtil.parseDateTime(config.getStartDate()), config.getJiraIssuesRange());
         parser = new JiraIssuesParser(fileWriter, process, issues);
     }
 
