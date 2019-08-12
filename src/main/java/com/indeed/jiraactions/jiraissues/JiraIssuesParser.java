@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class JiraIssuesParser {
     private static final Logger log = LoggerFactory.getLogger(JiraIssuesIndexBuilder.class);
-    private static TsvParserSettings settings = setupSettings(new TsvParserSettings());
+    private static TsvParserSettings settings = setupSettings();
 
     private final JiraIssuesProcess process;
     private final JiraIssuesFileWriter fileWriter;
@@ -33,7 +33,8 @@ public class JiraIssuesParser {
         this.newIssues = newIssues;
     }
 
-    private static TsvParserSettings setupSettings(final TsvParserSettings settings) {
+    private static TsvParserSettings setupSettings() {
+        final TsvParserSettings settings = new TsvParserSettings();
         settings.getFormat().setLineSeparator("\n");
         settings.setMaxColumns(1000);
         settings.setMaxCharsPerColumn(10000);

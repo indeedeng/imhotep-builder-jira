@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class JiraIssuesProcess {
     private static final Logger log = LoggerFactory.getLogger(JiraIssuesIndexBuilder.class);
@@ -51,7 +50,7 @@ public class JiraIssuesProcess {
         for(int i = 0; i < issue.length; i++) {
             mappedLine.put(oldFields.get(i), issue[i]);
         }
-        // Filters issues to a maximum of a year ago (for unclosed issues) and 6 months (for closed issues).
+        // Filters issues to last updated 6 months ago
         if(mappedLine.containsKey("lastupdated")) {
             if(Integer.parseInt(mappedLine.get("lastupdated")) < filter) {
                 return null;
@@ -64,7 +63,7 @@ public class JiraIssuesProcess {
                 return updatedIssue;  // Replace
             }
         }
-            return updateIssue(mappedLine);   // Update
+        return updateIssue(mappedLine);   // Update
     }
 
     public List<Map<String, String>> getRemainingIssues() {
@@ -77,15 +76,15 @@ public class JiraIssuesProcess {
     }
 
     public Map<String, String> updateIssue(final Map<String, String> mappedLine) {
-        final long DAY = TimeUnit.DAYS.toSeconds(1);
+        final long DAY = (startDate.getMillis()/1000) - Long.parseLong(mappedLine.get("time"));
         final String status = formatStatus(mappedLine.get("status"));
         try {
-            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + DAY));
-            mappedLine.replace("time", String.valueOf(Long.parseLong(mappedLine.get("time")) + DAY));
+            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage"))) + DAY);
+            mappedLine.replace("time", String.valueOf(startDate.getMillis()/1000));
             if(!mappedLine.containsKey("totaltime_" + status)) {
                 nonApiStatuses.add(mappedLine.get("status"));
             } else {
-                mappedLine.replace("totaltime_" + status, mappedLine.get("totaltime_" + status), String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + DAY));
+                mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + DAY));
             }
         } catch (final NumberFormatException e) {
             log.error("Value of field is not numeric.", e);

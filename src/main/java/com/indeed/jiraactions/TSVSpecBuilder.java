@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class TSVSpecBuilder {
@@ -49,16 +50,11 @@ public class TSVSpecBuilder {
         return this;
     }
 
-    public TSVSpecBuilder addIntColumn(final String header, final Function<Action, Integer> intExtractor) {
-        addColumn(header, action -> String.valueOf(intExtractor.apply(action)));
-        return this;
-    }
-
     public TSVSpecBuilder addStatusTimeColumns(final List<String> statusTypes) {
         for(final String type : statusTypes) {
-            final Function<Action, Long> totalStatusTime = action -> getTotalStatusTime(type, action);
-            final Function<Action, Long> timeToFirst = action -> getTimeToFirst(type, action);
-            final Function<Action, Long> timeToLast = action -> getTimeToLast(type, action);
+            final Function<Action, Long> totalStatusTime = action -> getTotalStatusTime(type, action.getStatusTimes());
+            final Function<Action, Long> timeToFirst = action -> getTimeToFirst(type, action.getStatusTimes());
+            final Function<Action, Long> timeToLast = action -> getTimeToLast(type, action.getStatusTimes());
             String formattedType = type.toLowerCase()
                     .replace(" ", "_")
                     .replace("-", "_")
@@ -128,43 +124,31 @@ public class TSVSpecBuilder {
         return String.join(" ", values);
     }
 
-    private static long getTotalStatusTime(final String statusType, final Action action) {
-        final List<StatusTime> st = action.getStatustimes();
+    private static long getTotalStatusTime(final String statusType, final Map<String, StatusTime> statusTimeMap) {
         long output = 0;
-        for(StatusTime statusTime : st) {
-            if (statusTime.getStatus().equals(statusType)) {
-                output = output + statusTime.getTimeinstatus();
-            }
+        if(statusTimeMap.containsKey(statusType)) {
+            output = statusTimeMap.get(statusType).getTimeinstatus();
         }
         return output;
     }
 
-    private static long getTimeToFirst(final String statusType, final Action action) {
-        final List<StatusTime> st = action.getStatustimes();
+    private static long getTimeToFirst(final String statusType, final Map<String, StatusTime> statusTimeMap) {
         long output = 0;
-        for(StatusTime statusTime : st) {
-            if (statusTime.getStatus().equals(statusType)) {
-                output = output + statusTime.getTimetofirst();
-            }
+        if(statusTimeMap.containsKey(statusType)) {
+            output = statusTimeMap.get(statusType).getTimetofirst();
         }
         return output;
     }
 
-    private static long getTimeToLast(final String statusType, final Action action) {
-        final List<StatusTime> st = action.getStatustimes();
+    private static long getTimeToLast(final String statusType, final Map<String, StatusTime> statusTimeMap) {
         long output = 0;
-        for(StatusTime statusTime : st) {
-            if (statusTime.getStatus().equals(statusType)) {
-                output = output + statusTime.getTimetolast();
-            }
+        if(statusTimeMap.containsKey(statusType)) {
+            output = statusTimeMap.get(statusType).getTimetolast();
         }
         return output;
     }
 
     private static String getAllStatuses(final Action action) {
-        final Iterable<String> values = action.getStatustimes().stream()
-                .map(StatusTime::getStatus)::iterator;
-
-        return String.join("|", values);
+        return String.join("|", action.getStatusHistory());
     }
 }

@@ -38,8 +38,8 @@ public class ActionTest {
     private static final long timeDiffWithPrevAction = 10;
 
     private final UserLookupService userLookupService = new FriendlyUserLookupService();
+    private final StatusTimeFactory statusTimeFactory = new StatusTimeFactory();
     private ActionFactory actionFactory;
-    private StatusTimeFactory statusTimeFactory;
 
     @Before
     public void initialize() {
@@ -48,7 +48,6 @@ public class ActionTest {
         EasyMock.replay(config);
 
         actionFactory = new ActionFactory(userLookupService, new CustomFieldApiParser(userLookupService), config);
-        statusTimeFactory = new StatusTimeFactory();
 
         author = ImmutableUser.builder()
                 .displayName("Author")
@@ -65,7 +64,7 @@ public class ActionTest {
                 .timestamp(prevActionTimestamp)
                 .prevstatus("")
                 .status("Pending Triage")
-                .statustimes(statusTimeFactory.firstStatusTime("Pending Triage"))
+                .statusTimes(statusTimeFactory.firstStatusTime("Pending Triage"))
                 .build();
 
         history = new History();

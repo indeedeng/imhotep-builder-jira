@@ -69,7 +69,7 @@ public class JiraActionsIndexBuilder {
             fileTime += headerStopwatch.elapsed(TimeUnit.MILLISECONDS);
 
             final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
-            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate, config.getJiraissues());
+            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate, config.getBuildJiraIssues());
 
             paginator.process();
             fileTime += apiPageProvider.getFileWritingTime();
@@ -92,7 +92,7 @@ public class JiraActionsIndexBuilder {
 
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
             final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getIssues());
-            if(config.getJiraissues()) {
+            if(config.getBuildJiraIssues()) {
                 log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
                 jiraIssuesIndexBuilder.run();
             } else {
@@ -112,7 +112,7 @@ public class JiraActionsIndexBuilder {
             log.info("{} ms to build Jiraactions.", stopwatch.elapsed(TimeUnit.MILLISECONDS)-jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
             log.info("Jiraactions:{apiTime: {} ms, processTime: {} ms, fileTime: {} ms, userLookupTime: {} ms}",
                     apiTime-apiUserTime, processTime, fileTime, apiUserTime);
-            if(config.getJiraissues()) {
+            if(config.getBuildJiraIssues()) {
                 log.info("{} ms to build Jiraissues.", jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
                 log.info("Jiraissues:{downloadTime: {} ms, processTime: {} ms, uploadTime: {} ms}",
                         jiraIssuesIndexBuilder.getDownloadTime(), jiraIssuesIndexBuilder.getProcessTime(), jiraIssuesIndexBuilder.getUploadTime());

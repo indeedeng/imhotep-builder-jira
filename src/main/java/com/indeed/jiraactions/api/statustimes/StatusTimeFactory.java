@@ -5,74 +5,72 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import org.joda.time.DateTime;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
 
 public class StatusTimeFactory {
 
-    public List<StatusTime> firstStatusTime(@Nonnull final String status) {
-        List<StatusTime> st = new ArrayList<>();
-        st.add(addStatus(status, 0, 0));
-        return st;
+    public Map<String, StatusTime> firstStatusTime(@Nonnull final String status) {  // Used for the first ever status
+        final Map<String, StatusTime> statusTimeMap = new HashMap<>();
+        final StatusTime st = ImmutableStatusTime.builder()
+                .timetofirst(0)
+                .timetolast(0)
+                .timeinstatus(0)
+                .build();
+        statusTimeMap.put(status, st);
+        return statusTimeMap;
     }
 
-    public StatusTime addStatus(@Nonnull final String status, final long timetofirst, final long timetolast) {
+    public StatusTime addStatus(@Nonnull final long timetofirst, final long timetolast) {
         return ImmutableStatusTime.builder()
-                .status(status)
                 .timeinstatus(0)
                 .timetofirst(timetofirst)
                 .timetolast(timetolast)
                 .build();
     }
 
-    public StatusTime updateStatus(@Nonnull final StatusTime prev, final long time) {
+    public StatusTime updateTime(@Nonnull final StatusTime prev, final long time) {
         return ImmutableStatusTime.builder()
                 .from(prev)
-                .status(prev.getStatus())
                 .timeinstatus(prev.getTimeinstatus() + time)
                 .build();
     }
 
-    public StatusTime updateTimeToLast(@Nonnull final StatusTime prev) {
+    public StatusTime updateTimeToLast(@Nonnull final StatusTime prev, final long timetolast) {
         return ImmutableStatusTime.builder()
                 .from(prev)
-                .timetolast(0)
+                .timetolast(timetolast)
                 .build();
     }
 
-    public List<StatusTime> getStatusTimeUpdate(final List<StatusTime> list, final History history, final Action prevAction) {
-        final List<StatusTime> st = new ArrayList<>(list);
+    public Map<String, StatusTime> getStatusTimeUpdate(final Map<String, StatusTime> prevMap, final History history, final Action prevAction) {
+        final Map<String, StatusTime> statusTimeMap = new HashMap<>(prevMap);
         String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus();
-        st.set(st.size()-1, updateStatus(st.get(st.size()-1), getTimeDiff(prevAction.getTimestamp(), history.created)));
-        if (!status.equals(prevAction.getStatus())) {
-            boolean first = true;
-            for(int i = 0; i < st.size(); i++) {
-                if (st.get(i).getStatus().equals(status)) {
-                    st.set(i, updateTimeToLast(st.get(i)));
-                    first = false;
-                }
+        statusTimeMap.replace(prevAction.getStatus(), updateTime(statusTimeMap.get(prevAction.getStatus()), getTimeDiff(prevAction.getTimestamp(), history.created)));
+        if(statusTimeMap.containsKey(status)) {
+            statusTimeMap.replace(status, updateTime(statusTimeMap.get(status), getTimeDiff(prevAction.getTimestamp(), history.created)));
+            if(!status.equals(prevAction.getStatus())) {
+                statusTimeMap.replace(status, updateTimeToLast(statusTimeMap.get(status), prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created)));
             }
-            if (first) {
-                st.add(addStatus(status, prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created), prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created)));
-            } else {
-                st.add(addStatus(status, 0, prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created)));
-            }
-
+        } else {
+            statusTimeMap.put(status, addStatus(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created), prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created)));
         }
-        return st;
+        return statusTimeMap;
     }
 
-    public List<StatusTime> getStatusTimeComment(final List<StatusTime> list, final Comment comment, final Action prevAction) {
-        List<StatusTime> st = new ArrayList<>(list);
-        st.set(st.size()-1, updateStatus(st.get(st.size()-1), getTimeDiff(prevAction.getTimestamp(), comment.created)));
-        return st;
+    public Map<String, StatusTime> getStatusTimeComment(final Map<String, StatusTime> prevMap, final Comment comment, final Action prevAction) {
+        Map<String, StatusTime> statusTimeMap = new HashMap<>(prevMap);
+        String status = prevAction.getStatus();
+        statusTimeMap.replace(status, updateTime(statusTimeMap.get(status), getTimeDiff(prevAction.getTimestamp(), comment.created)));
+        return statusTimeMap;
     }
 
-    public List<StatusTime> getStatusTimeCurrent(final List<StatusTime> list, final Action prevAction, final DateTime endDate) {
-        List<StatusTime> st = new ArrayList<>(list);
-        st.set(st.size()-1, updateStatus(st.get(st.size()-1), getTimeDiff(prevAction.getTimestamp(), endDate)));
-        return st;
+    public Map<String, StatusTime> getStatusTimeCurrent(final Map<String, StatusTime> prevMap, final Action prevAction, final DateTime endDate) {
+        Map<String, StatusTime> statusTimeMap = new HashMap<>(prevMap);
+        String status = prevAction.getStatus();
+        statusTimeMap.replace(status, updateTime(statusTimeMap.get(status), getTimeDiff(prevAction.getTimestamp(), endDate)));
+        return statusTimeMap;
     }
 
     private long getTimeDiff(final DateTime before, final DateTime after) {

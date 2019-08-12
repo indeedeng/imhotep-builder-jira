@@ -40,16 +40,19 @@ public interface Action {
     String getComponents();
     String getLabels();
     String getCreatedDate();
-    int getCreatedDateInt();
-    int getClosedDate();
-    int getResolvedDate();
-    int getLastUpdated();
-    long getDlt();
     String getPriority();
-    int getComments();
-    List<StatusTime> getStatustimes();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
+
+    // Jiraissues Fields - Building these fields alongside the jiraactions fields do not affect the jiraactions TSV unless they are added into its headers through TsvFileWriter
+    long getCreatedDateLong();
+    long getClosedDate();
+    long getResolvedDate();
+    long getLastUpdated();
+    long getDeliveryLeadTime();
+    long getComments();
+    Map<String, StatusTime> getStatusTimes();
+    List<String> getStatusHistory();
 
     @Nullable
     @VisibleForTesting
