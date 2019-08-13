@@ -1,31 +1,38 @@
 package com.indeed.jiraactions.jiraissues;
 
+import com.google.common.collect.ImmutableList;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class TestJiraIssuesProcess {
     final DateTime date = DateTime.parse("2019-01-01");
     final int monthRange = 6;
     final JiraIssuesProcess process = new JiraIssuesProcess(date, monthRange);
     final List<String[]> newIssues = new ArrayList<>();
-    final String[] fields = {"issuekey", "status", "time", "issueage", "totaltime_open", "totaltime_pending_triage", "totaltime_in_progress", "totaltime_closed"};
+    final List<String> fields = ImmutableList.of("issuekey", "status", "time", "issueage", "totaltime_open", "totaltime_pending_triage", "totaltime_in_progress", "totaltime_closed");
 
     @Before
     public void setup() {
         setupNewIssues();
 
         process.setNewIssues(newIssues);
-        process.setNewFields(Arrays.stream(fields).collect(Collectors.toList()));
-        process.setOldFields(Arrays.stream(fields).collect(Collectors.toList()));
+        process.setNewFields(fields);
+        process.setOldFields(fields);
         process.convertToMap();
+    }
+
+    // These issues replicate the new issues from jiraactions and will only be used by testCompare(), testGetRemainingIssues() and testNonApiStatuses().
+    public void setupNewIssues() {
+        final String[] newIssue1 = {"A", "In Progress", "1546322400", "86400", "0", "86400", "0", "0"};       // Should replace previous day's issue
+        newIssues.add(newIssue1);
+        final String[] newIssue2 = {"C", "Open", "1546322400", "86400", "0", "0", "0", "0"};      // Should be added
+        newIssues.add(newIssue2);
     }
 
     @Test
@@ -63,45 +70,41 @@ public class TestJiraIssuesProcess {
     }
 
     @Test
-    public void testNewFields() {
-        final JiraIssuesProcess process = new JiraIssuesProcess(date, monthRange);
-
-        final List<String[]> newIssues = new ArrayList<>();
-        final String[] newFields = {"issuekey", "status", "time", "issueage", "totaltime_closed", "totaltime_open"};
-        newIssues.add(newFields);
-
-        final String[] oldFields = {"issuekey", "status", "time", "issueage", "totaltime_open"};
-        process.setNewIssues(newIssues);
-        process.setOldFields(Arrays.stream(oldFields).collect(Collectors.toList()));
-        process.setNewFields(Arrays.stream(newFields).collect(Collectors.toList()));
-
-        final String[] issue = {"A", "Open", "1546236000", "0", "0"};
-        final Map<String, String> output = process.compareAndUpdate(issue);
-        final String[] expected = {"A", "Open", "1546322400", "86400", "0", "86400"};      // If there is a new field it will set "0" as the value for that field
-        Assert.assertEquals(expected, output.values().toArray());
+    public void testNonApiStatuses() {
+        final String[] issue = {"D", "Accepted", "1546236000", "0", "0", "0", "0", "0"};       // Technically, "Accepted" is in the API but it isn't in the fields that were set for these tests so it will be added.
+        process.compareAndUpdate(issue);
+        Assert.assertEquals("Accepted", process.getNonApiStatuses().get(0));
     }
 
     @Test
-    public void testNonApiStatuses() {
-        final String[] issue = {"D", "Accepted", "1546236000", "0", "0", "0", "0", "0"};       // "Accepted" is in the API but it isn't in the fields that were set for these tests
-        process.compareAndUpdate(issue);
-        Assert.assertEquals("Accepted", process.getNonApiStatuses().get(0));
+    public void testNewFields() {
+        final JiraIssuesProcess process = new JiraIssuesProcess(date, monthRange);
+
+        final List<String> oldFields = ImmutableList.of("issuekey", "status", "time", "issueage", "totaltime_open");
+        final List<String> newFields = ImmutableList.of("issuekey", "status", "time", "issueage", "totaltime_closed", "totaltime_open");
+
+        process.setNewIssues(new ArrayList<>());
+        process.setOldFields(oldFields);
+        process.setNewFields(newFields);
+
+        final String[] issue = {"A", "Open", "1546236000", "0", "0"};
+        final Map<String, String> output = process.compareAndUpdate(issue);
+        final String[] expected = {"A", "Open", "1546322400", "86400", "0", "86400"};      // If there is a new status field it will set "0" as the value for that field
+        Assert.assertEquals(expected, output.values().toArray());
     }
 
     @Test
     public void testStatusReplacement() {
         final JiraIssuesProcess process = new JiraIssuesProcess(date, monthRange);
 
-        final List<String[]> newIssues = new ArrayList<>();
-        final String[] newFields = {"issuekey", "status", "time", "issueage", "totaltime_c", "totaltime_a"};
-        newIssues.add(newFields);
+        final List<String> oldFields = ImmutableList.of("issuekey", "status", "time", "issueage", "totaltime_a", "totaltime_b");      // b is replaced by c and is placed in a different order
+        final List<String> newFields = ImmutableList.of("issuekey", "status", "time", "issueage", "totaltime_c", "totaltime_a");
 
-        final String[] oldFields = {"issuekey", "status", "time", "issueage", "totaltime_a", "totaltime_b"};      // b is replaced by c and is placed in a different order
-        process.setNewIssues(newIssues);
-        process.setOldFields(Arrays.stream(oldFields).collect(Collectors.toList()));
-        process.setNewFields(Arrays.stream(newFields).collect(Collectors.toList()));
+        process.setNewIssues(new ArrayList<>());
+        process.setOldFields(oldFields);
+        process.setNewFields(newFields);
 
-        final String[] issue = {"A", "a", "1546236000", "0", "0", "1"};        // There currently isn't a way to check which statuses get replaced so the best it can do is "remove" the old one and set 0 as the new one
+        final String[] issue = {"A", "a", "1546236000", "0", "0", "1"};        // There currently isn't a way to check which statuses get replaced in the API so the best it can do is "remove" the old one and set 0 as the new one
         final Map<String, String> output = process.compareAndUpdate(issue);
         final String[] expected = {"A", "a", "1546322400", "86400", "0", "86400"};
         Assert.assertEquals(expected, output.values().toArray());
@@ -112,14 +115,11 @@ public class TestJiraIssuesProcess {
         // start date is 2019-01-01
         final JiraIssuesProcess process = new JiraIssuesProcess(date, monthRange);
 
-        final List<String[]> newIssues = new ArrayList<>();
-        final String[] newFields = {"issuekey", "status", "time", "issueage", "lastupdated"};
-        newIssues.add(newFields);
+        final List<String> fields = ImmutableList.of("issuekey", "status", "time", "issueage", "lastupdated");  // We are using the same fields for this test
 
-        final String[] oldFields = {"issuekey", "status", "time", "issueage", "lastupdated"};
-        process.setNewIssues(newIssues);
-        process.setOldFields(Arrays.stream(oldFields).collect(Collectors.toList()));
-        process.setNewFields(Arrays.stream(newFields).collect(Collectors.toList()));
+        process.setNewIssues(new ArrayList<>());
+        process.setOldFields(fields);
+        process.setNewFields(fields);
 
         final String[] issue1 = {"A", "Closed", "1546236000", "0", "20180101"};        // last updated 2018-01-01.
         final Map<String, String> output1 = process.compareAndUpdate(issue1);
@@ -132,14 +132,6 @@ public class TestJiraIssuesProcess {
 
 
 
-    }
-
-    public void setupNewIssues() {
-        newIssues.add(fields);
-        String[] issue1 = {"A", "In Progress", "1546322400", "86400", "0", "86400", "0", "0"};       // Should replace previous day's issue
-        newIssues.add(issue1);
-        String[] issue2 = {"C", "Open", "1546322400", "86400", "0", "0", "0", "0"};      // Should be added
-        newIssues.add(issue2);
     }
 
 }

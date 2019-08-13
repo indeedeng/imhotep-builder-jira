@@ -90,7 +90,7 @@ public class JiraActionsIndexBuilder {
             log.debug("No values seen for these custom fields: " + missedFields);
 
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
-            final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getIssues());
+            final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getFields(), writer.getIssues());
             if (config.buildJiraIssues()) {
                 log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
                 jiraIssuesIndexBuilder.run();

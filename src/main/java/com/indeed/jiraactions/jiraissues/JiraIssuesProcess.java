@@ -14,7 +14,7 @@ public class JiraIssuesProcess {
 
     private final List<Map<String, String>> newIssuesMapped = new ArrayList<>();
     private final List<String> nonApiStatuses = new ArrayList<>(); // Old statuses that don't show up in the API.
-    private List<String[]> newIssues;
+    private List<String[]> newIssues; // New issues from jiraactions
     private List<String> newFields; // Fields from jiraaction's updated issues.
     private List<String> oldFields; // Fields from previous TSV
 
@@ -27,34 +27,29 @@ public class JiraIssuesProcess {
     }
 
     public void convertToMap() {
-        for (int issue = 1; issue < newIssues.size(); issue++) {
-            final Map<String, String> mappedLine = new LinkedHashMap<>(newFields.size());
-            final String[] line = newIssues.get(issue);
-            if (line == null) {
-                break;
-            } else {
-                for (int i = 0; i < line.length; i++) {
-                    mappedLine.put(newFields.get(i), line[i]);
-                }
-                newIssuesMapped.add(mappedLine);
+        for (final String[] issue : newIssues) {
+            final Map<String, String> mappedIssue = new LinkedHashMap<>(newFields.size());
+            for (int i = 0; i < issue.length; i++) {
+                mappedIssue.put(newFields.get(i), issue[i]);
             }
+            newIssuesMapped.add(mappedIssue);
         }
     }
 
-    /* If the issue is updated through jiraactions it will replace it because that version is the latest.
-     * If it isn't replaced then it gets updated -- only fields involving time are updated so this is really easy.
-     * Issues from jiraactions are removed when they get replaced meaning that the ones remaining are new issues and are therefore added.
+    /* If the issue is updated through jiraactions, the jiraactions issue will replace the previous day's issue because that version is the latest.
+     * If the previous day's issue isn't replaced, then it gets updated -- only fields involving time are updated so this is really easy.
+     * Issues from jiraactions are removed when they replace the old issues, meaning that the ones remaining are newly created issues and are added through the parser.
      */
     public Map<String, String> compareAndUpdate(final String[] issue) {
-        final int filter = Integer.parseInt(startDate.minusMonths(monthRange).toString("yyyyMMdd"));
+        final int lookbackTimeLimit = Integer.parseInt(startDate.minusMonths(monthRange).toString("yyyyMMdd"));
         final Map<String, String> mappedLine = new LinkedHashMap<>();
-        // Changes the issue from a String[] to a Map<String, String>
+        // Changes the issue from a String[] to a Map<Field, Value>
         for (int i = 0; i < issue.length; i++) {
             mappedLine.put(oldFields.get(i), issue[i]);
         }
         // Filters issues to the jiraissues range (in months)
         if (mappedLine.containsKey("lastupdated")) {
-            if (Integer.parseInt(mappedLine.get("lastupdated")) < filter) {
+            if (Integer.parseInt(mappedLine.get("lastupdated")) < lookbackTimeLimit) {
                 return null;
             }
         }
@@ -78,15 +73,15 @@ public class JiraIssuesProcess {
     }
 
     public Map<String, String> updateIssue(final Map<String, String> mappedLine) {
-        final long DAY = (startDate.getMillis()/1000) - Long.parseLong(mappedLine.get("time"));
+        final long day = (startDate.getMillis() / 1000) - Long.parseLong(mappedLine.get("time"));
         final String status = formatStatus(mappedLine.get("status"));
         try {
-            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + DAY));
-            mappedLine.replace("time", String.valueOf(startDate.getMillis()/1000));
+            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + day));
+            mappedLine.replace("time", String.valueOf(startDate.getMillis() / 1000));
             if (!mappedLine.containsKey("totaltime_" + status)) {
                 nonApiStatuses.add(mappedLine.get("status"));
             } else {
-                mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + DAY));
+                mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + day));
             }
         } catch (final NumberFormatException e) {
             log.error("Value of field is not numeric.", e);
@@ -94,7 +89,7 @@ public class JiraIssuesProcess {
 
         // This part is very important in making sure that the previous TSV will conform to the new fields
         final Map<String, String> mappedLineNewFields = new LinkedHashMap<>();
-        for (String field : newFields) {
+        for (final String field : newFields) {
             if (!mappedLine.containsKey(field)) {
                 if (field.startsWith("totaltime") || field.startsWith("timetofirst") || field.startsWith("timetolast")) {
                     mappedLineNewFields.put(field, "0");

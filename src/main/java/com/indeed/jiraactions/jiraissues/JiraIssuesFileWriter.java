@@ -109,7 +109,7 @@ public class JiraIssuesFileWriter {
                     log.info("Http response: " + response.getStatusLine().toString() + ": " + file.getName() + ".");
                     if (response.getStatusLine().getStatusCode() == 200) {
                         return;
-                    }remote: Resolving deltas: 100% (15/15), completed with 15 local objects
+                    }
                 } catch (final IOException e) {
                     log.warn("Failed to upload file: " + file.getName() + ".", e);
                 }

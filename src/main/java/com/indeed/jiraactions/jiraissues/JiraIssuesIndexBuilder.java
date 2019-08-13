@@ -19,10 +19,10 @@ public class JiraIssuesIndexBuilder {
     private long processTime = 0;
     private long uploadTime = 0;
 
-    public JiraIssuesIndexBuilder(final JiraActionsIndexBuilderConfig config, final List<String[]> issues) {
+    public JiraIssuesIndexBuilder(final JiraActionsIndexBuilderConfig config, final List<String> fields, final List<String[]> issues) {
         fileWriter = new JiraIssuesFileWriter(config);
         process = new JiraIssuesProcess(JiraActionsUtil.parseDateTime(config.getStartDate()), config.getJiraIssuesRange());
-        parser = new JiraIssuesParser(fileWriter, process, issues);
+        parser = new JiraIssuesParser(fileWriter, process, fields, issues);
     }
 
     public void run() throws Exception {

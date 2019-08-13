@@ -33,6 +33,7 @@ public class TsvFileWriter {
     private final Map<DateMidnight, WriterData> writerDataMap;
     private final List<TSVColumnSpec> columnSpecs;
     private final List<TSVColumnSpec> columnSpecsJiraissues;
+    private List<String> fields = new ArrayList<>();
     private final List<String[]> issues = new ArrayList<>();
 
     public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes, final List<String> statusTypes) {
@@ -59,6 +60,10 @@ public class TsvFileWriter {
 
     public List<String[]> getIssues() {
         return issues;
+    }
+
+    public List<String> getFields() {
+        return fields;
     }
 
     private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
@@ -189,10 +194,9 @@ public class TsvFileWriter {
     }
 
     private void setJiraissuesHeaders() {
-        final String[] headerLine = columnSpecsJiraissues.stream()
+        fields = columnSpecsJiraissues.stream()
                 .map(TSVColumnSpec::getHeader)
-                .toArray(String[]::new);
-        issues.add(headerLine);
+                .collect(Collectors.toList());
     }
 
     public void writeIssue(final Action action) throws IOException {

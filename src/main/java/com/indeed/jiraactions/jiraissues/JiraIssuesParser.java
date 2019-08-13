@@ -22,14 +22,16 @@ public class JiraIssuesParser {
     private final JiraIssuesProcess process;
     private final JiraIssuesFileWriter fileWriter;
 
+    private final List<String> newFields;
     private final List<String[]> newIssues;
     private File file;
     private FileReader reader;
     private TsvParser parser;
 
-    public JiraIssuesParser(final JiraIssuesFileWriter fileWriter, final JiraIssuesProcess process, final List<String[]> newIssues) {
+    public JiraIssuesParser(final JiraIssuesFileWriter fileWriter, final JiraIssuesProcess process, final List<String> newFields, final List<String[]> newIssues) {
         this.fileWriter = fileWriter;
         this.process = process;
+        this.newFields = newFields;
         this.newIssues = newIssues;
     }
 
@@ -50,7 +52,7 @@ public class JiraIssuesParser {
 
         fileWriter.setFields(Arrays.stream(newIssues.get(0)).collect(Collectors.toList()));   // Sets fields of the TSV using new issues.
 
-        process.setNewFields(Arrays.stream(newIssues.get(0)).collect(Collectors.toList()));
+        process.setNewFields(newFields);
         process.setNewIssues(newIssues);
         process.setOldFields(Arrays.stream(parser.parseNext()).collect(Collectors.toList()));
         process.convertToMap();
@@ -75,8 +77,10 @@ public class JiraIssuesParser {
             }
         }
         log.debug("Updated/Replaced {} Issues.", counter);
-        log.debug("Fields not in API {}", process.getNonApiStatuses());
-        for (Map<String, String> issue : process.getRemainingIssues()) {     // Adds the remaining issues
+        if (!process.getNonApiStatuses().isEmpty()) {
+            log.warn("Fields not in API {}", process.getNonApiStatuses());
+        }
+        for (final Map<String, String> issue : process.getRemainingIssues()) {     // Adds the remaining issues
             fileWriter.writeIssue(issue);
         }
     }
