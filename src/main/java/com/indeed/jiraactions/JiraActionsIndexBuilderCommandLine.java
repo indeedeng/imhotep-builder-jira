@@ -89,9 +89,9 @@ public class JiraActionsIndexBuilderCommandLine {
             final String indexName = config.getString("indexname");
             final boolean buildJiraIssues = config.getBoolean("buildjiraissues");
             final int jiraIssuesRange = config.getInt("jiraissuesrange");
-            final String[] deliveryLeadTimeStatuses = {"Accepted", "In Progress", "Reopened", "In Development", "In Dev Blocked", "Pending Review", "Pending Code Review", "Pending Dependencies", "Pending Merge", "Pending QA Release", "Conflict", "Pending Verification", "In QA", "Final Verification", "QA Ready", "Pending Closure", "Pending Prod Release", "In Production"};
-            final String[] deliveryLeadTimeResolutions = {"Fixed", "Done"};
-            final String[] deliveryLeadTimeTypes = {"Bug", "Improvement", "New Feature"};
+            final String[] deliveryLeadTimeStatuses = config.getStringArray("deliveryleadtimestatuses");
+            final String[] deliveryLeadTimeResolutions = config.getStringArray("deliveryleadtimeresolutions");
+            final String[] deliveryLeadTimeTypes = config.getStringArray("deliveryleadtimetypes");
             final String customFieldsPath = config.getString("customfieldsfile");
             if(StringUtils.isEmpty(customFieldsPath)) {
                 customFieldDefinitions = new CustomFieldDefinition[0];
