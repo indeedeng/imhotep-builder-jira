@@ -72,8 +72,12 @@ public class JiraIssuesProcess {
         return addedIssues;
     }
 
+    public long test(DateTime dateTime) {
+        return (dateTime.getMillis() / 1000) - (dateTime.minusDays(1).getMillis() / 1000);
+    }
+
     public Map<String, String> updateIssue(final Map<String, String> mappedLine) {
-        final long day = (startDate.getMillis() / 1000) - Long.parseLong(mappedLine.get("time"));
+        final long day = (startDate.getMillis() / 1000) - (startDate.minusDays(1).getMillis() / 1000);
         final String status = formatStatus(mappedLine.get("status"));
         try {
             mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + day));

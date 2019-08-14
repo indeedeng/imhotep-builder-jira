@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 
 public class StatusTimeFactory {
 
-    public static Map<String, StatusTime> firstStatusTime(@Nonnull final String status) {  // Used for the first ever status
+    public Map<String, StatusTime> firstStatusTime(@Nonnull final String status) {  // Used for the first ever status
         final Map<String, StatusTime> statusTimeMap = new HashMap<>();
         final StatusTime st = ImmutableStatusTime.builder()
                 .timetofirst(0)
@@ -22,7 +22,7 @@ public class StatusTimeFactory {
         return statusTimeMap;
     }
 
-    private static StatusTime addStatus(@Nonnull final long timetofirst, final long timetolast) {
+    private StatusTime addStatus(@Nonnull final long timetofirst, final long timetolast) {
         return ImmutableStatusTime.builder()
                 .timeinstatus(0)
                 .timetofirst(timetofirst)
@@ -30,7 +30,7 @@ public class StatusTimeFactory {
                 .build();
     }
 
-    private static StatusTime updateTime(@Nonnull final StatusTime prev, final long time) {
+    private StatusTime updateTime(@Nonnull final StatusTime prev, final long time) {
         return ImmutableStatusTime.builder()
                 .from(prev)
                 .timeinstatus(prev.getTimeinstatus() + time)
@@ -44,12 +44,12 @@ public class StatusTimeFactory {
                 .build();
     }
 
-    public static Map<String, StatusTime> getStatusTimeUpdate(final Map<String, StatusTime> prevMap, final History history, final Action prevAction) {
+    public Map<String, StatusTime> getStatusTimeUpdate(final Map<String, StatusTime> prevMap, final History history, final Action prevAction) {
         final Map<String, StatusTime> statusTimeMap = new HashMap<>(prevMap);
         final String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus();
+        StatusTime statusTime = statusTimeMap.get(prevAction.getStatus());
         statusTimeMap.replace(prevAction.getStatus(), updateTime(statusTimeMap.get(prevAction.getStatus()), getTimeDiff(prevAction.getTimestamp(), history.created)));
         if (statusTimeMap.containsKey(status)) {
-            statusTimeMap.replace(status, updateTime(statusTimeMap.get(status), getTimeDiff(prevAction.getTimestamp(), history.created)));
             if (!prevAction.getStatus().equals(status)) {
                 statusTimeMap.replace(status, updateTimeToLast(statusTimeMap.get(status), prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created)));
             }
@@ -59,21 +59,21 @@ public class StatusTimeFactory {
         return statusTimeMap;
     }
 
-    public static Map<String, StatusTime> getStatusTimeComment(final Map<String, StatusTime> prevMap, final Comment comment, final Action prevAction) {
+    public Map<String, StatusTime> getStatusTimeComment(final Map<String, StatusTime> prevMap, final Comment comment, final Action prevAction) {
         final Map<String, StatusTime> statusTimeMap = new HashMap<>(prevMap);
         final String status = prevAction.getStatus();
         statusTimeMap.replace(status, updateTime(statusTimeMap.get(status), getTimeDiff(prevAction.getTimestamp(), comment.created)));
         return statusTimeMap;
     }
 
-    public static Map<String, StatusTime> getStatusTimeCurrent(final Map<String, StatusTime> prevMap, final Action prevAction, final DateTime endDate) {
+    public Map<String, StatusTime> getStatusTimeCurrent(final Map<String, StatusTime> prevMap, final Action prevAction, final DateTime endDate) {
         final Map<String, StatusTime> statusTimeMap = new HashMap<>(prevMap);
         final String status = prevAction.getStatus();
         statusTimeMap.replace(status, updateTime(statusTimeMap.get(status), getTimeDiff(prevAction.getTimestamp(), endDate)));
         return statusTimeMap;
     }
 
-    private static long getTimeDiff(final DateTime before, final DateTime after) {
+    private long getTimeDiff(final DateTime before, final DateTime after) {
         return (after.getMillis() - before.getMillis()) / 1000;
     }
 }

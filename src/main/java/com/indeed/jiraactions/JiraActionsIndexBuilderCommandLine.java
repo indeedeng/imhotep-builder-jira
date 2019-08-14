@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * @author soono
@@ -87,9 +89,9 @@ public class JiraActionsIndexBuilderCommandLine {
             final String indexName = config.getString("indexname");
             final boolean buildJiraIssues = config.getBoolean("buildjiraissues");
             final int jiraIssuesRange = config.getInt("jiraissuesrange");
-            final String[] deliveryLeadTimeFieldArray = config.getStringArray("deliveryleadtimefields");
-            final String deliveryLeadTimeFields = COMMA_JOINER.join(deliveryLeadTimeFieldArray);
-
+            final String[] deliveryLeadTimeStatuses = {"Accepted", "In Progress", "Reopened", "In Development", "In Dev Blocked", "Pending Review", "Pending Code Review", "Pending Dependencies", "Pending Merge", "Pending QA Release", "Conflict", "Pending Verification", "In QA", "Final Verification", "QA Ready", "Pending Closure", "Pending Prod Release", "In Production"};
+            final String[] deliveryLeadTimeResolutions = {"Fixed", "Done"};
+            final String[] deliveryLeadTimeTypes = {"Bug", "Improvement", "New Feature"};
             final String customFieldsPath = config.getString("customfieldsfile");
             if(StringUtils.isEmpty(customFieldsPath)) {
                 customFieldDefinitions = new CustomFieldDefinition[0];
@@ -114,7 +116,9 @@ public class JiraActionsIndexBuilderCommandLine {
                     .indexName(indexName)
                     .buildJiraIssues(buildJiraIssues)
                     .jiraIssuesRange(jiraIssuesRange)
-                    .deliveryLeadTimeFields(deliveryLeadTimeFields)
+                    .deliveryLeadTimeStatuses(new HashSet<>(Arrays.asList(deliveryLeadTimeStatuses)))
+                    .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))
+                    .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))
                     .customFields(customFieldDefinitions)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);

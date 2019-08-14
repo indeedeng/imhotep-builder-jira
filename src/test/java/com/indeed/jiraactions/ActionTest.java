@@ -17,7 +17,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 
 /**
  * @author soono
@@ -212,5 +211,21 @@ public class ActionTest {
 
         final Action action = actionFactory.update(newPrevAction, history2);
         Assert.assertEquals(history2.created.getMillis()/1000 - prevAction.getTimestamp().getMillis()/1000, action.getTimeinstate());
+    }
+
+    @Test
+    public void testStatusTimeUpdate() {
+        final Item item = new Item();
+        item.setField("status");
+        item.fromString = "Pending Triage";
+        item.toString = "Accepted";
+        history2.items = new Item[] { item };
+
+        final Action newAction = actionFactory.update(prevAction, history2);
+        Assert.assertEquals(2, newAction.getStatusTimes().size());
+        Assert.assertEquals(20, newAction.getStatusTimes().get("Pending Triage").getTimeinstatus());
+        Assert.assertEquals(0, newAction.getStatusTimes().get("Accepted").getTimeinstatus());
+        Assert.assertEquals(20, newAction.getStatusTimes().get("Accepted").getTimetofirst());
+        Assert.assertEquals(20, newAction.getStatusTimes().get("Accepted").getTimetolast());
     }
 }
