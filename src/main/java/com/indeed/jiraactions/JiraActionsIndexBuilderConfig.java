@@ -23,6 +23,8 @@ public interface JiraActionsIndexBuilderConfig {
     int getJiraBatchSize();
     String getIndexName();
     boolean buildJiraIssues();
+    String getJiraIssuesDownloadUrl();
+    String getJiraIssuesUploadUrl();
     int getJiraIssuesRange();
     Set<String> getDeliveryLeadTimeStatuses();
     Set<String> getDeliveryLeadTimeResolutions();

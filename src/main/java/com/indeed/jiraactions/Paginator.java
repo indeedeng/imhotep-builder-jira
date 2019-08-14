@@ -23,12 +23,14 @@ public class Paginator {
     private final DateTime startDate;
     private final DateTime endDate;
     private final boolean buildJiraIssues;
+    private final boolean buildJiraIssuesApi;
 
-    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate, final boolean buildJiraIssues) {
+    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate, final boolean buildJiraIssues, final boolean buildJiraIssuesApi) {
         this.pageProvider = pageProvider;
         this.startDate = startDate;
         this.endDate = endDate;
         this.buildJiraIssues = buildJiraIssues;
+        this.buildJiraIssuesApi = buildJiraIssuesApi;
     }
 
     /*
@@ -75,11 +77,25 @@ public class Paginator {
                         final List<Action> actions = getActionsFilterByLastSeen(seenIssues, issue, preFilteredActions);
                         final List<Action> filteredActions = actions.stream().filter(a -> a.isInRange(startDate, endDate)).collect(Collectors.toList());
 
-                        if (buildJiraIssues && !filteredActions.isEmpty()) {
-                            final Action action = pageProvider.getJiraissues(filteredActions.get(filteredActions.size() - 1), issue);
-                            pageProvider.writeIssue(action);
+                        if (buildJiraIssues) {
+                            if (buildJiraIssuesApi) { // Jiraissues API
+                                final List<Action> apiActions = actions.stream().filter(a -> a.isInRange(startDate.minusMonths(6), endDate)).collect(Collectors.toList());
+                                if (!apiActions.isEmpty()) {
+                                    final Action action = pageProvider.getJiraissues(apiActions.get(apiActions.size()-1), issue);
+                                    if(action.getLastUpdated()>=Integer.parseInt(startDate.minusMonths(6).toString("yyyyMMdd"))) {
+                                        pageProvider.writeIssue(action);
+                                    }
+                                }
+                            } else {    // Jiraactions & Jiraissues TSV
+                                if (!filteredActions.isEmpty()) {
+                                    final Action action = pageProvider.getJiraissues(filteredActions.get(filteredActions.size() - 1), issue);
+                                    pageProvider.writeIssue(action);
+                                }
+                                pageProvider.writeActions(filteredActions);
+                            }
+                        } else {    // Jiraactions
+                            pageProvider.writeActions(filteredActions);
                         }
-                        pageProvider.writeActions(filteredActions);
 
 
                         final boolean ignoreForEndDetection = ignoreUpdatedDate(issue, preFilteredActions);

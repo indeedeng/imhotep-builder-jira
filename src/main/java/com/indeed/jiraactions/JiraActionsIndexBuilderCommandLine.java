@@ -88,6 +88,8 @@ public class JiraActionsIndexBuilderCommandLine {
             final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
             final boolean buildJiraIssues = config.getBoolean("buildjiraissues");
+            final String jiraIssuesDownloadUrl = config.getString("jiraissuesurl");
+            final String jiraIssuesUploadUrl = config.getString("jiraissuesdownloadurl");
             final int jiraIssuesRange = config.getInt("jiraissuesrange");
             final String[] deliveryLeadTimeStatuses = {"Accepted", "In Progress", "Reopened", "In Development", "In Dev Blocked", "Pending Review", "Pending Code Review", "Pending Dependencies", "Pending Merge", "Pending QA Release", "Conflict", "Pending Verification", "In QA", "Final Verification", "QA Ready", "Pending Closure", "Pending Prod Release", "In Production"};
             final String[] deliveryLeadTimeResolutions = {"Fixed", "Done"};
@@ -115,6 +117,8 @@ public class JiraActionsIndexBuilderCommandLine {
                     .jiraBatchSize(jiraBatchSize)
                     .indexName(indexName)
                     .buildJiraIssues(buildJiraIssues)
+                    .jiraIssuesDownloadUrl(jiraIssuesDownloadUrl)
+                    .jiraIssuesUploadUrl(jiraIssuesUploadUrl)
                     .jiraIssuesRange(jiraIssuesRange)
                     .deliveryLeadTimeStatuses(new HashSet<>(Arrays.asList(deliveryLeadTimeStatuses)))
                     .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))

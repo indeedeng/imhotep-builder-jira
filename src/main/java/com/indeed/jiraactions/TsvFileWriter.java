@@ -17,6 +17,8 @@ import org.joda.time.Days;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,25 +26,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import java.util.zip.GZIPOutputStream;
 
 public class TsvFileWriter {
     private static final Logger log = LoggerFactory.getLogger(TsvFileWriter.class);
 
     private final JiraActionsIndexBuilderConfig config;
     private final Map<DateMidnight, WriterData> writerDataMap;
+    private final Map<DateMidnight, WriterData> writerDataMapJiraIssues;
     private final List<TSVColumnSpec> columnSpecs;
     private final List<TSVColumnSpec> columnSpecsJiraissues;
     private List<String> fields = new ArrayList<>();
     private final List<String[]> issues = new ArrayList<>();
+    private final boolean buildJiraIssuesApi;
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes, final List<String> statusTypes) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes, final List<String> statusTypes, final boolean buildJiraIssuesApi) {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
+        writerDataMapJiraIssues = new HashMap<>(days);
         this.columnSpecs = createColumnSpecs(linkTypes);
         this.columnSpecsJiraissues = createColumnSpecsJiraissues(linkTypes, statusTypes);
+        this.buildJiraIssuesApi = buildJiraIssuesApi;
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
@@ -54,7 +60,11 @@ public class TsvFileWriter {
         final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
         for (DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
             createFileAndWriteHeaders(date);
-            setJiraissuesHeaders();
+            if (buildJiraIssuesApi) {
+                createFileAndWriteHeadersJiraIssues(date);
+            } else {
+                setJiraissuesHeaders();
+            }
         }
     }
 
@@ -162,6 +172,25 @@ public class TsvFileWriter {
         writerDataMap.put(day.toDateMidnight(), new WriterData(file, bw));
     }
 
+    private void createFileAndWriteHeadersJiraIssues(final DateTime day) throws IOException {
+        final String filename = String.format("jiraissues_%s.tsv", reformatDate(day));
+        final File file = new File(filename);
+        file.deleteOnExit();
+
+        final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+
+        final String headerLine = columnSpecsJiraissues.stream()
+                .map(TSVColumnSpec::getHeader)
+                .collect(Collectors.joining("\t"));
+
+        // Write header
+        bw.write(headerLine);
+        bw.newLine();
+        bw.flush();
+
+        writerDataMapJiraIssues.put(day.toDateMidnight(), new WriterData(file, bw));
+    }
+
     public void writeActions(final List<Action> actions) throws IOException {
         if (actions.isEmpty()) {
             return;
@@ -203,30 +232,61 @@ public class TsvFileWriter {
         if (action == null) {
             return;
         }
-        final String[] line = columnSpecsJiraissues.stream()
-                .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
-                .map(rawValue -> rawValue.replace("\t", "\\t"))
-                .map(rawValue -> rawValue.replace("\n", "\\n"))
-                .map(rawValue -> rawValue.replace("\r", "\\r"))
-                .toArray(String[]::new);
-        issues.add(line);
+        if(buildJiraIssuesApi) {
+            final WriterData writerData = writerDataMapJiraIssues.get(action.getTimestamp().toDateMidnight());
+            final BufferedWriter bw = writerData.getBufferedWriter();
+            writerData.setWritten();
+            writerData.setDirty(true);
+            final String line = columnSpecsJiraissues.stream()
+                    .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
+                    .map(rawValue -> rawValue.replace("\t", "\\t"))
+                    .map(rawValue -> rawValue.replace("\n", "\\n"))
+                    .map(rawValue -> rawValue.replace("\r", "\\r"))
+                    .collect(Collectors.joining("\t"));
+            bw.write(line);
+            bw.newLine();
+
+            writerDataMapJiraIssues.values().stream()
+                    .filter(WriterData::isDirty).forEach(x -> {
+                try {
+                    x.getBufferedWriter().flush();
+                    x.setDirty(false);
+                } catch (final IOException e) {
+                    log.error("Failed to flush.", e);
+                }
+            });
+        } else {
+            final String[] line = columnSpecsJiraissues.stream()
+                    .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
+                    .map(rawValue -> rawValue.replace("\t", "\\t"))
+                    .map(rawValue -> rawValue.replace("\n", "\\n"))
+                    .map(rawValue -> rawValue.replace("\r", "\\r"))
+                    .toArray(String[]::new);
+            issues.add(line);
+        }
     }
 
     private static final int NUM_RETRIES = 5;
-    public void uploadTsvFile() {
+    public void uploadTsvFile(final boolean jiraIssuesApi) {
         if (StringUtils.isEmpty(config.getIuploadURL())) {
             log.info("Skipping upload because iuploadurl is empty.");
             return;
         }
 
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
+        final String iuploadUrlJiraIssues = config.getJiraIssuesUploadUrl();
 
         log.info("Uploading to " + iuploadUrl);
 
         final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
-        writerDataMap.values().forEach(wd -> {
+        Map<DateMidnight, WriterData> dataMap = writerDataMap;
+        if (jiraIssuesApi) {
+            dataMap = writerDataMapJiraIssues;
+        }
+
+        dataMap.values().forEach(wd -> {
             try {
                 wd.getBufferedWriter().close();
             } catch (final IOException e) {
@@ -234,8 +294,33 @@ public class TsvFileWriter {
             }
 
             if (wd.isWritten()) {
-                final File file = wd.getFile();
-                final HttpPost httpPost = new HttpPost(iuploadUrl);
+                File file = wd.getFile();
+                HttpPost httpPost = new HttpPost(iuploadUrl);
+                if (file.getName().startsWith("jiraissues")) {
+
+                    httpPost = new HttpPost(iuploadUrlJiraIssues);
+                    final byte[] buffer = new byte[1024];
+                    final File gzip = new File(file.getName() + ".gz");
+                    gzip.deleteOnExit();
+                    try {
+                        final FileInputStream in = new FileInputStream(file);
+                        final GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzip));
+                        int i;
+                        while ((i = in.read(buffer)) > 0) {
+                            out.write(buffer, 0, i);
+                        }
+                        in.close();
+                        out.finish();
+                        out.close();
+                        file = gzip;
+                    } catch (final IOException e) {
+                        try {
+                            throw e;
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
                 httpPost.setHeader("Authorization", basicAuth);
                 httpPost.setEntity(MultipartEntityBuilder.create()
                         .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())

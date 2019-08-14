@@ -40,7 +40,7 @@ public class JiraIssuesFileWriter {
         this.config = config;
     }
 
-    public void downloadTsv() throws IOException, InterruptedException {
+    public boolean downloadTsv() throws IOException, InterruptedException {
         int backoff = 10000;
         final DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate());
         final String formattedDate = date.minusDays(1).toString("yyyyMMdd");
@@ -54,14 +54,12 @@ public class JiraIssuesFileWriter {
 
         for (int tries = 1; tries <= NUM_RETRIES; tries++) {
             backoff = Math.max(backoff / 2, 10000);
-            URL url = new URL("https://squall.indeed.com/iupload/repository/qa/index/jiraissues/file/indexed/jiraissues_" + formattedDate + ".tsv.gz/");
+            final URL url = new URL(config.getJiraIssuesDownloadUrl() + "/jiraissues_" + formattedDate + ".tsv.gz/");
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization", basicAuth);
             if (connection.getResponseCode() == 400) {
-                url = new URL("https://squall.indeed.com/iupload/repository/qa/index/jiraissues/file/indexing/jiraissues_" + formattedDate + ".tsv.gz/");
-                log.debug("Previous TSV not finished indexing. Using url {}.", url);
-                connection = (HttpsURLConnection) url.openConnection();
-                connection.setRequestProperty("Authorization", basicAuth);
+                log.debug("Previous Day's TSV missing. Using API method.");
+                return true;
             }
             try (final GZIPInputStream in = new GZIPInputStream(connection.getInputStream())) {
                 int length;
@@ -71,6 +69,8 @@ public class JiraIssuesFileWriter {
                 }
                 log.info("Successfully downloaded file with {}.", url);
                 stream.close();
+                in.close();
+                return false;
             } catch (final IOException e) {
                 log.error("Failed on try {}/5.", tries);
                 if (tries == 5) {
@@ -80,10 +80,13 @@ public class JiraIssuesFileWriter {
                 backoff *= 2;
             }
         }
+        return true;
     }
 
-    public void uploadTsv() {
-        final String iuploadUrl = String.format("https://squall.indeed.com/iupload/repository/qa/index/jiraissues/file/");
+    public void compressAndUploadTsv() throws IOException {
+        compressGzip();
+
+        final String iuploadUrl = config.getJiraIssuesUploadUrl();
 
         log.info("Uploading to " + iuploadUrl);
 
