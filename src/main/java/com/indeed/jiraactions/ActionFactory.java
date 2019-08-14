@@ -174,7 +174,11 @@ public class ActionFactory {
         if (StringUtils.isEmpty(resolutionDate)) {
             return 0;
         } else {
-            return Long.parseLong(resolutionDate.substring(0,10).replaceAll("-", ""));
+            if (resolutionDate.contains("T")) {
+                return Long.parseLong(DateTime.parse(resolutionDate).toString("yyyyMMdd"));     // The initial value of resolution date contains the 'T' while the resolution date in the changelog does not
+            } else {
+                return Long.parseLong(resolutionDate.substring(0, 10).replaceAll("-", ""));
+            }
         }
     }
 
