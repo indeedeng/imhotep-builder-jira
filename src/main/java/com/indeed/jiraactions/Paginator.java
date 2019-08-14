@@ -97,7 +97,6 @@ public class Paginator {
                             pageProvider.writeActions(filteredActions);
                         }
 
-
                         final boolean ignoreForEndDetection = ignoreUpdatedDate(issue, preFilteredActions);
                         if (!firstPass // Don't bail out the first time through
                                 && preFilteredActions.size() > 0 // It had issues in our time range; so we can tell if it was filtered

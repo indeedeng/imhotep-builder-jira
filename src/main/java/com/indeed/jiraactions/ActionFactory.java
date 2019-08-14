@@ -174,7 +174,7 @@ public class ActionFactory {
         if (StringUtils.isEmpty(resolutionDate)) {
             return 0;
         } else {
-            return Long.parseLong(DateTime.parse(resolutionDate).toString("yyyyMMdd"));
+            return Long.parseLong(resolutionDate.substring(0,10).replaceAll("-", ""));
         }
     }
 
