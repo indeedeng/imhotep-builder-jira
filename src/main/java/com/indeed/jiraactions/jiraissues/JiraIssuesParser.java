@@ -67,8 +67,9 @@ public class JiraIssuesParser {
                 stopwatch.stop();
                 break;
             } else {
-                if (process.compareAndUpdate(issue) != null) {
-                    fileWriter.writeIssue(process.compareAndUpdate(issue));
+                final Map<String, String> processedIssue = process.compareAndUpdate(issue);
+                if (processedIssue != null) {
+                    fileWriter.writeIssue(processedIssue);
                 }
                 counter++;
                 if (counter % 100000 == 0) {
