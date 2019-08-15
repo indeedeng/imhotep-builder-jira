@@ -38,6 +38,11 @@ public class ActionsBuilder {
         return actions;
     }
 
+    @Nonnull
+    public Action buildJiraIssues(final Action action) throws IOException {
+        return setUpdateToCurrent(action);
+    }
+
     //
     // For Create Action
     //
@@ -95,6 +100,10 @@ public class ActionsBuilder {
                 }
             }
         }
+    }
+
+    private Action setUpdateToCurrent(final Action prevAction) {
+        return actionFactory.toCurrent(prevAction);
     }
 
     private boolean isCreatedDuringRange(final DateTime createdDate) {

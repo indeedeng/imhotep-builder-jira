@@ -8,6 +8,7 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 
+import com.indeed.jiraactions.api.statustimes.StatusTimeFactory;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -36,6 +37,7 @@ public class ActionTest {
     private static final long timeDiffWithPrevAction = 10;
 
     private final UserLookupService userLookupService = new FriendlyUserLookupService();
+    private final StatusTimeFactory statusTimeFactory = new StatusTimeFactory();
     private ActionFactory actionFactory;
 
     @Before
@@ -61,6 +63,7 @@ public class ActionTest {
                 .timestamp(prevActionTimestamp)
                 .prevstatus("")
                 .status("Pending Triage")
+                .statusTimes(statusTimeFactory.firstStatusTime("Pending Triage"))
                 .build();
 
         history = new History();
@@ -197,6 +200,7 @@ public class ActionTest {
                 .prevstatus("On Backlog")
                 .status("Accepted")
                 .timeinstate(100)
+                .statusTimes(statusTimeFactory.firstStatusTime("Accepted"))
                 .build();
 
         final Item item = new Item();
@@ -207,5 +211,21 @@ public class ActionTest {
 
         final Action action = actionFactory.update(newPrevAction, history2);
         Assert.assertEquals(history2.created.getMillis()/1000 - prevAction.getTimestamp().getMillis()/1000, action.getTimeinstate());
+    }
+
+    @Test
+    public void testStatusTimeUpdate() {
+        final Item item = new Item();
+        item.setField("status");
+        item.fromString = "Pending Triage";
+        item.toString = "Accepted";
+        history2.items = new Item[] { item };
+
+        final Action newAction = actionFactory.update(prevAction, history2);
+        Assert.assertEquals(2, newAction.getStatusTimes().size());
+        Assert.assertEquals(20, newAction.getStatusTimes().get("Pending Triage").getTimeinstatus());
+        Assert.assertEquals(0, newAction.getStatusTimes().get("Accepted").getTimeinstatus());
+        Assert.assertEquals(20, newAction.getStatusTimes().get("Accepted").getTimetofirst());
+        Assert.assertEquals(20, newAction.getStatusTimes().get("Accepted").getTimetolast());
     }
 }

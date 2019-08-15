@@ -9,6 +9,8 @@ import com.indeed.jiraactions.api.IssuesAPICaller;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.links.LinkTypesApiCaller;
+import com.indeed.jiraactions.api.statustimes.StatusTypesApiCaller;
+import com.indeed.jiraactions.jiraissues.JiraIssuesIndexBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -41,7 +43,7 @@ public class JiraActionsIndexBuilder {
             final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config, apiCaller);
             initializeIssuesApiCaller(issuesAPICaller);
 
-            if(!issuesAPICaller.currentPageExist()) {
+            if (!issuesAPICaller.currentPageExist()) {
                 log.warn("No issues found for this time range.");
                 return;
             }
@@ -57,15 +59,17 @@ public class JiraActionsIndexBuilder {
 
             final LinkTypesApiCaller linkTypesApiCaller = new LinkTypesApiCaller(config, apiCaller);
             final List<String> linkTypes = linkTypesApiCaller.getLinkTypes();
+            final StatusTypesApiCaller statusTypesApiCaller = new StatusTypesApiCaller(config, apiCaller);
+            final List<String> statusTypes = statusTypesApiCaller.getStatusTypes();
 
-            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes);
+            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes, statusTypes);
             final Stopwatch headerStopwatch = Stopwatch.createStarted();
             writer.createFileAndWriteHeaders();
             headerStopwatch.stop();
             fileTime += headerStopwatch.elapsed(TimeUnit.MILLISECONDS);
 
             final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
-            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate);
+            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate, config.buildJiraIssues());
 
             paginator.process();
             fileTime += apiPageProvider.getFileWritingTime();
@@ -90,13 +94,29 @@ public class JiraActionsIndexBuilder {
             fileUploadStopwatch.stop();
             log.debug("{} ms to create and upload TSV.", fileUploadStopwatch.elapsed(TimeUnit.MILLISECONDS));
 
+            final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
+            final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getFields(), writer.getIssues());
+            if (config.buildJiraIssues()) {
+                log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
+                jiraIssuesIndexBuilder.run();
+            } else {
+                log.info("Not building jiraissues.");
+            }
+            jiraIssuesStopwatch.stop();
+
             stopwatch.stop();
 
             final long apiUserTime = userLookupService.getUserLookupTotalTime();
 
-            log.info("{} ms for the whole process.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
-            log.info("apiTime: {}ms, processTime: {}ms, fileTime: {}ms, userLookupTime: {}ms",
+            log.info("{} ms to build Jiraactions.", stopwatch.elapsed(TimeUnit.MILLISECONDS) - jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
+            log.info("Jiraactions:{apiTime: {} ms, processTime: {} ms, fileTime: {} ms, userLookupTime: {} ms}",
                     apiTime-apiUserTime, processTime, fileTime, apiUserTime);
+            if (config.buildJiraIssues()) {
+                log.info("{} ms to build Jiraissues.", jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
+                log.info("Jiraissues:{downloadTime: {} ms, processTime: {} ms, uploadTime: {} ms}",
+                        jiraIssuesIndexBuilder.getDownloadTime(), jiraIssuesIndexBuilder.getProcessTime(), jiraIssuesIndexBuilder.getUploadTime());
+            }
+            log.info("{} ms for the whole process.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
         } catch (final Exception e) {
             log.error("Threw an exception trying to run the index builder", e);
             throw e;

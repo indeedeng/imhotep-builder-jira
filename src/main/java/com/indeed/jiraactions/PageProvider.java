@@ -21,5 +21,9 @@ public interface PageProvider {
 
     List<Action> getActions(final Issue issue) throws IOException;
 
+    Action getJiraissues(final Action action, final Issue issue) throws IOException;
+
     void writeActions(final List<Action> actions) throws IOException;
+
+    void writeIssue(final Action action) throws IOException;
 }

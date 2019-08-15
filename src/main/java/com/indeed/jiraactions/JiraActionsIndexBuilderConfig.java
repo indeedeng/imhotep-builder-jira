@@ -4,6 +4,8 @@ import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 
 import org.immutables.value.Value;
 
+import java.util.Set;
+
 @Value.Immutable
 public interface JiraActionsIndexBuilderConfig {
     String getJiraUsername();
@@ -20,5 +22,10 @@ public interface JiraActionsIndexBuilderConfig {
     String getEndDate();
     int getJiraBatchSize();
     String getIndexName();
+    boolean buildJiraIssues();
+    int getJiraIssuesLookbackMonths();
+    Set<String> getDeliveryLeadTimeStatuses();
+    Set<String> getDeliveryLeadTimeResolutions();
+    Set<String> getDeliveryLeadTimeTypes();
     CustomFieldDefinition[] getCustomFields();
 }

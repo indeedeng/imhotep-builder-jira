@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * @author soono
@@ -85,7 +87,11 @@ public class JiraActionsIndexBuilderCommandLine {
             final String iuploadUsername = config.getString("iupload.username");
             final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
-
+            final boolean buildJiraIssues = config.getBoolean("buildjiraissues");
+            final int jiraIssuesLookbackMonths = config.getInt("jiraissueslookbackmonths");
+            final String[] deliveryLeadTimeStatuses = config.getStringArray("deliveryleadtimestatuses");
+            final String[] deliveryLeadTimeResolutions = config.getStringArray("deliveryleadtimeresolutions");
+            final String[] deliveryLeadTimeTypes = config.getStringArray("deliveryleadtimetypes");
             final String customFieldsPath = config.getString("customfieldsfile");
             if(StringUtils.isEmpty(customFieldsPath)) {
                 customFieldDefinitions = new CustomFieldDefinition[0];
@@ -108,6 +114,11 @@ public class JiraActionsIndexBuilderCommandLine {
                     .endDate(endDate)
                     .jiraBatchSize(jiraBatchSize)
                     .indexName(indexName)
+                    .buildJiraIssues(buildJiraIssues)
+                    .jiraIssuesLookbackMonths(jiraIssuesLookbackMonths)
+                    .deliveryLeadTimeStatuses(new HashSet<>(Arrays.asList(deliveryLeadTimeStatuses)))
+                    .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))
+                    .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))
                     .customFields(customFieldDefinitions)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);

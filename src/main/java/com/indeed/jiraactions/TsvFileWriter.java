@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +32,17 @@ public class TsvFileWriter {
     private final JiraActionsIndexBuilderConfig config;
     private final Map<DateMidnight, WriterData> writerDataMap;
     private final List<TSVColumnSpec> columnSpecs;
+    private final List<TSVColumnSpec> columnSpecsJiraissues;
+    private List<String> fields = new ArrayList<>();
+    private final List<String[]> issues = new ArrayList<>();
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes, final List<String> statusTypes) {
         this.config = config;
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
         this.columnSpecs = createColumnSpecs(linkTypes);
+        this.columnSpecsJiraissues = createColumnSpecsJiraissues(linkTypes, statusTypes);
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
@@ -47,9 +52,18 @@ public class TsvFileWriter {
 
     public void createFileAndWriteHeaders() throws IOException {
         final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
-        for(DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
+        for (DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
             createFileAndWriteHeaders(date);
+            setJiraissuesHeaders();
         }
+    }
+
+    public List<String[]> getIssues() {
+        return issues;
+    }
+
+    public List<String> getFields() {
+        return fields;
     }
 
     private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
@@ -88,6 +102,43 @@ public class TsvFileWriter {
         return specBuilder.build();
     }
 
+    private List<TSVColumnSpec> createColumnSpecsJiraissues(final List<String> linkTypes, final List<String> statusTypes) {
+        final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
+        specBuilder
+                .addColumn("issuekey", Action::getIssuekey)
+                .addUserColumns("actor", Action::getActor)
+                .addUserColumns("assignee", Action::getAssignee)
+                .addColumn("category", Action::getCategory)
+                .addColumn("components*|", Action::getComponents)
+                .addLongColumn("createdate", Action::getCreatedDateLong)
+                .addColumn("duedate", Action::getDueDate)
+                .addTimeColumn("int duedate_time", Action::getDueDateTime)
+                .addColumn("fixversion*|", Action::getFixversions)
+                .addLongColumn("issueage", Action::getIssueage)
+                .addColumn("issuetype", Action::getIssuetype)
+                .addColumn("labels*", Action::getLabels)
+                .addColumn("priority", Action::getPriority)
+                .addColumn("project", Action::getProject)
+                .addColumn("projectkey", Action::getProjectkey)
+                .addUserColumns("reporter", Action::getReporter)
+                .addColumn("resolution", Action::getResolution)
+                .addColumn("status", Action::getStatus)
+                .addColumn("summary", Action::getSummary)
+                .addTimeColumn("time", Action::getTimestamp)
+                .addLongColumn("comments", Action::getComments)
+                .addLongColumn("closedate", Action::getClosedDate)
+                .addLongColumn("resolutiondate", Action::getResolutionDate)
+                .addLongColumn("lastupdated", Action::getLastUpdated)
+                .addLongColumn("deliveryleadtime", Action::getDeliveryLeadTime)
+                .addStatusTimeColumns(statusTypes)
+                .addLinkColumns(linkTypes);
+
+        for (final CustomFieldDefinition customField : config.getCustomFields()) {
+            specBuilder.addCustomFieldColumns(customField);
+        }
+        return specBuilder.build();
+    }
+
     private void createFileAndWriteHeaders(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getIndexName(), reformatDate(day));
         final File file = new File(filename);
@@ -112,7 +163,7 @@ public class TsvFileWriter {
     }
 
     public void writeActions(final List<Action> actions) throws IOException {
-        if(actions.isEmpty()) {
+        if (actions.isEmpty()) {
             return;
         }
 
@@ -140,6 +191,25 @@ public class TsvFileWriter {
                 log.error("Failed to flush.", e);
             }
         });
+    }
+
+    private void setJiraissuesHeaders() {
+        fields = columnSpecsJiraissues.stream()
+                .map(TSVColumnSpec::getHeader)
+                .collect(Collectors.toList());
+    }
+
+    public void writeIssue(final Action action) throws IOException {
+        if (action == null) {
+            return;
+        }
+        final String[] line = columnSpecsJiraissues.stream()
+                .map(columnSpec -> columnSpec.getActionExtractor().apply(action))
+                .map(rawValue -> rawValue.replace("\t", "\\t"))
+                .map(rawValue -> rawValue.replace("\n", "\\n"))
+                .map(rawValue -> rawValue.replace("\r", "\\r"))
+                .toArray(String[]::new);
+        issues.add(line);
     }
 
     private static final int NUM_RETRIES = 5;
@@ -171,14 +241,13 @@ public class TsvFileWriter {
                         .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
                         .build());
 
-                for(int i = 0; i < NUM_RETRIES; i++) {
+                for (int i = 0; i < NUM_RETRIES; i++) {
                     try {
                         final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
                         log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
-                        if(response.getStatusLine().getStatusCode() != 200) {
-                            continue;
+                        if (response.getStatusLine().getStatusCode() == 200) {
+                            return;
                         }
-                        return;
                     } catch (final IOException e) {
                         log.warn("Failed to upload file: " + wd.file.getName() + ".", e);
                     }

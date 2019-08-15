@@ -6,11 +6,13 @@ import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
 
+import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class TSVSpecBuilder {
@@ -48,6 +50,22 @@ public class TSVSpecBuilder {
         return this;
     }
 
+    public TSVSpecBuilder addStatusTimeColumns(final List<String> statusTypes) {
+        for (final String type : statusTypes) {
+            final Function<Action, Long> totalStatusTime = action -> getTotalStatusTime(type, action.getStatusTimes());
+            final Function<Action, Long> timeToFirst = action -> getTimeToFirst(type, action.getStatusTimes());
+            final Function<Action, Long> timeToLast = action -> getTimeToLast(type, action.getStatusTimes());
+            final String formattedType = JiraActionsUtil.formatStringForIqlField(type);
+            addLongColumn(String.format("totaltime_%s", formattedType), totalStatusTime);
+            addLongColumn(String.format("timetofirst_%s", formattedType), timeToFirst);
+            addLongColumn(String.format("timetolast_%s", formattedType), timeToLast);
+        }
+        final Function<Action, String> valueExtractor = TSVSpecBuilder::getAllStatuses;
+        addColumn("statushistory*|", valueExtractor);
+
+        return this;
+    }
+
     public TSVSpecBuilder addCustomFieldColumns(final CustomFieldDefinition customField) {
         final List<String> headers = customField.getHeaders();
         final Function<Action, List<String>> valueExtractor = action -> getCustomFieldValue(customField, action);
@@ -59,7 +77,7 @@ public class TSVSpecBuilder {
     }
 
     public TSVSpecBuilder addLinkColumns(final List<String> linkTypes) {
-        for(final String type : linkTypes) {
+        for (final String type : linkTypes) {
             final Function<Action, String> valueExtractor = action -> getLinkValue(type, action);
             addColumn(
                     String.format("link_%s*", type.replace(" ", "_")), valueExtractor);
@@ -98,5 +116,30 @@ public class TSVSpecBuilder {
                 .map(Link::getTargetKey)::iterator;
 
         return String.join(" ", values);
+    }
+
+    private static long getTotalStatusTime(final String statusType, final Map<String, StatusTime> statusTimeMap) {
+        if (statusTimeMap.containsKey(statusType)) {
+            return statusTimeMap.get(statusType).getTimeinstatus();
+        }
+        return 0;
+    }
+
+    private static long getTimeToFirst(final String statusType, final Map<String, StatusTime> statusTimeMap) {
+        if (statusTimeMap.containsKey(statusType)) {
+            return statusTimeMap.get(statusType).getTimetofirst();
+        }
+        return 0;
+    }
+
+    private static long getTimeToLast(final String statusType, final Map<String, StatusTime> statusTimeMap) {
+        if (statusTimeMap.containsKey(statusType)) {
+            return statusTimeMap.get(statusType).getTimetolast();
+        }
+        return 0;
+    }
+
+    private static String getAllStatuses(final Action action) {
+        return String.join("|", action.getStatusHistory());
     }
 }

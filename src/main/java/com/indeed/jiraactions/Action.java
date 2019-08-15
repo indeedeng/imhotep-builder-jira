@@ -5,6 +5,7 @@ import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
+import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
@@ -12,6 +13,7 @@ import org.joda.time.DateTime;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 @Value.Immutable
 public interface Action {
@@ -41,6 +43,16 @@ public interface Action {
     String getPriority();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
+
+    // Jiraissues Fields - Building these fields alongside the jiraactions fields does not affect the jiraactions TSV unless they are added into its headers through TsvFileWriter
+    long getCreatedDateLong();
+    long getClosedDate();
+    long getResolutionDate();
+    long getLastUpdated();
+    long getDeliveryLeadTime();
+    long getComments();
+    Map<String, StatusTime> getStatusTimes();
+    List<String> getStatusHistory();
 
     @Nullable
     @VisibleForTesting
