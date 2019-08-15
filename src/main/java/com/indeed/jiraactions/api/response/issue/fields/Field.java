@@ -82,7 +82,7 @@ public class Field {
             case "fixversions": return fixVersions == null ? "" : Joiner.on("|").join(fixVersions);
             case "duedate": return duedate == null ? "" : duedate;
             case "resolutiondate": return resolutiondate == null ? "" : resolutiondate;
-            case "components": return components == null ? "" : Joiner.on("|").join(components);
+            case "component": return components == null ? "" : Joiner.on("|").join(components);
             case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
             case "priority": return priority == null ? "" : priority.name;
         }

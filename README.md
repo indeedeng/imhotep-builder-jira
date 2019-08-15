@@ -64,6 +64,22 @@ up the older ways to use the JSON approach instead. Creating a new, simple field
 More complicated fields may required defining new types of transformations. The principle value of this approach is that it lets us support
 different custom fields for different JIRA instances.
 
+# Jiraissues Index
+The jiraissues index is a daily snapshot of a JIRA ticket/issue's current state where each document is a unique issue.
+Jiraissues compliements jiraactions by making up for jiraactions' weakness of not being able to see the current state of an issue until it gets updated/changed.
+This index runs alongside jiraactions but will upload a separate TSV file into its own index.
+
+# Jiraissues Architecture
+The jiraissues index builds alongside the jiraactions index, borrowing some of jiraactions' fields while adding its own. Although the additional jiraissues fields are added to the same Action class jiraactions uses, jiraactions won't use it unless you set the headers to do so. Jiraissues uses a toCurrent() method to update the latest action of an issue from jiraactions to fit the fields of jiraissues.
+This method allows for both jiraactions and jiraissues to build at the same time without drastic and complex changes to the code.
+Jiraissues will store all of the issues in a list while jiraactions writes them to the TSV. The list is then passed in to the jiraissues builder after jiraactions finishes and jiraissues will start building off of the previous day's TSV file using these new/updated issues.
+
+The jiraissues builder uses a TSV parser to parse through yesterday's downloaded TSV file for every issue and compares that old issue to all the updated ones from jiraactions.
+There are 3 things that happen when it compares the old issue:
+1. Replace - If the updated issues contains the issuekey of the old one then it writes the new one instead.
+2. Update - If the issue isn't in the new issues it will update its time-related fields in a method then write that.
+3. Add - After going through all the old issues, any new issues that aren't replaced are added.
+
 # To Run Locally
 1. Create a file called `imhotep-jira.properties` (see `imhotep-jira-template.properties` for the basic template). Properties are:
     * `jira.username` (required): username for JIRA instance
