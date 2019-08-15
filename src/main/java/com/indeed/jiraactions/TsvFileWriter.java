@@ -129,7 +129,7 @@ public class TsvFileWriter {
                 .addLongColumn("closedate", Action::getClosedDate)
                 .addLongColumn("resolutiondate", Action::getResolutionDate)
                 .addLongColumn("lastupdated", Action::getLastUpdated)
-                .addLongColumn("delivery_lead_time", Action::getDeliveryLeadTime)
+                .addLongColumn("deliveryleadtime", Action::getDeliveryLeadTime)
                 .addStatusTimeColumns(statusTypes)
                 .addLinkColumns(linkTypes);
 
