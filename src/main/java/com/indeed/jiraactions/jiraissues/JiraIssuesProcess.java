@@ -1,5 +1,6 @@
 package com.indeed.jiraactions.jiraissues;
 
+import com.indeed.jiraactions.JiraActionsUtil;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +20,11 @@ public class JiraIssuesProcess {
     private List<String> oldFields; // Fields from previous TSV
 
     private final DateTime startDate;
-    private final int monthRange;
+    private final int lookbackMonths;
 
-    public JiraIssuesProcess(final DateTime startDate, final int monthRange) {
+    public JiraIssuesProcess(final DateTime startDate, final int lookbackMonths) {
         this.startDate = startDate;
-        this.monthRange = monthRange;
+        this.lookbackMonths = lookbackMonths;
     }
 
     public void convertToMap() {
@@ -41,7 +42,7 @@ public class JiraIssuesProcess {
      * Issues from jiraactions are removed when they replace the old issues, meaning that the ones remaining are newly created issues and are added through the parser.
      */
     public Map<String, String> compareAndUpdate(final String[] issue) {
-        final int lookbackTimeLimit = Integer.parseInt(startDate.minusMonths(monthRange).toString("yyyyMMdd"));
+        final int lookbackTimeLimit = Integer.parseInt(startDate.minusMonths(lookbackMonths).toString("yyyyMMdd"));
         final Map<String, String> mappedLine = new LinkedHashMap<>();
         // Changes the issue from a String[] to a Map<Field, Value>
         for (int i = 0; i < issue.length; i++) {
@@ -54,7 +55,7 @@ public class JiraIssuesProcess {
             }
         }
 
-        for (Map<String, String> updatedIssue: newIssuesMapped) {
+        for (final Map<String, String> updatedIssue : newIssuesMapped) {
             if (mappedLine.get("issuekey").equals(updatedIssue.get("issuekey"))) {
                 newIssuesMapped.remove(updatedIssue);
                 return updatedIssue;  // Replace
@@ -78,7 +79,7 @@ public class JiraIssuesProcess {
 
     public Map<String, String> updateIssue(final Map<String, String> mappedLine) {
         final long day = (startDate.getMillis() / 1000) - (startDate.minusDays(1).getMillis() / 1000);
-        final String status = formatStatus(mappedLine.get("status"));
+        final String status = JiraActionsUtil.formatStringForIqlField(mappedLine.get("status"));
         try {
             mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + day));
             mappedLine.replace("time", String.valueOf(startDate.getMillis() / 1000));
@@ -107,19 +108,6 @@ public class JiraIssuesProcess {
         return mappedLineNewFields;
     }
 
-    private String formatStatus(final String status) {
-        if (status.equals("")) {
-            return "";
-        }
-        return status
-                .toLowerCase()
-                .replace(" ", "_")
-                .replace("-", "_")
-                .replace("(", "")
-                .replace(")", "")
-                .replace("&", "and")
-                .replace("/", "_");
-    }
 
     public void setNewIssues(final List<String[]> newIssues) {
         this.newIssues = newIssues;

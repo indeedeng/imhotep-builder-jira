@@ -184,7 +184,7 @@ public class ActionFactory {
 
     private long getDateClosed(final Action prevAction, final History history) {
         final String status = history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus();
-        if (status.equals("Closed")) {
+        if ("Closed".equals(status)) {
             if (prevAction.getStatus().equals(status)) {
                 return prevAction.getClosedDate();
             }
@@ -212,8 +212,7 @@ public class ActionFactory {
     }
 
     private long getDeliveryLeadTime(final Map<String, StatusTime> statusTimes, final Action action) {
-        if (config.getDeliveryLeadTimeResolutions().contains(action.getResolution()) &&
-        (config.getDeliveryLeadTimeTypes().contains(action.getIssuetype()))) {
+        if (config.getDeliveryLeadTimeResolutions().contains(action.getResolution()) && (config.getDeliveryLeadTimeTypes().contains(action.getIssuetype()))) {
             long deliveryLeadTime = 0;
             for (final String status : config.getDeliveryLeadTimeStatuses()) {
                 if (statusTimes.containsKey(status)) {

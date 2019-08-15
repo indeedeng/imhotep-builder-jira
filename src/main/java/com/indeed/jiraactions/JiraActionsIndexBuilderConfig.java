@@ -23,7 +23,7 @@ public interface JiraActionsIndexBuilderConfig {
     int getJiraBatchSize();
     String getIndexName();
     boolean buildJiraIssues();
-    int getJiraIssuesRange();
+    int getJiraIssuesLookbackMonths();
     Set<String> getDeliveryLeadTimeStatuses();
     Set<String> getDeliveryLeadTimeResolutions();
     Set<String> getDeliveryLeadTimeTypes();

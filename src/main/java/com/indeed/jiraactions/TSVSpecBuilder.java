@@ -55,13 +55,7 @@ public class TSVSpecBuilder {
             final Function<Action, Long> totalStatusTime = action -> getTotalStatusTime(type, action.getStatusTimes());
             final Function<Action, Long> timeToFirst = action -> getTimeToFirst(type, action.getStatusTimes());
             final Function<Action, Long> timeToLast = action -> getTimeToLast(type, action.getStatusTimes());
-            String formattedType = type.toLowerCase()
-                    .replace(" ", "_")
-                    .replace("-", "_")
-                    .replace("(", "")
-                    .replace(")", "")
-                    .replace("&", "and")
-                    .replace("/", "_");
+            final String formattedType = JiraActionsUtil.formatStringForIqlField(type);
             addLongColumn(String.format("totaltime_%s", formattedType), totalStatusTime);
             addLongColumn(String.format("timetofirst_%s", formattedType), timeToFirst);
             addLongColumn(String.format("timetolast_%s", formattedType), timeToLast);

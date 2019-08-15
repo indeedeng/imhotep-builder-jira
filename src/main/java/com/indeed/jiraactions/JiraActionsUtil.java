@@ -1,5 +1,6 @@
 package com.indeed.jiraactions;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -60,5 +61,20 @@ public abstract class JiraActionsUtil {
         }
         final long unixTime = date.getMillis()/1000;
         return String.valueOf(unixTime);
+    }
+
+    @Nonnull
+    public static String formatStringForIqlField(final String status) {
+        if (StringUtils.isEmpty(status)) {
+            return "";
+        }
+        return status
+                .toLowerCase()
+                .replace(" ", "_")
+                .replace("-", "_")
+                .replace("(", "")
+                .replace(")", "")
+                .replace("&", "and")
+                .replace("/", "_");
     }
 }

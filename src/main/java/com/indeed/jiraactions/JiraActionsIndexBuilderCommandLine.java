@@ -88,7 +88,7 @@ public class JiraActionsIndexBuilderCommandLine {
             final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
             final boolean buildJiraIssues = config.getBoolean("buildjiraissues");
-            final int jiraIssuesRange = config.getInt("jiraissuesrange");
+            final int jiraIssuesLookbackMonths = config.getInt("jiraissueslookbackmonths");
             final String[] deliveryLeadTimeStatuses = config.getStringArray("deliveryleadtimestatuses");
             final String[] deliveryLeadTimeResolutions = config.getStringArray("deliveryleadtimeresolutions");
             final String[] deliveryLeadTimeTypes = config.getStringArray("deliveryleadtimetypes");
@@ -115,7 +115,7 @@ public class JiraActionsIndexBuilderCommandLine {
                     .jiraBatchSize(jiraBatchSize)
                     .indexName(indexName)
                     .buildJiraIssues(buildJiraIssues)
-                    .jiraIssuesRange(jiraIssuesRange)
+                    .jiraIssuesLookbackMonths(jiraIssuesLookbackMonths)
                     .deliveryLeadTimeStatuses(new HashSet<>(Arrays.asList(deliveryLeadTimeStatuses)))
                     .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))
                     .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))
