@@ -89,6 +89,11 @@ public class JiraActionsIndexBuilder {
 
             log.debug("No values seen for these custom fields: " + missedFields);
 
+            final Stopwatch fileUploadStopwatch = Stopwatch.createStarted();
+            writer.uploadTsvFile();
+            fileUploadStopwatch.stop();
+            log.debug("{} ms to create and upload TSV.", fileUploadStopwatch.elapsed(TimeUnit.MILLISECONDS));
+
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
             final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getFields(), writer.getIssues());
             if (config.buildJiraIssues()) {
@@ -98,11 +103,6 @@ public class JiraActionsIndexBuilder {
                 log.info("Not building jiraissues.");
             }
             jiraIssuesStopwatch.stop();
-
-            final Stopwatch fileUploadStopwatch = Stopwatch.createStarted();
-            writer.uploadTsvFile();
-            fileUploadStopwatch.stop();
-            log.debug("{} ms to create and upload TSV.", fileUploadStopwatch.elapsed(TimeUnit.MILLISECONDS));
 
             stopwatch.stop();
 
