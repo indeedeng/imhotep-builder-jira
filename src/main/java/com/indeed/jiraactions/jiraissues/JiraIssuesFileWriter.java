@@ -54,15 +54,9 @@ public class JiraIssuesFileWriter {
 
         for (int tries = 1; tries <= NUM_RETRIES; tries++) {
             backoff = Math.max(backoff / 2, 10000);
-            URL url = new URL("https://squall.indeed.com/iupload/repository/qa/index/jiraissues/file/indexed/jiraissues_" + formattedDate + ".tsv.gz/");
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            final URL url = new URL(config.getIuploadURL() + "/file/indexed/jiraissues_" + formattedDate + ".tsv.gz/");
+            final HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization", basicAuth);
-            if (connection.getResponseCode() == 400) {
-                url = new URL("https://squall.indeed.com/iupload/repository/qa/index/jiraissues/file/indexing/jiraissues_" + formattedDate + ".tsv.gz/");
-                log.debug("Previous TSV not finished indexing. Using url {}.", url);
-                connection = (HttpsURLConnection) url.openConnection();
-                connection.setRequestProperty("Authorization", basicAuth);
-            }
             try (final GZIPInputStream in = new GZIPInputStream(connection.getInputStream())) {
                 int length;
                 final byte[] buffer = new byte[1024];
@@ -83,7 +77,7 @@ public class JiraIssuesFileWriter {
     }
 
     public void uploadTsv() {
-        final String iuploadUrl = String.format("https://squall.indeed.com/iupload/repository/qa/index/jiraissues/file/");
+        final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), "jiraissues");
 
         log.info("Uploading to " + iuploadUrl);
 
