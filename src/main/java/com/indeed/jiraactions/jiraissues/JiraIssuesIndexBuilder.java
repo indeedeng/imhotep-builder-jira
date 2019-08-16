@@ -6,6 +6,7 @@ import com.indeed.jiraactions.JiraActionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -45,10 +46,11 @@ public class JiraIssuesIndexBuilder {
             processStopwatch.stop();
 
             final Stopwatch uploadStopwatch = Stopwatch.createStarted();
-            fileWriter.compressGzip();
-            fileWriter.uploadTsv();
+            fileWriter.compressAndUploadTsv();
             this.uploadTime = uploadStopwatch.elapsed(TimeUnit.MILLISECONDS);
             uploadStopwatch.stop();
+
+            log.info("Jiraissues:{processTime: {} ms, uploadTime: {} ms}", getProcessTime(), getUploadTime());
 
         } catch (final Exception e) {
             log.error("Threw an exception trying to run the index builder", e);
@@ -56,8 +58,10 @@ public class JiraIssuesIndexBuilder {
         }
     }
 
-    public long getDownloadTime() {
-        return downloadTime;
+    public boolean downloadTsv() throws IOException, InterruptedException {
+        log.info("Downloading previous day's TSV.");
+        final boolean download = fileWriter.downloadTsv();
+        return download;
     }
 
     public long getProcessTime() {

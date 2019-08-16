@@ -28,6 +28,7 @@ public class IssuesAPICaller {
     private final String urlBase;
     private final ApiCaller apiCaller;
     private final JiraActionsIndexBuilderConfig config;
+    private final boolean buildJiraIssuesApi;
 
     // For Pagination
     private final int maxPerPage; // Max number of issues per page
@@ -37,9 +38,10 @@ public class IssuesAPICaller {
 
     private int backoff = 10_000;
 
-    public IssuesAPICaller(final JiraActionsIndexBuilderConfig config, final ApiCaller apiCaller) throws UnsupportedEncodingException {
+    public IssuesAPICaller(final JiraActionsIndexBuilderConfig config, final ApiCaller apiCaller, final boolean buildJiraIssuesApi) throws UnsupportedEncodingException {
         this.config = config;
         this.apiCaller = apiCaller;
+        this.buildJiraIssuesApi = buildJiraIssuesApi;
 
         maxPerPage = config.getJiraBatchSize()*2;
         batchSize = config.getJiraBatchSize();
@@ -155,7 +157,7 @@ public class IssuesAPICaller {
          * that were created after we started).
          */
 
-        final String start = getDateStringInJiraTime(config.getStartDate());
+        final String start = buildJiraIssuesApi ? getDateStringInJiraTime(JiraActionsUtil.parseDateTime(config.getStartDate()).minusMonths(6).toString()) : getDateStringInJiraTime(config.getStartDate());
         final String end = getDateStringInJiraTime(config.getEndDate());
         query.append("updatedDate>=\"").append(start)
                 .append("\" AND createdDate<\"").append(end).append("\"");
