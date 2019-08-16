@@ -73,16 +73,12 @@ public class JiraIssuesProcess {
         return addedIssues;
     }
 
-    public long test(DateTime dateTime) {
-        return (dateTime.getMillis() / 1000) - (dateTime.minusDays(1).getMillis() / 1000);
-    }
-
     public Map<String, String> updateIssue(final Map<String, String> mappedLine) {
-        final long day = (startDate.getMillis() / 1000) - (startDate.minusDays(1).getMillis() / 1000);
+        final long day = Long.parseLong(JiraActionsUtil.getUnixTimestamp(startDate)) - Long.parseLong(JiraActionsUtil.getUnixTimestamp(startDate.minusDays(1)));
         final String status = JiraActionsUtil.formatStringForIqlField(mappedLine.get("status"));
         try {
             mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + day));
-            mappedLine.replace("time", String.valueOf(startDate.getMillis() / 1000));
+            mappedLine.replace("time", JiraActionsUtil.getUnixTimestamp(startDate));
             if (!mappedLine.containsKey("totaltime_" + status)) {
                 nonApiStatuses.add(mappedLine.get("status"));
             } else {
