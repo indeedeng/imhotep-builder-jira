@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +41,15 @@ public class JiraActionsIndexBuilder {
             final CustomFieldApiParser customFieldApiParser = new CustomFieldApiParser(userLookupService);
             final ActionFactory actionFactory = new ActionFactory(userLookupService, customFieldApiParser, config);
 
-            final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config, apiCaller);
+            boolean buildJiraIssuesApi = false;
+            final Stopwatch downloadStopwatch = Stopwatch.createStarted();
+            if(config.buildJiraIssues() ) {
+                final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, new ArrayList<>(), new ArrayList<>());
+                buildJiraIssuesApi = jiraIssuesIndexBuilder.downloadTsv();
+            }
+            downloadStopwatch.stop();
+
+            final IssuesAPICaller issuesAPICaller = new IssuesAPICaller(config, apiCaller, false);
             initializeIssuesApiCaller(issuesAPICaller);
 
             if (!issuesAPICaller.currentPageExist()) {
@@ -62,14 +71,16 @@ public class JiraActionsIndexBuilder {
             final StatusTypesApiCaller statusTypesApiCaller = new StatusTypesApiCaller(config, apiCaller);
             final List<String> statusTypes = statusTypesApiCaller.getStatusTypes();
 
-            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes, statusTypes);
+            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes, statusTypes, buildJiraIssuesApi);
             final Stopwatch headerStopwatch = Stopwatch.createStarted();
             writer.createFileAndWriteHeaders();
             headerStopwatch.stop();
             fileTime += headerStopwatch.elapsed(TimeUnit.MILLISECONDS);
 
             final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
-            final Paginator paginator = new Paginator(apiPageProvider, startDate, endDate, config.buildJiraIssues());
+            final Paginator paginator = buildJiraIssuesApi
+                    ? new Paginator(apiPageProvider, startDate, endDate, false, false) // We want to only build the jiraactions TSV first when building jiraissuesApi
+                    : new Paginator(apiPageProvider, startDate, endDate, config.buildJiraIssues(), false);
 
             paginator.process();
             fileTime += apiPageProvider.getFileWritingTime();
@@ -90,19 +101,33 @@ public class JiraActionsIndexBuilder {
             log.debug("No values seen for these custom fields: " + missedFields);
 
             final Stopwatch fileUploadStopwatch = Stopwatch.createStarted();
-            writer.uploadTsvFile();
+            writer.uploadTsvFile(false);
             fileUploadStopwatch.stop();
             log.debug("{} ms to create and upload TSV.", fileUploadStopwatch.elapsed(TimeUnit.MILLISECONDS));
 
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
-            final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getFields(), writer.getIssues());
-            if (config.buildJiraIssues()) {
-                log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
-                jiraIssuesIndexBuilder.run();
-            } else {
-                log.info("Not building jiraissues.");
+            if(!buildJiraIssuesApi) {
+                final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config,writer.getFields(), writer.getIssues());
+                if(config.buildJiraIssues()) {
+                    log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
+                    jiraIssuesIndexBuilder.run();
+                } else {
+                    log.info("Not building jiraissues.");
+                }
             }
             jiraIssuesStopwatch.stop();
+
+            if (buildJiraIssuesApi) {   // This is how the jiraissuesAPI tsv mainly gets built
+                final IssuesAPICaller issuesAPICallerJiraIssues = new IssuesAPICaller(config, apiCaller, true);
+                initializeIssuesApiCaller(issuesAPICallerJiraIssues);
+
+                final ApiPageProvider apiPageProviderJiraIssues = new ApiPageProvider(issuesAPICallerJiraIssues, actionFactory, config, writer);
+                final Paginator paginatorJiraIssues = new Paginator(apiPageProviderJiraIssues, startDate.minusMonths(6), endDate, config.buildJiraIssues(), true);
+
+                paginatorJiraIssues.process();
+
+                writer.uploadTsvFile(true);
+            }
 
             stopwatch.stop();
 
@@ -113,8 +138,6 @@ public class JiraActionsIndexBuilder {
                     apiTime-apiUserTime, processTime, fileTime, apiUserTime);
             if (config.buildJiraIssues()) {
                 log.info("{} ms to build Jiraissues.", jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
-                log.info("Jiraissues:{downloadTime: {} ms, processTime: {} ms, uploadTime: {} ms}",
-                        jiraIssuesIndexBuilder.getDownloadTime(), jiraIssuesIndexBuilder.getProcessTime(), jiraIssuesIndexBuilder.getUploadTime());
             }
             log.info("{} ms for the whole process.", stopwatch.elapsed(TimeUnit.MILLISECONDS));
         } catch (final Exception e) {
