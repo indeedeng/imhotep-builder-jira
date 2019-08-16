@@ -79,7 +79,7 @@ public class Paginator {
 
                         if (buildJiraIssues) {
                             if (buildJiraIssuesApi) { // Jiraissues API
-                                final List<Action> apiActions = actions.stream().filter(a -> a.isInRange(startDate.minusMonths(6), endDate)).collect(Collectors.toList());  // It doesn't use filteredActions because these issues don't fall in the range
+                                final List<Action> apiActions = actions.stream().filter(a -> a.isInRange(startDate.minusMonths(6), endDate)).collect(Collectors.toList());  // It doesn't use filteredActions because it filters a different range
                                 if (!apiActions.isEmpty()) {
                                     final Action action = pageProvider.getJiraissues(apiActions.get(apiActions.size()-1), issue);
                                     if (action.getLastUpdated()>=Integer.parseInt(startDate.minusMonths(6).toString("yyyyMMdd"))) {

@@ -106,28 +106,26 @@ public class JiraActionsIndexBuilder {
             log.debug("{} ms to create and upload TSV.", fileUploadStopwatch.elapsed(TimeUnit.MILLISECONDS));
 
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
-            if(!buildJiraIssuesApi) {
-                final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config,writer.getFields(), writer.getIssues());
-                if(config.buildJiraIssues()) {
+            if (!buildJiraIssuesApi) {
+                if (config.buildJiraIssues()) {
+                    final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config,writer.getFields(), writer.getIssues());
                     log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
                     jiraIssuesIndexBuilder.run();
                 } else {
                     log.info("Not building jiraissues.");
                 }
-            }
-            jiraIssuesStopwatch.stop();
-
-            if (buildJiraIssuesApi) {   // This is how the jiraissuesAPI tsv mainly gets built
+            } else {    // This is how the jiraissuesAPI tsv mainly gets built
                 final IssuesAPICaller issuesAPICallerJiraIssues = new IssuesAPICaller(config, apiCaller, true);
                 initializeIssuesApiCaller(issuesAPICallerJiraIssues);
 
                 final ApiPageProvider apiPageProviderJiraIssues = new ApiPageProvider(issuesAPICallerJiraIssues, actionFactory, config, writer);
-                final Paginator paginatorJiraIssues = new Paginator(apiPageProviderJiraIssues, startDate.minusMonths(6), endDate, config.buildJiraIssues(), true);
+                final Paginator paginatorJiraIssues = new Paginator(apiPageProviderJiraIssues, startDate, endDate, config.buildJiraIssues(), true);
 
                 paginatorJiraIssues.process();
 
                 writer.uploadTsvFile(true);
             }
+            jiraIssuesStopwatch.stop();
 
             stopwatch.stop();
 
