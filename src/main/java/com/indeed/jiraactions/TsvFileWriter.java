@@ -173,7 +173,7 @@ public class TsvFileWriter {
     }
 
     private void createFileAndWriteHeadersJiraIssues(final DateTime day) throws IOException {
-        final String filename = String.format("jiraissues_%s.tsv", reformatDate(day));
+        final String filename = String.format("%s_%s.tsv", config.getSnapshotIndexName(), reformatDate(day));
         final File file = new File(filename);
         file.deleteOnExit();
 
@@ -274,7 +274,7 @@ public class TsvFileWriter {
         }
 
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
-        final String iuploadUrlJiraIssues = String.format("%s/%s/file/", config.getIuploadURL(), "jiraissues");
+        final String iuploadUrlJiraIssues = String.format("%s/%s/file/", config.getIuploadURL(), config.getSnapshotIndexName());
 
         log.info("Uploading to " + iuploadUrl);
 
@@ -292,7 +292,7 @@ public class TsvFileWriter {
             if (wd.isWritten()) {
                 File file = wd.getFile();
                 HttpPost httpPost = new HttpPost(iuploadUrl);
-                if (file.getName().startsWith("jiraissues")) {
+                if (config.getSnapshotIndexName() != null && file.getName().startsWith(config.getSnapshotIndexName())) {
 
                     httpPost = new HttpPost(iuploadUrlJiraIssues);
                     final byte[] buffer = new byte[1024];

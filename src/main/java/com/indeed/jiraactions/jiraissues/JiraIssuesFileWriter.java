@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,26 +41,29 @@ public class JiraIssuesFileWriter {
         this.config = config;
     }
 
-    public boolean downloadTsv() throws IOException, InterruptedException {
+    @Nullable
+    public File downloadTsv() throws IOException, InterruptedException {
         int backoff = 10000;
-        final DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate());
+        final DateTime date = JiraActionsUtil.parseDateTime(config.getEndDate());
         final String formattedDate = date.minusDays(1).toString("yyyyMMdd");
 
         final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
 
-        final File file = new File("jiraissues_downloaded.tsv");
+        final File file = new File(config.getSnapshotIndexName() + "_downloaded.tsv");
         file.deleteOnExit();
         final FileOutputStream stream = new FileOutputStream(file);
+        final URL url = new URL(String.format("%s/%s/file/indexed/%s_%s.tsv.gz/",
+                config.getIuploadURL(), config.getSnapshotIndexName(), config.getSnapshotIndexName(), formattedDate));
+        log.info("Attempting to download previous TSV at {}", url.toString());
 
         for (int tries = 1; tries <= NUM_RETRIES; tries++) {
             backoff = Math.max(backoff / 2, 10000);
-            final URL url = new URL(config.getIuploadURL() + "/jiraissues/file/indexed/jiraissues_" + formattedDate + ".tsv.gz/");
             final HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization", basicAuth);
             if (connection.getResponseCode() == 400) {
                 log.info("Previous Day's TSV missing. Using API method.");
-                return true;
+                return null;
             }
 
             try (final GZIPInputStream in = new GZIPInputStream(connection.getInputStream())) {
@@ -71,9 +75,9 @@ public class JiraIssuesFileWriter {
                 log.info("Successfully downloaded file with {}.", url);
                 stream.close();
                 in.close();
-                return false;
+                return file;
             } catch (final IOException e) {
-                log.error("Failed on try {}/5.", tries);
+                log.error("Failed to download yesterday's TSV on try {}/5.", tries);
                 if (tries == 5) {
                     log.error("Failed on final try, aborting.", e);
                 }
@@ -81,13 +85,13 @@ public class JiraIssuesFileWriter {
                 backoff *= 2;
             }
         }
-        return true;
+        return null;
     }
 
-    public void compressAndUploadTsv() throws IOException {
+    void compressAndUploadTsv() throws IOException {
         compressGzip();
 
-        final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), "jiraissues");
+        final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getSnapshotIndexName());
 
         log.info("Uploading to " + iuploadUrl);
 
@@ -122,10 +126,10 @@ public class JiraIssuesFileWriter {
         }
     }
 
-    public void createTsvAndSetHeaders() throws IOException {
-        final DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate());
+    void createTsvAndSetHeaders() throws IOException {
+        final DateTime date = JiraActionsUtil.parseDateTime(config.getEndDate());
         final String formattedDate = date.toString("yyyyMMdd");
-        final File file = new File("jiraissues_" + formattedDate + ".tsv");
+        final File file = new File(String.format("%s_%s.tsv", config.getSnapshotIndexName(), formattedDate));
         file.deleteOnExit();
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         final String fieldsLine = String.join("\t", fields);
@@ -136,7 +140,7 @@ public class JiraIssuesFileWriter {
         writerData = new WriterData(file, bw);
     }
 
-    public void compressGzip() throws IOException {
+    void compressGzip() throws IOException {
         final byte[] buffer = new byte[1024];
         final File gzip = new File(writerData.getFile().getName() + ".gz");
         gzip.deleteOnExit();
@@ -155,7 +159,7 @@ public class JiraIssuesFileWriter {
         }
     }
 
-    public void writeIssue(final Map<String, String> issue) {
+    void writeIssue(final Map<String, String> issue) {
         final String line = issue.values().stream()
                 .map(rawValue -> rawValue.replace("\t", "\\t"))
                 .map(rawValue -> rawValue.replace("\n", "\\n"))
