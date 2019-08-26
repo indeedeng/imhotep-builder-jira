@@ -50,7 +50,7 @@ public class JiraIssuesParser {
         parser = new TsvParser(settings);
         parser.beginParsing(reader);
 
-        fileWriter.setFields(Arrays.stream(newIssues.get(0)).collect(Collectors.toList()));   // Sets fields of the TSV using new issues.
+        fileWriter.setFields(newFields);
 
         process.setNewFields(newFields);
         process.setNewIssues(newIssues);
