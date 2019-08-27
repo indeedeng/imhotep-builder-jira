@@ -21,11 +21,17 @@ public class JiraIssuesProcess {
     private List<String> oldFields; // Fields from previous TSV
 
     private final DateTime startDate;
+    private final DateTime endDate;
     private final int lookbackMonths;
+    private final long secondsInDay;
 
-    JiraIssuesProcess(final DateTime startDate, final int lookbackMonths) {
+    JiraIssuesProcess(final DateTime startDate, final DateTime endDate, final int lookbackMonths) {
         this.startDate = startDate;
+        this.endDate = endDate;
         this.lookbackMonths = lookbackMonths;
+
+        secondsInDay = Long.parseLong(JiraActionsUtil.getUnixTimestamp(endDate)) - Long.parseLong(JiraActionsUtil.getUnixTimestamp(endDate.minusDays(1)));
+
     }
 
     void convertToMap() {
@@ -76,15 +82,14 @@ public class JiraIssuesProcess {
     }
 
     Map<String, String> updateIssue(final Map<String, String> mappedLine) {
-        final long day = Long.parseLong(JiraActionsUtil.getUnixTimestamp(startDate)) - Long.parseLong(JiraActionsUtil.getUnixTimestamp(startDate.minusDays(1)));
         final String status = JiraActionsUtil.formatStringForIqlField(mappedLine.get("status"));
         try {
-            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + day));
-            mappedLine.replace("time", JiraActionsUtil.getUnixTimestamp(startDate));
+            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + secondsInDay));
+            mappedLine.replace("time", JiraActionsUtil.getUnixTimestamp(endDate));
             if (!mappedLine.containsKey("totaltime_" + status)) {
                 nonApiStatuses.add(mappedLine.get("status"));
             } else {
-                mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + day));
+                mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + secondsInDay));
             }
         } catch (final NumberFormatException e) {
             log.error("Value of field is not numeric.", e);

@@ -45,7 +45,7 @@ public class TsvFileWriter {
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
-        writerDataMapJiraIssues = new HashMap<>(days);
+        writerDataMapJiraIssues = new HashMap<>(1);
         this.columnSpecs = createColumnSpecs(linkTypes);
         this.columnSpecsJiraissues = createColumnSpecsJiraissues(linkTypes, statusTypes);
         this.buildJiraIssuesApi = buildJiraIssuesApi;
@@ -60,11 +60,12 @@ public class TsvFileWriter {
         final DateTime endDate = JiraActionsUtil.parseDateTime(config.getEndDate());
         for (DateTime date = JiraActionsUtil.parseDateTime(config.getStartDate()); date.isBefore(endDate); date = date.plusDays(1)) {
             createFileAndWriteHeaders(date);
-            if (buildJiraIssuesApi) {
-                createFileAndWriteHeadersJiraIssues(date);
-            } else {
-                setJiraissuesHeaders();
-            }
+        }
+
+        if (buildJiraIssuesApi) {
+            createFileAndWriteHeadersJiraIssues(endDate);
+        } else {
+            setJiraissuesHeaders();
         }
     }
 
@@ -232,7 +233,7 @@ public class TsvFileWriter {
         if (action == null) {
             return;
         }
-        if(buildJiraIssuesApi) {
+        if (buildJiraIssuesApi) {
             final WriterData writerData = writerDataMapJiraIssues.get(action.getTimestamp().toDateMidnight());
             final BufferedWriter bw = writerData.getBufferedWriter();
             writerData.setWritten();
@@ -276,7 +277,7 @@ public class TsvFileWriter {
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getIndexName());
         final String iuploadUrlJiraIssues = String.format("%s/%s/file/", config.getIuploadURL(), config.getSnapshotIndexName());
 
-        log.info("Uploading to " + iuploadUrl);
+        log.info("Uploading to {}", iuploadUrl);
 
         final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
@@ -289,52 +290,45 @@ public class TsvFileWriter {
                 log.error("Failed to close " + wd.file.getName() + ".", e);
             }
 
-            if (wd.isWritten()) {
-                File file = wd.getFile();
-                HttpPost httpPost = new HttpPost(iuploadUrl);
-                if (config.getSnapshotIndexName() != null && file.getName().startsWith(config.getSnapshotIndexName())) {
-
-                    httpPost = new HttpPost(iuploadUrlJiraIssues);
-                    final byte[] buffer = new byte[1024];
-                    final File gzip = new File(file.getName() + ".gz");
-                    gzip.deleteOnExit();
-                    try {
-                        final FileInputStream in = new FileInputStream(file);
-                        final GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzip));
-                        int i;
-                        while ((i = in.read(buffer)) > 0) {
-                            out.write(buffer, 0, i);
-                        }
-                        in.close();
-                        out.finish();
-                        out.close();
-                        file = gzip;
-                    } catch (final IOException e) {
-                        try {
-                            throw e;
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                };
-                httpPost.setHeader("Authorization", basicAuth);
-                httpPost.setEntity(MultipartEntityBuilder.create()
-                        .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
-                        .build());
-
-                for (int i = 0; i < NUM_RETRIES; i++) {
-                    try {
-                        final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
-                        log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
-                        if (response.getStatusLine().getStatusCode() == 200) {
-                            return;
-                        }
-                    } catch (final IOException e) {
-                        log.warn("Failed to upload file: " + wd.file.getName() + ".", e);
-                    }
-                }
-                log.error("Retries expired, unable to upload file: " + wd.file.getName() + ".");
+            if (!wd.isWritten()) {
+                return;
             }
+            final HttpPost httpPost = jiraIssuesApi ? new HttpPost(iuploadUrlJiraIssues) : new HttpPost(iuploadUrl);
+
+            final byte[] buffer = new byte[1024];
+            final File gzip = new File(wd.getFile().getName() + ".gz");
+            gzip.deleteOnExit();
+
+            try (final FileInputStream in = new FileInputStream(wd.getFile())) {
+                try (final GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzip))) {
+                    int i;
+                    while ((i = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, i);
+                    }
+                    out.finish();
+                }
+            } catch (final IOException e) {
+                log.error(String.format("Failed to gzip file: %s", wd.getFile().getName()), e);
+                return;
+            }
+
+            httpPost.setHeader("Authorization", basicAuth);
+            httpPost.setEntity(MultipartEntityBuilder.create()
+                    .addBinaryBody("file", gzip, ContentType.MULTIPART_FORM_DATA, gzip.getName())
+                    .build());
+
+            for (int i = 0; i < NUM_RETRIES; i++) {
+                try {
+                    final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
+                    log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
+                    if (response.getStatusLine().getStatusCode() == 200) {
+                        return;
+                    }
+                } catch (final IOException e) {
+                    log.warn("Failed to upload file: " + wd.file.getName() + ".", e);
+                }
+            }
+            log.error("Retries expired, unable to upload file: " + wd.file.getName() + ".");
         });
     }
 

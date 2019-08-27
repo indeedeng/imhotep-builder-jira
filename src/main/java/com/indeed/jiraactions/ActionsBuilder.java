@@ -39,7 +39,7 @@ public class ActionsBuilder {
     }
 
     @Nonnull
-    public Action buildJiraIssues(final Action action) throws IOException {
+    public Action buildJiraIssues(final Action action) {
         return setUpdateToCurrent(action);
     }
 
@@ -92,7 +92,7 @@ public class ActionsBuilder {
                                     comment.id, issue.key);
                         } else {
                             LOG.debug("Unable to process comment {} by {} on issue {}, somehow doesn't fit in our timeline.",
-                                    comment.id, comment.author.getDisplayName(), issue.key, comment.author.getDisplayName());
+                                    comment.id, comment.author.getDisplayName(), issue.key);
                         }
                         currentActionIndex = 0;
                         break;

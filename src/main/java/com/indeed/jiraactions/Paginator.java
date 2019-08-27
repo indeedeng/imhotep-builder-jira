@@ -24,13 +24,17 @@ public class Paginator {
     private final DateTime endDate;
     private final boolean buildJiraIssues;
     private final boolean buildJiraIssuesApi;
+    private final int snapshotLookbackMonths;
 
-    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate, final boolean buildJiraIssues, final boolean buildJiraIssuesApi) {
+    public Paginator(final PageProvider pageProvider, final DateTime startDate, final DateTime endDate,
+                     final boolean buildJiraIssues, final boolean buildJiraIssuesApi,
+                     final int snapshotLookbackMonths) {
         this.pageProvider = pageProvider;
         this.startDate = startDate;
         this.endDate = endDate;
         this.buildJiraIssues = buildJiraIssues;
         this.buildJiraIssuesApi = buildJiraIssuesApi;
+        this.snapshotLookbackMonths = snapshotLookbackMonths;
     }
 
     /*
@@ -70,7 +74,7 @@ public class Paginator {
             while (pageProvider.hasPage()) {
                 final Stopwatch stopwatch = Stopwatch.createStarted();
                 final List<Issue> issues = Lists.newArrayList(pageProvider.getPage());
-                log.debug(String.join(", ", issues.stream().map(x -> x.key).collect(Collectors.toList())));
+                log.debug(issues.stream().map(x -> x.key).collect(Collectors.joining(", ")));
                 for (final Issue issue : issues) {
                     try {
                         final List<Action> preFilteredActions = pageProvider.getActions(issue);
@@ -79,10 +83,10 @@ public class Paginator {
 
                         if (buildJiraIssues) {
                             if (buildJiraIssuesApi) { // Jiraissues API
-                                final List<Action> apiActions = actions.stream().filter(a -> a.isInRange(startDate.minusMonths(6), endDate)).collect(Collectors.toList());  // It doesn't use filteredActions because it filters a different range
+                                final List<Action> apiActions = actions.stream().filter(a -> a.isInRange(startDate.minusMonths(snapshotLookbackMonths), endDate)).collect(Collectors.toList());  // It doesn't use filteredActions because it filters a different range
                                 if (!apiActions.isEmpty()) {
-                                    final Action action = pageProvider.getJiraissues(apiActions.get(apiActions.size()-1), issue);
-                                    if (action.getLastUpdated()>=Integer.parseInt(startDate.minusMonths(6).toString("yyyyMMdd"))) {
+                                    final Action action = pageProvider.getJiraissues(apiActions.get(apiActions.size() - 1), issue);
+                                    if (action.getLastUpdated() >= Integer.parseInt(startDate.minusMonths(snapshotLookbackMonths).toString("yyyyMMdd"))) {
                                         pageProvider.writeIssue(action);
                                     }
                                 }

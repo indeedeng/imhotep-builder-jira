@@ -81,8 +81,8 @@ public class JiraActionsIndexBuilder {
 
             final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
             final Paginator paginator = buildJiraIssuesApi
-                    ? new Paginator(apiPageProvider, startDate, endDate, false, false) // We want to only build the jiraactions TSV first when building jiraissuesApi
-                    : new Paginator(apiPageProvider, startDate, endDate, config.buildSnapshotIndex(), false);
+                    ? new Paginator(apiPageProvider, startDate, endDate, false, false, config.getSnapshotLookbackMonths()) // We want to only build the jiraactions TSV first when building jiraissuesApi
+                    : new Paginator(apiPageProvider, startDate, endDate, config.buildSnapshotIndex(), false, config.getSnapshotLookbackMonths());
 
             paginator.process();
             fileTime += apiPageProvider.getFileWritingTime();
@@ -110,7 +110,7 @@ public class JiraActionsIndexBuilder {
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
             if (!buildJiraIssuesApi) {
                 if (config.buildSnapshotIndex()) {
-                    final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config,writer.getFields(), writer.getIssues());
+                    final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getFields(), writer.getIssues());
                     log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
                     jiraIssuesIndexBuilder.run();
                 } else {
@@ -121,7 +121,7 @@ public class JiraActionsIndexBuilder {
                 initializeIssuesApiCaller(issuesAPICallerJiraIssues);
 
                 final ApiPageProvider apiPageProviderJiraIssues = new ApiPageProvider(issuesAPICallerJiraIssues, actionFactory, config, writer);
-                final Paginator paginatorJiraIssues = new Paginator(apiPageProviderJiraIssues, startDate, endDate, config.buildSnapshotIndex(), true);
+                final Paginator paginatorJiraIssues = new Paginator(apiPageProviderJiraIssues, startDate, endDate, config.buildSnapshotIndex(), true, config.getSnapshotLookbackMonths());
 
                 paginatorJiraIssues.process();
 

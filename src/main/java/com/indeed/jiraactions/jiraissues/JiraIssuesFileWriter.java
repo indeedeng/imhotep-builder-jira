@@ -89,18 +89,18 @@ public class JiraIssuesFileWriter {
     }
 
     void compressAndUploadTsv() throws IOException {
-        compressGzip();
+        final String filename = compressGzip();
 
         final String iuploadUrl = String.format("%s/%s/file/", config.getIuploadURL(), config.getSnapshotIndexName());
 
-        log.info("Uploading to " + iuploadUrl);
+        log.info("Uploading {} to {}", filename, iuploadUrl);
 
         final String userPass = config.getIuploadUsername() + ":" + config.getIuploadPassword();
         final String basicAuth = "Basic " + new String(new Base64().encode(userPass.getBytes()));
         try {
             writerData.getBufferedWriter().close();
         } catch (final IOException e) {
-            log.error("Failed to close" + writerData.file.getName() + ".", e);
+            log.error(String.format("Failed to close %s", filename), e);
         }
 
         final File file = new File(writerData.getFile().getName() + ".gz");
@@ -140,23 +140,21 @@ public class JiraIssuesFileWriter {
         writerData = new WriterData(file, bw);
     }
 
-    void compressGzip() throws IOException {
+    String compressGzip() throws IOException {
+        final String filename = writerData.getFile().getName() + ".gz";
         final byte[] buffer = new byte[1024];
-        final File gzip = new File(writerData.getFile().getName() + ".gz");
+        final File gzip = new File(filename);
         gzip.deleteOnExit();
-        try {
-            final FileInputStream in = new FileInputStream(writerData.getFile());
-            final GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzip));
-            int i;
-            while ((i = in.read(buffer)) > 0) {
-                out.write(buffer, 0, i);
+        try (final FileInputStream in = new FileInputStream(writerData.getFile())) {
+            try (final GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzip))) {
+                int i;
+                while ((i = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, i);
+                }
+                out.finish();
             }
-            in.close();
-            out.finish();
-            out.close();
-        } catch (final IOException e) {
-            throw e;
         }
+        return filename;
     }
 
     void writeIssue(final Map<String, String> issue) {
