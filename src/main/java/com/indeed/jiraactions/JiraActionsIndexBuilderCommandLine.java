@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * @author soono
@@ -100,6 +102,8 @@ public class JiraActionsIndexBuilderCommandLine {
             final String[] deliveryLeadTimeStatuses = config.getStringArray("snapshot.deliveryleadtime..statuses");
             final String[] deliveryLeadTimeResolutions = config.getStringArray("snapshot.deliveryleadtime..resolutions");
             final String[] deliveryLeadTimeTypes = config.getStringArray("snapshot.deliveryleadtime.types");
+            final OptionalInt maxStringTermLength = Optional.ofNullable(config.getInteger("index.maxStringTermLength", null))
+                    .map(OptionalInt::of).orElse(OptionalInt.empty());
 
             final JiraActionsIndexBuilderConfig indexBuilderConfig = ImmutableJiraActionsIndexBuilderConfig.builder()
                     .jiraUsername(jiraUsername)
@@ -122,6 +126,7 @@ public class JiraActionsIndexBuilderCommandLine {
                     .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))
                     .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))
                     .customFields(customFieldDefinitions)
+                    .maxStringTermLength(maxStringTermLength)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);
 

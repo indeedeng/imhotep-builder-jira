@@ -63,7 +63,7 @@ public class CustomFieldApiParser {
                     }
                 }
                 return customFieldValue;
-            }).orElseGet(() -> new CustomFieldValue(definition));
+            }).orElseGet(() -> ImmutableCustomFieldValue.of(definition));
         }
     }
 
@@ -83,9 +83,9 @@ public class CustomFieldApiParser {
             final CustomFieldValue prevValue = prevAction.getCustomFieldValues().get(definition);
             if(prevValue == null) {
                 log.error("No previous value for {} found for issue {}.", definition.getName(), prevAction.getIssuekey());
-                return new CustomFieldValue(definition);
+                return ImmutableCustomFieldValue.of(definition);
             } else {
-                return new CustomFieldValue(prevValue);
+                return ImmutableCustomFieldValue.copyOf(prevValue);
             }
         }
     }
@@ -121,9 +121,15 @@ public class CustomFieldApiParser {
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
             if (StringUtils.isNotEmpty(definition.getSeparator()) && !valueStringIsEmpty) {
                 final String split = StringUtils.isEmpty(splitPattern) ? ", ?" : splitPattern;
-                return new CustomFieldValue(definition, splitValueString.replaceAll(split, definition.getSeparator()), "");
+                return ImmutableCustomFieldValue.builder()
+                        .definition(definition)
+                        .value(splitValueString.replaceAll(split, definition.getSeparator()))
+                        .build();
             } else {
-                return new CustomFieldValue(definition, splitValueString, "");
+                return ImmutableCustomFieldValue.builder()
+                        .definition(definition)
+                        .value(splitValueString)
+                        .build();
             }
         } else if(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME.equals(definition.getMultiValueFieldConfiguration())) {
             final String usernames;
@@ -138,11 +144,15 @@ public class CustomFieldApiParser {
                 final User user = userLookupService.getUser(value);
                 usernames = user.getName();
             }
-            return new CustomFieldValue(definition, splitValueString, usernames);
+            return ImmutableCustomFieldValue.builder()
+                    .definition(definition)
+                    .value(splitValueString)
+                    .childValue(usernames)
+                    .build();
         } else {
 
             if (valueStringIsEmpty) {
-                return new CustomFieldValue(definition, "", "");
+                return ImmutableCustomFieldValue.of(definition);
             }
 
             // Parent values: Escaped bug(20664)Level 1 values: Latent Code Issue(20681)
@@ -157,7 +167,11 @@ public class CustomFieldApiParser {
                 parent = "";
                 child = "";
             }
-            return new CustomFieldValue(definition, parent, child);
+            return ImmutableCustomFieldValue.builder()
+                    .definition(definition)
+                    .value(parent)
+                    .childValue(child)
+                    .build();
         }
     }
 
@@ -165,20 +179,35 @@ public class CustomFieldApiParser {
                                                   final JsonNode json) {
         if(CustomFieldDefinition.MultiValueFieldConfiguration.NONE.equals(definition.getMultiValueFieldConfiguration())) {
             final String value = getValueFromNode(definition, json);
-            return new CustomFieldValue(definition, value);
+            return ImmutableCustomFieldValue.builder()
+                    .definition(definition)
+                    .value(value)
+                    .build();
         } else if(CustomFieldDefinition.MultiValueFieldConfiguration.USERNAME.equals(definition.getMultiValueFieldConfiguration())) {
             final String username = getValueFromNode(definition, json.get("key"));
             final String displayName = getValueFromNode(definition, json.get("displayName"));
             final User user = userLookupService.getUser(username);
-            return new CustomFieldValue(definition, displayName, user.getName());
+
+            return ImmutableCustomFieldValue.builder()
+                    .definition(definition)
+                    .value(displayName)
+                    .childValue(user.getName())
+                    .build();
         } else {
             final String value = getValueFromNode(definition, json);
             final JsonNode child = json.get("child");
             if(child == null) {
-                return new CustomFieldValue(definition, value);
+                return ImmutableCustomFieldValue.builder()
+                        .definition(definition)
+                        .value(value)
+                        .build();
             } else {
                 final String childValue = getValueFromNode(definition, child);
-                return new CustomFieldValue(definition, value, childValue);
+                return ImmutableCustomFieldValue.builder()
+                        .definition(definition)
+                        .value(value)
+                        .childValue(childValue)
+                        .build();
             }
         }
     }

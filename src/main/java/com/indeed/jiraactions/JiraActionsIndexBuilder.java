@@ -73,7 +73,11 @@ public class JiraActionsIndexBuilder {
             final StatusTypesApiCaller statusTypesApiCaller = new StatusTypesApiCaller(config, apiCaller);
             final List<String> statusTypes = statusTypesApiCaller.getStatusTypes();
 
-            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes, statusTypes, buildJiraIssuesApi);
+            final OutputFormatter outputFormatter = new OutputFormatter(config);
+            final CustomFieldOutputter customFieldOutputter = new CustomFieldOutputter(outputFormatter);
+
+            final TsvFileWriter writer = new TsvFileWriter(config, linkTypes, statusTypes, buildJiraIssuesApi,
+                    outputFormatter, customFieldOutputter);
             final Stopwatch headerStopwatch = Stopwatch.createStarted();
             writer.createFileAndWriteHeaders();
             headerStopwatch.stop();

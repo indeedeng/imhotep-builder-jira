@@ -45,19 +45,19 @@ public class TestJiraIssuesProcess {
         final String[] issue1 = {"A", "Pending Triage", "0", "0", "0", "0", "0", "0"};   // Test Replacing Process
         final Map<String, String> output1 = process.compareAndUpdate(issue1);
         final String[] expected1 = {"A", "In Progress", unixtime, "86400", "0", "86400", "0", "0"};
-        Assert.assertEquals(expected1, output1.values().toArray());
+        Assert.assertArrayEquals(expected1, output1.values().toArray());
 
         final String[] issue2 = {"B", "Closed", "0", "0", "0", "0", "0", "0"};  // Test Updating Process - Although we could have tested the actual update method, this also checks if there is a new instance of that issue and would be a better case.
         final Map<String, String> output2 = process.compareAndUpdate(issue2);
         final String[] expected2 = {"B", "Closed", unixtime, "86400", "0", "0", "0", "86400"};
-        Assert.assertEquals(expected2, output2.values().toArray());
+        Assert.assertArrayEquals(expected2, output2.values().toArray());
 
         final List<Map<String, String>> remainingIssues = process.getRemainingIssues();
         Assert.assertEquals(1, remainingIssues.size());
 
         final Map<String, String> remainingIssue = remainingIssues.get(0);
         final String[] expectedIssue = {"C", "Open", unixtime, "86400", "0", "0", "0", "0"};    // Test Adding Process - It uses the issues from setupNewIssues in which A was already replaced earlier in the test so C is the remaining issue.
-        Assert.assertEquals(expectedIssue, remainingIssue.values().toArray());
+        Assert.assertArrayEquals(expectedIssue, remainingIssue.values().toArray());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class TestJiraIssuesProcess {
         final String[] issue3 = {"", "", "0", "0", "0", "0", "0", "0"};       // Test blank issuekey and status
         final Map<String, String> output3 = process.compareAndUpdate(issue3);
         final String[] expected3 = {"", "", unixtime, "86400", "0", "0", "0", "0"};
-        Assert.assertEquals(expected3, output3.values().toArray());
+        Assert.assertArrayEquals(expected3, output3.values().toArray());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class TestJiraIssuesProcess {
         final String[] issue = {"A", "Open", "0", "0", "0"};
         final Map<String, String> output = process.compareAndUpdate(issue);
         final String[] expected = {"A", "Open", unixtime, "86400", "0", "86400"};      // If there is a new status field it will set "0" as the value for that field
-        Assert.assertEquals(expected, output.values().toArray());
+        Assert.assertArrayEquals(expected, output.values().toArray());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class TestJiraIssuesProcess {
         final String[] issue = {"A", "a", "0", "0", "0", "1"};        // There currently isn't a way to check which statuses get replaced in the API so the best it can do is "remove" the old one and set 0 as the new one
         final Map<String, String> output = process.compareAndUpdate(issue);
         final String[] expected = {"A", "a", unixtime, "86400", "0", "86400"};
-        Assert.assertEquals(expected, output.values().toArray());
+        Assert.assertArrayEquals(expected, output.values().toArray());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class TestJiraIssuesProcess {
         final String[] issue2 = {"B", "Open", "0", "0", "20180801"};     // last updated 2018-08-01
         final Map<String, String> output2 = process.compareAndUpdate(issue2);
         final String[] expected2 = {"B", "Open", unixtime, "86400", "20180801"};
-        Assert.assertEquals(expected2, output2.values().toArray());
+        Assert.assertArrayEquals(expected2, output2.values().toArray());
     }
 
     @Test
@@ -155,12 +155,12 @@ public class TestJiraIssuesProcess {
         final String[] issue1 = {"A", "Open", "0", "0"};
         final Map<String, String> output1 = process1.compareAndUpdate(issue1);
         final String[] expected1 = {"A", "Open", start1unixtime, "86400"};
-        Assert.assertEquals(expected1, output1.values().toArray());
+        Assert.assertArrayEquals(expected1, output1.values().toArray());
 
         final String[] issue2 = {"B", "Open", "0", "0"};
         final Map<String, String> output2 = process2.compareAndUpdate(issue2);
         final String[] expected2 = {"B", "Open", start2unixtime, "86400"};
-        Assert.assertEquals(expected2, output2.values().toArray());
+        Assert.assertArrayEquals(expected2, output2.values().toArray());
 
     }
 
