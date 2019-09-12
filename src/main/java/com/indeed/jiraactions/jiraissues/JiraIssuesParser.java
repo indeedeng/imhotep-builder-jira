@@ -1,6 +1,7 @@
 package com.indeed.jiraactions.jiraissues;
 
 import com.google.common.base.Stopwatch;
+import com.indeed.jiraactions.JiraActionsIndexBuilderConfig;
 import com.univocity.parsers.tsv.TsvParser;
 import com.univocity.parsers.tsv.TsvParserSettings;
 import org.slf4j.Logger;
@@ -17,8 +18,9 @@ import java.util.stream.Collectors;
 
 public class JiraIssuesParser {
     private static final Logger log = LoggerFactory.getLogger(JiraIssuesParser.class);
-    private static TsvParserSettings settings = setupSettings();
+    private static final TsvParserSettings settings = setupSettings();
 
+    private final JiraActionsIndexBuilderConfig config;
     private final JiraIssuesProcess process;
     private final JiraIssuesFileWriter fileWriter;
 
@@ -28,7 +30,9 @@ public class JiraIssuesParser {
     private FileReader reader;
     private TsvParser parser;
 
-    public JiraIssuesParser(final JiraIssuesFileWriter fileWriter, final JiraIssuesProcess process, final List<String> newFields, final List<String[]> newIssues) {
+    public JiraIssuesParser(final JiraActionsIndexBuilderConfig config, final JiraIssuesFileWriter fileWriter,
+            final JiraIssuesProcess process, final List<String> newFields, final List<String[]> newIssues) {
+        this.config = config;
         this.fileWriter = fileWriter;
         this.process = process;
         this.newFields = newFields;
@@ -44,13 +48,13 @@ public class JiraIssuesParser {
         return settings;
     }
 
-    public void setupParserAndProcess() throws FileNotFoundException {
-        file = new File("jiraissues_downloaded.tsv");
+    void setupParserAndProcess() throws FileNotFoundException {
+        file = new File(config.getSnapshotIndexName() + "_downloaded.tsv");
         reader = new FileReader(file);
         parser = new TsvParser(settings);
         parser.beginParsing(reader);
 
-        fileWriter.setFields(Arrays.stream(newIssues.get(0)).collect(Collectors.toList()));   // Sets fields of the TSV using new issues.
+        fileWriter.setFields(newFields);
 
         process.setNewFields(newFields);
         process.setNewIssues(newIssues);
@@ -58,7 +62,7 @@ public class JiraIssuesParser {
         process.convertToMap();
     }
 
-    public void parseTsv() {
+    void parseTsv() {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         int counter = 0;
         while (true) {
@@ -72,7 +76,7 @@ public class JiraIssuesParser {
                     fileWriter.writeIssue(processedIssue);
                 }
                 counter++;
-                if (counter % 100000 == 0) {
+                if (counter % 10_000 == 0) {
                     log.debug("{} ms to parse {} issues.", stopwatch.elapsed(TimeUnit.MILLISECONDS), counter);
                 }
             }

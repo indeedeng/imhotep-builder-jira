@@ -6,6 +6,8 @@ import com.indeed.jiraactions.JiraActionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +24,8 @@ public class JiraIssuesIndexBuilder {
 
     public JiraIssuesIndexBuilder(final JiraActionsIndexBuilderConfig config, final List<String> fields, final List<String[]> issues) {
         fileWriter = new JiraIssuesFileWriter(config);
-        process = new JiraIssuesProcess(JiraActionsUtil.parseDateTime(config.getStartDate()), config.getJiraIssuesLookbackMonths());
-        parser = new JiraIssuesParser(fileWriter, process, fields, issues);
+        process = new JiraIssuesProcess(JiraActionsUtil.parseDateTime(config.getStartDate()), JiraActionsUtil.parseDateTime(config.getEndDate()), config.getSnapshotLookbackMonths());
+        parser = new JiraIssuesParser(config, fileWriter, process, fields, issues);
     }
 
     public void run() throws Exception {
@@ -58,17 +60,17 @@ public class JiraIssuesIndexBuilder {
         }
     }
 
-    public boolean downloadTsv() throws IOException, InterruptedException {
+    @Nullable
+    public File downloadTsv() throws IOException, InterruptedException {
         log.info("Downloading previous day's TSV.");
-        final boolean download = fileWriter.downloadTsv();
-        return download;
+        return fileWriter.downloadTsv();
     }
 
-    public long getProcessTime() {
+    private long getProcessTime() {
         return processTime;
     }
 
-    public long getUploadTime() {
+    private long getUploadTime() {
         return uploadTime;
     }
 }

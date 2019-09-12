@@ -5,13 +5,14 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class JiraIssuesProcess {
-    private static final Logger log = LoggerFactory.getLogger(JiraIssuesIndexBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(JiraIssuesProcess.class);
 
     private final List<Map<String, String>> newIssuesMapped = new ArrayList<>();
     private final List<String> nonApiStatuses = new ArrayList<>(); // Old statuses that don't show up in the API.
@@ -20,14 +21,20 @@ public class JiraIssuesProcess {
     private List<String> oldFields; // Fields from previous TSV
 
     private final DateTime startDate;
+    private final DateTime endDate;
     private final int lookbackMonths;
+    private final long secondsInDay;
 
-    public JiraIssuesProcess(final DateTime startDate, final int lookbackMonths) {
+    JiraIssuesProcess(final DateTime startDate, final DateTime endDate, final int lookbackMonths) {
         this.startDate = startDate;
+        this.endDate = endDate;
         this.lookbackMonths = lookbackMonths;
+
+        secondsInDay = Long.parseLong(JiraActionsUtil.getUnixTimestamp(endDate)) - Long.parseLong(JiraActionsUtil.getUnixTimestamp(endDate.minusDays(1)));
+
     }
 
-    public void convertToMap() {
+    void convertToMap() {
         for (final String[] issue : newIssues) {
             final Map<String, String> mappedIssue = new LinkedHashMap<>(newFields.size());
             for (int i = 0; i < issue.length; i++) {
@@ -41,7 +48,8 @@ public class JiraIssuesProcess {
      * If the previous day's issue isn't replaced, then it gets updated -- only fields involving time are updated so this is really easy.
      * Issues from jiraactions are removed when they replace the old issues, meaning that the ones remaining are newly created issues and are added through the parser.
      */
-    public Map<String, String> compareAndUpdate(final String[] issue) {
+    @Nullable
+    Map<String, String> compareAndUpdate(final String[] issue) {
         final int lookbackTimeLimit = Integer.parseInt(startDate.minusMonths(lookbackMonths).toString("yyyyMMdd"));
         final Map<String, String> mappedLine = new LinkedHashMap<>();
         // Changes the issue from a String[] to a Map<Field, Value>
@@ -64,7 +72,7 @@ public class JiraIssuesProcess {
         return updateIssue(mappedLine);   // Update
     }
 
-    public List<Map<String, String>> getRemainingIssues() {
+    List<Map<String, String>> getRemainingIssues() {
         final List<Map<String, String>> addedIssues = new ArrayList<>();
         if (!newIssues.isEmpty()) {
             addedIssues.addAll(newIssuesMapped);
@@ -73,16 +81,15 @@ public class JiraIssuesProcess {
         return addedIssues;
     }
 
-    public Map<String, String> updateIssue(final Map<String, String> mappedLine) {
-        final long day = Long.parseLong(JiraActionsUtil.getUnixTimestamp(startDate)) - Long.parseLong(JiraActionsUtil.getUnixTimestamp(startDate.minusDays(1)));
+    Map<String, String> updateIssue(final Map<String, String> mappedLine) {
         final String status = JiraActionsUtil.formatStringForIqlField(mappedLine.get("status"));
         try {
-            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + day));
-            mappedLine.replace("time", JiraActionsUtil.getUnixTimestamp(startDate));
+            mappedLine.replace("issueage", String.valueOf(Long.parseLong(mappedLine.get("issueage")) + secondsInDay));
+            mappedLine.replace("time", JiraActionsUtil.getUnixTimestamp(endDate));
             if (!mappedLine.containsKey("totaltime_" + status)) {
                 nonApiStatuses.add(mappedLine.get("status"));
             } else {
-                mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + day));
+                mappedLine.replace("totaltime_" + status, String.valueOf(Long.parseLong(mappedLine.get("totaltime_" + status)) + secondsInDay));
             }
         } catch (final NumberFormatException e) {
             log.error("Value of field is not numeric.", e);
@@ -105,19 +112,19 @@ public class JiraIssuesProcess {
     }
 
 
-    public void setNewIssues(final List<String[]> newIssues) {
+    void setNewIssues(final List<String[]> newIssues) {
         this.newIssues = newIssues;
     }
 
-    public void setNewFields(final List<String> newFields) {
+    void setNewFields(final List<String> newFields) {
         this.newFields = newFields;
     }
 
-    public void setOldFields(final List<String> oldFields) {
+    void setOldFields(final List<String> oldFields) {
         this.oldFields = oldFields;
     }
 
-    public List<String> getNonApiStatuses() {
+    List<String> getNonApiStatuses() {
         return nonApiStatuses;
     }
 }

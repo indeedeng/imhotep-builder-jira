@@ -41,11 +41,13 @@ public class JiraActionsIndexBuilder {
             final CustomFieldApiParser customFieldApiParser = new CustomFieldApiParser(userLookupService);
             final ActionFactory actionFactory = new ActionFactory(userLookupService, customFieldApiParser, config);
 
-            boolean buildJiraIssuesApi = false;
+            final boolean buildJiraIssuesApi;
             final Stopwatch downloadStopwatch = Stopwatch.createStarted();
-            if(config.buildJiraIssues() ) {
+            if(config.buildSnapshotIndex() ) {
                 final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, new ArrayList<>(), new ArrayList<>());
-                buildJiraIssuesApi = jiraIssuesIndexBuilder.downloadTsv();
+                buildJiraIssuesApi = jiraIssuesIndexBuilder.downloadTsv() == null;
+            } else {
+                buildJiraIssuesApi = false;
             }
             downloadStopwatch.stop();
 
@@ -79,8 +81,8 @@ public class JiraActionsIndexBuilder {
 
             final ApiPageProvider apiPageProvider = new ApiPageProvider(issuesAPICaller, actionFactory, config, writer);
             final Paginator paginator = buildJiraIssuesApi
-                    ? new Paginator(apiPageProvider, startDate, endDate, false, false) // We want to only build the jiraactions TSV first when building jiraissuesApi
-                    : new Paginator(apiPageProvider, startDate, endDate, config.buildJiraIssues(), false);
+                    ? new Paginator(apiPageProvider, startDate, endDate, false, false, config.getSnapshotLookbackMonths()) // We want to only build the jiraactions TSV first when building jiraissuesApi
+                    : new Paginator(apiPageProvider, startDate, endDate, config.buildSnapshotIndex(), false, config.getSnapshotLookbackMonths());
 
             paginator.process();
             fileTime += apiPageProvider.getFileWritingTime();
@@ -107,8 +109,8 @@ public class JiraActionsIndexBuilder {
 
             final Stopwatch jiraIssuesStopwatch = Stopwatch.createStarted();
             if (!buildJiraIssuesApi) {
-                if (config.buildJiraIssues()) {
-                    final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config,writer.getFields(), writer.getIssues());
+                if (config.buildSnapshotIndex()) {
+                    final JiraIssuesIndexBuilder jiraIssuesIndexBuilder = new JiraIssuesIndexBuilder(config, writer.getFields(), writer.getIssues());
                     log.info("Building jiraissues with {} new/updated issues.", writer.getIssues().size());
                     jiraIssuesIndexBuilder.run();
                 } else {
@@ -119,7 +121,7 @@ public class JiraActionsIndexBuilder {
                 initializeIssuesApiCaller(issuesAPICallerJiraIssues);
 
                 final ApiPageProvider apiPageProviderJiraIssues = new ApiPageProvider(issuesAPICallerJiraIssues, actionFactory, config, writer);
-                final Paginator paginatorJiraIssues = new Paginator(apiPageProviderJiraIssues, startDate, endDate, config.buildJiraIssues(), true);
+                final Paginator paginatorJiraIssues = new Paginator(apiPageProviderJiraIssues, startDate, endDate, config.buildSnapshotIndex(), true, config.getSnapshotLookbackMonths());
 
                 paginatorJiraIssues.process();
 
@@ -134,7 +136,7 @@ public class JiraActionsIndexBuilder {
             log.info("{} ms to build Jiraactions.", stopwatch.elapsed(TimeUnit.MILLISECONDS) - jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
             log.info("Jiraactions:{apiTime: {} ms, processTime: {} ms, fileTime: {} ms, userLookupTime: {} ms}",
                     apiTime-apiUserTime, processTime, fileTime, apiUserTime);
-            if (config.buildJiraIssues()) {
+            if (config.buildSnapshotIndex()) {
                 log.info("{} ms to build Jiraissues.", jiraIssuesStopwatch.elapsed(TimeUnit.MILLISECONDS));
             }
             log.info("{} ms for the whole process.", stopwatch.elapsed(TimeUnit.MILLISECONDS));

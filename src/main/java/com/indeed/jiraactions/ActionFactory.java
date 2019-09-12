@@ -147,7 +147,7 @@ public class ActionFactory {
         return ImmutableAction.builder()
                 .from(prevAction)
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), JiraActionsUtil.parseDateTime(config.getEndDate())))
-                .timestamp(JiraActionsUtil.parseDateTime(config.getStartDate()))
+                .timestamp(JiraActionsUtil.parseDateTime(config.getEndDate()))
                 .lastUpdated(Integer.parseInt(prevAction.getTimestamp().toString("yyyyMMdd")))
                 .statusTimes(statusTimeFactory.getStatusTimeCurrent(prevAction.getStatusTimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())))
                 .deliveryLeadTime(getDeliveryLeadTime(statusTimeFactory.getStatusTimeCurrent(prevAction.getStatusTimes(), prevAction, JiraActionsUtil.parseDateTime(config.getEndDate())), prevAction))

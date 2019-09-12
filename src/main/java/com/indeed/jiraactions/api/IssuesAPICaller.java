@@ -157,7 +157,7 @@ public class IssuesAPICaller {
          * that were created after we started).
          */
 
-        final String start = buildJiraIssuesApi ? getDateStringInJiraTime(JiraActionsUtil.parseDateTime(config.getStartDate()).minusMonths(6).toString()) : getDateStringInJiraTime(config.getStartDate());
+        final String start = buildJiraIssuesApi ? getDateStringInJiraTime(JiraActionsUtil.parseDateTime(config.getStartDate()).minusMonths(config.getSnapshotLookbackMonths()).toString()) : getDateStringInJiraTime(config.getStartDate());
         final String end = getDateStringInJiraTime(config.getEndDate());
         query.append("updatedDate>=\"").append(start)
                 .append("\" AND createdDate<\"").append(end).append("\"");

@@ -129,7 +129,7 @@ public class ApiPageProvider implements PageProvider {
     }
 
     @Override
-    public Action getJiraissues(final Action action, final Issue issue) throws IOException {
+    public Action getJiraissues(final Action action, final Issue issue) {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         final ActionsBuilder actionsBuilder = new ActionsBuilder(actionFactory, issue, startDate, endDate);
         final Action updatedAction = actionsBuilder.buildJiraIssues(action);

@@ -87,17 +87,19 @@ public class JiraActionsIndexBuilderCommandLine {
             final String iuploadUsername = config.getString("iupload.username");
             final String iuploadPassword = config.getString("iupload.password");
             final String indexName = config.getString("indexname");
-            final boolean buildJiraIssues = config.getBoolean("buildjiraissues");
-            final int jiraIssuesLookbackMonths = config.getInt("jiraissueslookbackmonths");
-            final String[] deliveryLeadTimeStatuses = config.getStringArray("deliveryleadtimestatuses");
-            final String[] deliveryLeadTimeResolutions = config.getStringArray("deliveryleadtimeresolutions");
-            final String[] deliveryLeadTimeTypes = config.getStringArray("deliveryleadtimetypes");
             final String customFieldsPath = config.getString("customfieldsfile");
             if(StringUtils.isEmpty(customFieldsPath)) {
                 customFieldDefinitions = new CustomFieldDefinition[0];
             } else {
                 customFieldDefinitions = CustomFieldDefinitionParser.parseCustomFields(this.getClass().getClassLoader().getResourceAsStream(customFieldsPath));
             }
+
+            final boolean buildSnapshotIndex = config.getBoolean("snapshot.build");
+            final int jiraIssuesLookbackMonths = config.getInt("snapshot.lookbackmonths");
+            final String snapshotIndexName = config.getString("snapshot.indexname");
+            final String[] deliveryLeadTimeStatuses = config.getStringArray("snapshot.deliveryleadtime..statuses");
+            final String[] deliveryLeadTimeResolutions = config.getStringArray("snapshot.deliveryleadtime..resolutions");
+            final String[] deliveryLeadTimeTypes = config.getStringArray("snapshot.deliveryleadtime.types");
 
             final JiraActionsIndexBuilderConfig indexBuilderConfig = ImmutableJiraActionsIndexBuilderConfig.builder()
                     .jiraUsername(jiraUsername)
@@ -114,8 +116,8 @@ public class JiraActionsIndexBuilderCommandLine {
                     .endDate(endDate)
                     .jiraBatchSize(jiraBatchSize)
                     .indexName(indexName)
-                    .buildJiraIssues(buildJiraIssues)
-                    .jiraIssuesLookbackMonths(jiraIssuesLookbackMonths)
+                    .buildSnapshotIndex(buildSnapshotIndex)
+                    .snapshotLookbackMonths(jiraIssuesLookbackMonths)
                     .deliveryLeadTimeStatuses(new HashSet<>(Arrays.asList(deliveryLeadTimeStatuses)))
                     .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))
                     .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))

@@ -114,7 +114,7 @@ public class TestPaginator {
 
         mw.replayAll();
 
-        final Paginator paginator = new Paginator(provider, start, end, false, false);
+        final Paginator paginator = new Paginator(provider, start, end, false, false, 0);
         paginator.process();
 
         mw.verifyAll();
@@ -192,7 +192,7 @@ public class TestPaginator {
 
         mw.replayAll();
 
-        final Paginator paginator = new Paginator(provider, start, end, false, false);
+        final Paginator paginator = new Paginator(provider, start, end, false, false, 0);
         paginator.process();
 
         mw.verifyAll();
@@ -340,7 +340,7 @@ public class TestPaginator {
         EasyMock.expectLastCall();
 
         mw.replayAll();
-        final Paginator paginator = new Paginator(provider, start, end, false, false);
+        final Paginator paginator = new Paginator(provider, start, end, false, false, 0);
         paginator.process();
         mw.verifyAll();
     }
@@ -448,7 +448,7 @@ public class TestPaginator {
         EasyMock.expectLastCall();
 
         mw.replayAll();
-        final Paginator paginator = new Paginator(provider, start, end, false, false);
+        final Paginator paginator = new Paginator(provider, start, end, false, false, 0);
         paginator.process();
         mw.verifyAll();
     }
