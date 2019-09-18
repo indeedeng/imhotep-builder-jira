@@ -55,7 +55,7 @@ public class CustomFieldOutputter {
 
         return values.stream()
                 .map(CustomFieldOutputter::sanitize)
-                .map(value -> outputFormatter.truncate())
+                .map(v -> outputFormatter.truncate(v, definition.getSeparator()))
                 .collect(Collectors.toList());
     }
 
