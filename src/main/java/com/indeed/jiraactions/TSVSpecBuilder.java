@@ -112,12 +112,14 @@ public class TSVSpecBuilder {
         }
     }
 
-    private static String getLinkValue(final String linkType, final Action action) {
-        final Iterable<String> values = action.getLinks().stream()
+    private String getLinkValue(final String linkType, final Action action) {
+        final String delimeter = " ";
+        final String links = action.getLinks().stream()
                 .filter(x -> x.getDescription().equals(linkType))
-                .map(Link::getTargetKey)::iterator;
+                .map(Link::getTargetKey)
+                .collect(Collectors.joining(delimeter));
 
-        return String.join(" ", values);
+        return outputFormatter.truncate(links, delimeter);
     }
 
     private String getAllLinksValue(final Action action) {

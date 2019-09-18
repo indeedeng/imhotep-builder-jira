@@ -30,8 +30,12 @@ public class LinkTypesApiCaller {
         final JsonNode root = apiCaller.getJsonNode(config.getJiraBaseURL() + API_PATH);
         for (final Iterator<JsonNode> it = root.get("issueLinkTypes").elements(); it.hasNext(); ) {
             final JsonNode node = it.next();
-            output.add(node.get("inward").textValue());
-            output.add(node.get("outward").textValue());
+            final String inward = node.get("inward").textValue();
+            final String outward = node.get("outward").textValue();
+            output.add(inward);
+            if (!inward.equalsIgnoreCase(outward)) {
+                output.add(outward);
+            }
         }
 
         return output.build();
