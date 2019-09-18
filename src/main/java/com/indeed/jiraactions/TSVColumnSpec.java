@@ -1,10 +1,7 @@
 package com.indeed.jiraactions;
 
-import com.google.common.collect.ImmutableList;
-
 import org.immutables.value.Value;
 
-import java.util.List;
 import java.util.function.Function;
 
 @Value.Immutable

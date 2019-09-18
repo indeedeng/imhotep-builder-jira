@@ -5,6 +5,7 @@ import org.immutables.value.Value;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nullable;
+import java.util.OptionalInt;
 import java.util.Set;
 
 @Value.Immutable
@@ -30,6 +31,7 @@ public interface JiraActionsIndexBuilderConfig {
     Set<String> getDeliveryLeadTimeResolutions();
     Set<String> getDeliveryLeadTimeTypes();
     CustomFieldDefinition[] getCustomFields();
+    OptionalInt getMaxStringTermLength();
 
     @Value.Check
     default void check() {

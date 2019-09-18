@@ -212,16 +212,13 @@ public class ActionFactory {
     }
 
     private long getDeliveryLeadTime(final Map<String, StatusTime> statusTimes, final Action action) {
-        if (config.getDeliveryLeadTimeResolutions().contains(action.getResolution()) && (config.getDeliveryLeadTimeTypes().contains(action.getIssuetype()))) {
-            long deliveryLeadTime = 0;
-            for (final String status : config.getDeliveryLeadTimeStatuses()) {
-                if (statusTimes.containsKey(status)) {
-                    deliveryLeadTime += statusTimes.get(status).getTimeinstatus();
-                }
-            }
-            return deliveryLeadTime;
+        if (!config.getDeliveryLeadTimeTypes().contains(action.getIssuetype())
+                || !config.getDeliveryLeadTimeResolutions().contains(action.getResolution())) {
+            return 0;
         }
-        return 0;
+        return statusTimes.entrySet().stream()
+                .filter(entry -> config.getDeliveryLeadTimeStatuses().contains(entry.getKey()))
+                .mapToLong(entry -> entry.getValue().getTimeinstatus())
+                .sum();
     }
-
 }

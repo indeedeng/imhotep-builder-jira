@@ -8,7 +8,6 @@ import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.customfields.ImmutableCustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.ImmutableUser;
 import com.indeed.jiraactions.api.response.issue.User;
-
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.joda.time.DateTime;
@@ -17,16 +16,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 public class TSVSpecBuilderTest extends EasyMockSupport {
     Action action;
     TSVSpecBuilder builder;
+    CustomFieldOutputter customFieldOutputter;
+    private final OutputFormatter outputFormatter = new OutputFormatter(OptionalInt.empty());
 
     @Before
     public void before() {
         action = createNiceMock(Action.class);
-        builder = new TSVSpecBuilder();
+        customFieldOutputter = createNiceMock(CustomFieldOutputter.class);
+
+        builder = new TSVSpecBuilder(outputFormatter, customFieldOutputter);
     }
 
     @Test
@@ -129,7 +133,7 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
 
     private CustomFieldValue newCustomFieldValue(final List<String> values) {
         final CustomFieldValue value = createNiceMock(CustomFieldValue.class);
-        EasyMock.expect(value.getValues()).andReturn(values).anyTimes();
+        EasyMock.expect(customFieldOutputter.getValues(value)).andReturn(values).anyTimes();
         return value;
     }
 

@@ -3,25 +3,34 @@ package com.indeed.jiraactions;
 import com.google.common.collect.ImmutableList;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
+import com.indeed.jiraactions.api.customfields.ImmutableCustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
 import com.indeed.jiraactions.api.response.issue.User;
-
 import com.indeed.jiraactions.api.statustimes.StatusTime;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class TSVSpecBuilder {
     private static final Logger log = LoggerFactory.getLogger(TSVSpecBuilder.class);
+    private static final Pattern SPACE_PATTERN = Pattern.compile(" ", Pattern.LITERAL);
 
-    private final ImmutableList.Builder<TSVColumnSpec> columnSpecs;
+    private final ImmutableList.Builder<TSVColumnSpec> columnSpecs = ImmutableList.builder();
 
-    public TSVSpecBuilder() {
-        columnSpecs = ImmutableList.builder();
+    private final OutputFormatter outputFormatter;
+    private final CustomFieldOutputter customFieldOutputter;
+
+    public TSVSpecBuilder(final OutputFormatter outputFormatter,
+                          final CustomFieldOutputter customFieldOutputter) {
+        this.outputFormatter = outputFormatter;
+        this.customFieldOutputter = customFieldOutputter;
     }
 
     public List<TSVColumnSpec> build() {
@@ -70,7 +79,7 @@ public class TSVSpecBuilder {
         final List<String> headers = customField.getHeaders();
         final Function<Action, List<String>> valueExtractor = action -> getCustomFieldValue(customField, action);
         for (int i = 0; i < headers.size(); i++) {
-            final int index = i;
+            final int index = i; // must be final for the lambda expression
             addColumn(headers.get(index), action -> valueExtractor.apply(action).get(index));
         }
         return this;
@@ -80,16 +89,16 @@ public class TSVSpecBuilder {
         for (final String type : linkTypes) {
             final Function<Action, String> valueExtractor = action -> getLinkValue(type, action);
             addColumn(
-                    String.format("link_%s*", type.replace(" ", "_")), valueExtractor);
+                    String.format("link_%s*", SPACE_PATTERN.matcher(type).replaceAll(Matcher.quoteReplacement("_"))), valueExtractor);
         }
 
-        final Function<Action, String> valueExtractor = TSVSpecBuilder::getAllLinksValue;
+        final Function<Action, String> valueExtractor = this::getAllLinksValue;
         addColumn("links*", valueExtractor);
 
         return this;
     }
 
-    private static List<String> getCustomFieldValue(final CustomFieldDefinition customField, final Action action) {
+    private List<String> getCustomFieldValue(final CustomFieldDefinition customField, final Action action) {
         final CustomFieldValue value = action.getCustomFieldValues().get(customField);
         if (value == null) {
             log.error(
@@ -97,25 +106,29 @@ public class TSVSpecBuilder {
                     customField.getImhotepFieldName(),
                     action.getIssuekey()
             );
-            return CustomFieldValue.emptyCustomField(customField).getValues();
+            return customFieldOutputter.getValues(ImmutableCustomFieldValue.of(customField));
         } else {
-            return value.getValues();
+            return customFieldOutputter.getValues(value);
         }
     }
 
-    private static String getLinkValue(final String linkType, final Action action) {
-        final Iterable<String> values = action.getLinks().stream()
+    private String getLinkValue(final String linkType, final Action action) {
+        final String delimeter = " ";
+        final String links = action.getLinks().stream()
                 .filter(x -> x.getDescription().equals(linkType))
-                .map(Link::getTargetKey)::iterator;
+                .map(Link::getTargetKey)
+                .collect(Collectors.joining(delimeter));
 
-        return String.join(" ", values);
+        return outputFormatter.truncate(links, delimeter);
     }
 
-    private static String getAllLinksValue(final Action action) {
-        final Iterable<String> values = action.getLinks().stream()
-                .map(Link::getTargetKey)::iterator;
+    private String getAllLinksValue(final Action action) {
+        final String delimeter = " ";
+        final String links = action.getLinks().stream()
+                .map(Link::getTargetKey)
+                .collect(Collectors.joining(delimeter));
 
-        return String.join(" ", values);
+        return outputFormatter.truncate(links, delimeter);
     }
 
     private static long getTotalStatusTime(final String statusType, final Map<String, StatusTime> statusTimeMap) {

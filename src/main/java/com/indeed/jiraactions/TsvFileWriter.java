@@ -1,7 +1,6 @@
 package com.indeed.jiraactions;
 
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -9,11 +8,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,23 +31,33 @@ public class TsvFileWriter {
     private static final Logger log = LoggerFactory.getLogger(TsvFileWriter.class);
 
     private final JiraActionsIndexBuilderConfig config;
+    private final OutputFormatter outputFormatter;
+    private final CustomFieldOutputter customFieldOutputter;
     private final Map<DateMidnight, WriterData> writerDataMap;
-    private final Map<DateMidnight, WriterData> writerDataMapJiraIssues;
+    private final Map<DateMidnight, WriterData> writerDataMapJiraIssues = new HashMap<>(1);
     private final List<TSVColumnSpec> columnSpecs;
     private final List<TSVColumnSpec> columnSpecsJiraissues;
     private List<String> fields = new ArrayList<>();
     private final List<String[]> issues = new ArrayList<>();
     private final boolean buildJiraIssuesApi;
 
-    public TsvFileWriter(final JiraActionsIndexBuilderConfig config, final List<String> linkTypes, final List<String> statusTypes, final boolean buildJiraIssuesApi) {
+    public TsvFileWriter(final JiraActionsIndexBuilderConfig config,
+                         final List<String> linkTypes,
+                         final List<String> statusTypes,
+                         final boolean buildJiraIssuesApi,
+                         final OutputFormatter outputFormatter,
+                         final CustomFieldOutputter customFieldOutputter
+    ) {
         this.config = config;
+        this.buildJiraIssuesApi = buildJiraIssuesApi;
+        this.outputFormatter = outputFormatter;
+        this.customFieldOutputter = customFieldOutputter;
+
         final int days = Days.daysBetween(JiraActionsUtil.parseDateTime(config.getStartDate()),
                 JiraActionsUtil.parseDateTime(config.getEndDate())).getDays();
         writerDataMap = new HashMap<>(days);
-        writerDataMapJiraIssues = new HashMap<>(1);
-        this.columnSpecs = createColumnSpecs(linkTypes);
-        this.columnSpecsJiraissues = createColumnSpecsJiraissues(linkTypes, statusTypes);
-        this.buildJiraIssuesApi = buildJiraIssuesApi;
+        columnSpecs = createColumnSpecs(linkTypes);
+        columnSpecsJiraissues = createColumnSpecsJiraissues(linkTypes, statusTypes);
     }
 
     private static final String FILENAME_DATE_TIME_PATTERN = "yyyyMMdd";
@@ -78,8 +87,7 @@ public class TsvFileWriter {
     }
 
     private List<TSVColumnSpec> createColumnSpecs(final List<String> linkTypes) {
-        final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
-        specBuilder
+        final TSVSpecBuilder specBuilder = new TSVSpecBuilder(outputFormatter, customFieldOutputter)
                 .addColumn("issuekey", Action::getIssuekey)
                 .addColumn("action", Action::getAction)
                 .addUserColumns("actor", Action::getActor)
@@ -114,8 +122,7 @@ public class TsvFileWriter {
     }
 
     private List<TSVColumnSpec> createColumnSpecsJiraissues(final List<String> linkTypes, final List<String> statusTypes) {
-        final TSVSpecBuilder specBuilder = new TSVSpecBuilder();
-        specBuilder
+        final TSVSpecBuilder specBuilder = new TSVSpecBuilder(outputFormatter, customFieldOutputter)
                 .addColumn("issuekey", Action::getIssuekey)
                 .addUserColumns("actor", Action::getActor)
                 .addUserColumns("assignee", Action::getAssignee)
