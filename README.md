@@ -5,6 +5,9 @@ Each document in an index is a single action (create, update, or comment) taken 
 that could conceivably be part of the given time range, and decomposing that issue into a series of actions. Those actions are then written
 to a series of .tsv (tab-separated value) files that are uploaded to an Imhotep shardbuilder.
 
+We have included some apachejira sample queries [here](http://opensource.indeedeng.io/imhotep/docs/sample-data/). You can gain insights
+from the data returned from your query, which can empower you to make data-driven decisions.
+
 **Status:**
 <br>[![Build Status](https://travis-ci.org/indeedeng/imhotep-builder-jira.svg?branch=master)](https://travis-ci.org/indeedeng/imhotep-builder-jira)
 ![Lifecycle](https://img.shields.io/osslifecycle/indeedeng/imhotep-builder-jira.svg)
@@ -60,16 +63,17 @@ The History section might instead contain this:
 This becomes complicated when you've heavily customized JIRA, as we have at Indeed. All the built-in JIRA fields are
 represented by POJOs matching the field names that come back from the API. But there are artifacts of several
 different attempts to handle custom fields. To make this more complicated, some custom fields are either parsed weirdly or transformed. It's
-not as simple as just taking a value from a field and put it somewhere else.
+not as simple as just taking a value from a field and putting it somewhere else.
 
-The correct and best way to do this is to define these values in a .json file (see `src/main/resources/customfields/example-custom-fields.json`). We have some examples of older code-based ways of custom field handling in this codebase (TODO: reference examples). We should clean
+The correct and best way to do this is to define these values in a .json file (see [src/main/resources/customfields/example-custom-fields.json](https://github.com/indeedeng/imhotep-builder-jira/blob/master/src/main/resources/customfields/example-custom-fields.json)).
+We have some examples of older code-based ways of custom field handling in this codebase (TODO: reference examples). We should clean
 up the older ways to use the JSON approach instead. Creating a new, simple field should be as easy as including another definition in a .json file.
-More complicated fields may required defining new types of transformations. The principle value of this approach is that it lets us support
+More complicated fields may require defining new types of transformations. The principle value of this approach is that it lets us support
 different custom fields for different JIRA instances.
 
 # Jiraissues Index
 The jiraissues index is a daily snapshot of a JIRA ticket/issue's current state where each document is a unique issue.
-Jiraissues compliements jiraactions by making up for jiraactions' weakness of not being able to see the current state of an issue until it gets updated/changed.
+Jiraissues compliments jiraactions by making up for jiraactions' weakness of not being able to see the current state of an issue until it gets updated/changed.
 This index runs alongside jiraactions but will upload a separate TSV file into its own index.
 
 # Jiraissues Architecture
@@ -79,8 +83,8 @@ Jiraissues will store all of the issues in a list while jiraactions writes them 
 
 The jiraissues builder uses a TSV parser to parse through yesterday's downloaded TSV file for every issue and compares that old issue to all the updated ones from jiraactions.
 There are 3 things that happen when it compares the old issue:
-1. Replace - If the updated issues contains the issuekey of the old one then it writes the new one instead.
-2. Update - If the issue isn't in the new issues it will update its time-related fields in a method then write that.
+1. Replace - If the updated issues contain the issuekey of the old one, then it writes the new one instead.
+2. Update - If the issue isn't in the new issues, it will update its time-related fields in a method, then write that.
 3. Add - After going through all the old issues, any new issues that aren't replaced are added.
 
 # To Run Locally
