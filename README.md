@@ -5,8 +5,9 @@ Each document in an index is a single action (create, update, or comment) taken 
 that could conceivably be part of the given time range, and decomposing that issue into a series of actions. Those actions are then written
 to a series of .tsv (tab-separated value) files that are uploaded to an Imhotep shardbuilder.
 
-We have included some apachejira sample queries [here](http://opensource.indeedeng.io/imhotep/docs/sample-data/). You can gain insights
-from the data returned from your query, which can empower you to make data-driven decisions.
+We have included some apachejira sample queries [here](http://opensource.indeedeng.io/imhotep/docs/sample-data/). These allow you to
+gain insights about JIRA projects such as which users report the most bugs, which projects have the most bugs, what users contribute the most to a project,
+how many unique contributors a project has, what the average number of contributions per user is, etc.
 
 **Status:**
 <br>[![Build Status](https://travis-ci.org/indeedeng/imhotep-builder-jira.svg?branch=master)](https://travis-ci.org/indeedeng/imhotep-builder-jira)
@@ -73,7 +74,7 @@ different custom fields for different JIRA instances.
 
 # Jiraissues Index
 The jiraissues index is a daily snapshot of a JIRA ticket/issue's current state where each document is a unique issue.
-Jiraissues compliments jiraactions by making up for jiraactions' weakness of not being able to see the current state of an issue until it gets updated/changed.
+Jiraissues complements jiraactions by making up for jiraactions' weakness of not being able to see the current state of an issue until it gets updated/changed.
 This index runs alongside jiraactions but will upload a separate TSV file into its own index.
 
 # Jiraissues Architecture
