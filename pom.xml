@@ -162,7 +162,7 @@
 
         <commons.io.version>1.4</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
-        <commons.cli.version>1.1</commons.cli.version>
+        <commons.cli.version>1.4</commons.cli.version>
         <commons.configuration.version>1.10</commons.configuration.version>
         <httpcore.version>4.3.3</httpcore.version>
         <httpmime.version>4.3.3</httpmime.version>
