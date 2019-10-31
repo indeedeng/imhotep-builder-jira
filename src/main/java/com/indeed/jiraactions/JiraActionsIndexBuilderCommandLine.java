@@ -3,12 +3,10 @@ package com.indeed.jiraactions;
 import com.google.common.base.Joiner;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinitionParser;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration.ConfigurationException;
@@ -40,30 +38,40 @@ public class JiraActionsIndexBuilderCommandLine {
         tool.run();
     }
 
-    private void initialize(String[] args) {
+    private void initialize(final String[] args) {
         final Options options = new Options()
-                .addOption(buildOption(
-                        "props",
-                        "path to imhotep-jira.properties file",
-                        "path"
-                )).addOption(buildOption(
-                        "start",
-                        "ISO-8601 formatted date string specifying the start date (inclusive)",
-                        "YYYY-MM-DD"
-                )).addOption(buildOption(
-                        "end",
-                        "ISO-8601 formatted date string specifying end date (exclusive)",
-                        "YYYY-MM-DD"
-                )).addOption(buildOption(
-                        "jiraBatchSize",
-                        "Number of issues to retrieve in each batch",
-                        "arg"
-                ));
-
+                .addOption(Option.builder("p")
+                        .longOpt("props")
+                        .desc("path to imhotep-jira.properties file")
+                        .hasArg()
+                        .numberOfArgs(1)
+                        .required()
+                        .build()
+                ).addOption(Option.builder("s")
+                        .longOpt("start")
+                        .desc("ISO-8601 formatted date string specifying the start date (inclusive)")
+                        .hasArg()
+                        .numberOfArgs(1)
+                        .required()
+                        .build()
+                ).addOption(Option.builder("e")
+                        .longOpt("end")
+                        .desc("ISO-8601 formatted date string specifying the end date (exclusive)")
+                        .hasArg()
+                        .numberOfArgs(1)
+                        .required()
+                        .build()
+                ).addOption(Option.builder("jb")
+                        .longOpt("jiraBatchSize")
+                        .desc("Number of issues to retrieve in each batch")
+                        .hasArg()
+                        .numberOfArgs(1)
+                        .required()
+                        .build());
         final String startDate;
         final String endDate;
         final int jiraBatchSize;
-        final CommandLineParser parser = new GnuParser();
+        final CommandLineParser parser = new DefaultParser();
         final CommandLine commandLineArgs;
         final CustomFieldDefinition[] customFieldDefinitions;
         try {
@@ -134,15 +142,6 @@ public class JiraActionsIndexBuilderCommandLine {
             LOGGER.error("Failed to initialize builder", e);
             System.exit(-1);
         }
-    }
-
-    private Option buildOption(final String name, final String description, final String argName) {
-        OptionBuilder.withLongOpt(name);
-        OptionBuilder.isRequired();
-        OptionBuilder.hasArg();
-        OptionBuilder.withArgName(argName);
-        OptionBuilder.withDescription(description);
-        return OptionBuilder.create(name);
     }
 
     private void run() {
