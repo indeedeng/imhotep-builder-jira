@@ -168,7 +168,7 @@
         <httpmime.version>4.3.3</httpmime.version>
         <jackson-core.version>2.9.10</jackson-core.version>
         <jackson-annotations.version>2.9.10</jackson-annotations.version>
-        <jackson-databind.version>2.9.10</jackson-databind.version>
+        <jackson-databind.version>2.9.10.1</jackson-databind.version>
         <jodatime.version>2.10</jodatime.version>
         <slf4j.version>1.7.25</slf4j.version>
         <univocity-parsers.version>2.8.2</univocity-parsers.version>
