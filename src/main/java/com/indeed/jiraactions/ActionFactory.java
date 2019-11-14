@@ -38,9 +38,10 @@ public class ActionFactory {
     public Action create(final Issue issue) throws IOException {
         final User assignee = userLookupService.getUser(issue.initialValueKey("assignee", "assigneekey"));
         final User reporter = userLookupService.getUser(issue.initialValueKey("reporter", "reporterkey"));
+        final User creator = issue.fields.creator == null ? User.INVALID_USER : userLookupService.getUser(issue.fields.creator.getKey());
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
-                .actor(issue.fields.creator == null ? User.INVALID_USER : issue.fields.creator)
+                .actor(creator)
                 .assignee(assignee)
                 .fieldschanged("created")
                 .issueage(0)
@@ -87,9 +88,10 @@ public class ActionFactory {
         final User reporter = history.itemExist("reporter")
                 ? userLookupService.getUser(history.getItemLastValueKey("reporter"))
                 : prevAction.getReporter();
+        final User actor = history.author == null ? User.INVALID_USER : userLookupService.getUser(history.author.getKey());
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("update")
-                .actor(history.author == null ? User.INVALID_USER: history.author)
+                .actor(actor)
                 .assignee(assignee)
                 .fieldschanged(history.getChangedFields())
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created))
@@ -129,10 +131,11 @@ public class ActionFactory {
     }
 
     public Action comment(final Action prevAction, final Comment comment) {
+        final User actor = comment.author == null ? User.INVALID_USER :  userLookupService.getUser(comment.author.getKey());
         return ImmutableAction.builder()
                 .from(prevAction)
                 .action("comment")
-                .actor(comment.author == null ? User.INVALID_USER : comment.author)
+                .actor(actor)
                 .fieldschanged("comment")
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), comment.created))
                 .timeinstate(timeInState(prevAction, comment))
