@@ -7,7 +7,6 @@ import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
-
 import com.indeed.jiraactions.api.statustimes.StatusTimeFactory;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
@@ -15,13 +14,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.text.ParseException;
-
 /**
  * @author soono
  */
 public class ActionTest {
+
     private Action prevAction;
     private History history;
     private History history2;
@@ -29,6 +26,8 @@ public class ActionTest {
     private Comment comment;
 
     // default values
+    private static final CustomFieldDefinition[] NO_CUSTOM_FIELDS = new CustomFieldDefinition[0];
+    private static final Item[] NO_ITEMS = new Item[0];
     private static final long prevActionTimeinstate = 50;
     private static final DateTime prevActionTimestamp = JiraActionsUtil.parseDateTime("2016-09-02T01:00:00");
     private static final DateTime historyCreated = JiraActionsUtil.parseDateTime("2016-09-02T01:00:10");
@@ -36,14 +35,14 @@ public class ActionTest {
     private static final DateTime commentCreated = JiraActionsUtil.parseDateTime("2016-09-02T01:00:30"); // diff with prevAction is 10s.
     private static final long timeDiffWithPrevAction = 10;
 
-    private final UserLookupService userLookupService = new FriendlyUserLookupService();
+    private final FriendlyUserLookupService userLookupService = new FriendlyUserLookupService();
     private final StatusTimeFactory statusTimeFactory = new StatusTimeFactory();
     private ActionFactory actionFactory;
 
     @Before
     public void initialize() {
         final JiraActionsIndexBuilderConfig config = EasyMock.createNiceMock(JiraActionsIndexBuilderConfig.class);
-        EasyMock.expect(config.getCustomFields()).andReturn(new CustomFieldDefinition[0]).anyTimes();
+        EasyMock.expect(config.getCustomFields()).andReturn(NO_CUSTOM_FIELDS).anyTimes();
         EasyMock.replay(config);
 
         actionFactory = new ActionFactory(userLookupService, new CustomFieldApiParser(userLookupService), config);
@@ -79,7 +78,7 @@ public class ActionTest {
         history2 = new History();
         history2.author = author;
         history2.created = historyCreated2;
-        history2.items = new Item[] { };
+        history2.items = NO_ITEMS;
 
         // For Comment Action
         comment = new Comment();
@@ -98,39 +97,39 @@ public class ActionTest {
     //
 
     @Test
-    public void testAction_update_action() throws ParseException, IOException {
+    public void testAction_update_action() {
         final Action action = actionFactory.update(prevAction, history);
-        Assert.assertTrue("update".equals(action.getAction()));
+        Assert.assertEquals("update", action.getAction());
     }
 
     @Test
-    public void testAction_update_actor() throws ParseException, IOException {
-        final String actor = "Test Actor";
+    public void testAction_update_actor() {
         history.author = ImmutableUser.builder()
                 .from(author)
-                .displayName(actor)
+                .key("updatedactor")
                 .build();
 
         final Action action = actionFactory.update(prevAction, history);
-        Assert.assertEquals(actor, action.getActor().getDisplayName());
+        final User actor = action.getActor();
+        userLookupService.assertCreatedUser(actor, "updatedactor");
     }
 
     @Test
-    public void testAction_update_assignee_whenAssigneeChanged() throws ParseException, IOException {
+    public void testAction_update_assignee_whenAssigneeChanged() {
         final Item item = new Item();
         item.setField("assignee");
         item.fromString = "old";
-        item.toString = "new";
-        item.to = "new";
+        item.toString = "newassignee";
+        item.to = "newassignee";
         history2.items = new Item[] { item };
 
         final Action action = actionFactory.update(prevAction, history2);
-        Assert.assertEquals(item.toString, action.getAssignee().getDisplayName());
+        userLookupService.assertCreatedUser(action.getAssignee(), "newassignee");
         Assert.assertTrue(action.getFieldschanged().contains(item.field));
     }
 
     @Test
-    public void testAction_update_assignee_whenAssigneeNotChanged() throws ParseException, IOException {
+    public void testAction_update_assignee_whenAssigneeNotChanged() {
         final User assignee = ImmutableUser.builder()
                 .displayName("Test Assignee")
                 .name("Test Assignee")
@@ -139,11 +138,11 @@ public class ActionTest {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).assignee(assignee).build();
 
         final Action action = actionFactory.update(newPrevAction, history);
-        Assert.assertTrue(action.getAssignee().equals(assignee));
+        Assert.assertEquals(action.getAssignee(), assignee);
     }
 
     @Test
-    public void testAction_updatenotstate_timing() throws ParseException, IOException {
+    public void testAction_updatenotstate_timing() {
         final Action action = actionFactory.update(prevAction, history);
         Assert.assertEquals(timeDiffWithPrevAction, action.getIssueage());
         Assert.assertEquals(timeDiffWithPrevAction, action.getTimeinstate());
@@ -151,7 +150,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_update_timeinstate() throws ParseException, IOException {
+    public void testAction_update_timeinstate() {
         final Action action = actionFactory.update(prevAction, history);
 
         final Action action2 = actionFactory.update(action, history2);
@@ -165,7 +164,7 @@ public class ActionTest {
     //
 
     @Test
-    public void testAction_comment_issueage() throws ParseException, IOException {
+    public void testAction_comment_issueage() {
         final Action action = actionFactory.update(prevAction, history);
 
         final Action action2 = actionFactory.comment(action, comment);
@@ -175,7 +174,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_comment_timeinstate_afterUpdate() throws ParseException {
+    public void testAction_comment_timeinstate_afterUpdate() {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction).action("update").build();
 
         final Action action = actionFactory.comment(newPrevAction, comment);
@@ -183,7 +182,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testAction_comment_timeinstate_afterComment() throws ParseException {
+    public void testAction_comment_timeinstate_afterComment() {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction)
                 .action("comment")
                 .timeinstate(prevActionTimeinstate)
@@ -193,7 +192,7 @@ public class ActionTest {
     }
 
     @Test
-    public void testChangeStatusAndChangeBack() throws IOException {
+    public void testChangeStatusAndChangeBack() {
         final Action newPrevAction = ImmutableAction.builder().from(prevAction)
                 .action("update")
                 .fieldschanged("status")

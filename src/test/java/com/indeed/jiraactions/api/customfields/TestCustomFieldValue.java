@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indeed.jiraactions.CustomFieldOutputter;
 import com.indeed.jiraactions.FriendlyUserLookupService;
 import com.indeed.jiraactions.OutputFormatter;
-import com.indeed.jiraactions.UserLookupService;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,7 +14,7 @@ import java.util.OptionalInt;
 
 public class TestCustomFieldValue {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private final UserLookupService userLookupService = new FriendlyUserLookupService();
+    private final FriendlyUserLookupService userLookupService = new FriendlyUserLookupService();
     private final CustomFieldApiParser apiParser = new CustomFieldApiParser(userLookupService);
     private final CustomFieldOutputter customFieldOutputter = new CustomFieldOutputter(new OutputFormatter(OptionalInt.empty()));
 
@@ -165,7 +164,7 @@ public class TestCustomFieldValue {
     @Test
     public void testUserLookupFromInitial() throws IOException {
         testFromInitial(verifier, "{\"self\":\"https://jira.example.com/rest/api/2/user?username=johndoe\",\"name\":\"johndoe\",\"key\":\"johndoe\",\"emailAddress\":\"johndoe@example.com\",\"avatarUrls\":{\"48x48\":\"https://jira.example.com/secure/useravatar?ownerId=johndoe&avatarId=25105\",\"24x24\":\"https://jira.example.com/secure/useravatar?size=small&ownerId=johndoe&avatarId=25105\",\"16x16\":\"https://jira.example.com/secure/useravatar?size=xsmall&ownerId=johndoe&avatarId=25105\",\"32x32\":\"https://jira.example.com/secure/useravatar?size=medium&ownerId=johndoe&avatarId=25105\"},\"displayName\":\"John Doe\",\"active\":true,\"timeZone\":\"America/Chicago\"}{\"self\":\"https://jira.example.com/rest/api/2/user?username=johndoe\",\"name\":\"johndoe\",\"key\":\"johndoe\",\"emailAddress\":\"johndoe@example.com\",\"avatarUrls\":{\"48x48\":\"https://jira.example.com/secure/useravatar?ownerId=johndoe&avatarId=25105\",\"24x24\":\"https://jira.example.com/secure/useravatar?size=small&ownerId=johndoe&avatarId=25105\",\"16x16\":\"https://jira.example.com/secure/useravatar?size=xsmall&ownerId=johndoe&avatarId=25105\",\"32x32\":\"https://jira.example.com/secure/useravatar?size=medium&ownerId=johndoe&avatarId=25105\"},\"displayName\":\"John Doe\",\"active\":true,\"timeZone\":\"America/Chicago\"}",
-                "John Doe\tjohndoe");
+                "John Doe\tName: johndoe");
     }
 
     @Test
@@ -218,7 +217,7 @@ public class TestCustomFieldValue {
     @Test
     public void testUserLookupFromChangelog() {
         final CustomFieldValue field = apiParser.customFieldValueFromChangelog(verifier, "aaldridge", "Andreas Aldridge");
-        assertEquals(field, "Andreas Aldridge\taaldridge");
+        assertEquals(field, "Andreas Aldridge\tName: aaldridge");
     }
 
     @Test
