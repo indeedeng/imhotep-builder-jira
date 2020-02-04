@@ -107,6 +107,8 @@ public class JiraActionsIndexBuilderCommandLine {
             final boolean buildSnapshotIndex = config.getBoolean("snapshot.build");
             final int jiraIssuesLookbackMonths = config.getInt("snapshot.lookbackmonths");
             final String snapshotIndexName = config.getString("snapshot.indexname");
+            final int snapshotReadRetries = config.getInt("snapshot.read.retries", 5);
+            final int snapshotWriteRetries = config.getInt("snapshot.write.retries", 5);
             final String[] deliveryLeadTimeStatuses = config.getStringArray("snapshot.deliveryleadtime..statuses");
             final String[] deliveryLeadTimeResolutions = config.getStringArray("snapshot.deliveryleadtime..resolutions");
             final String[] deliveryLeadTimeTypes = config.getStringArray("snapshot.deliveryleadtime.types");
@@ -130,6 +132,9 @@ public class JiraActionsIndexBuilderCommandLine {
                     .indexName(indexName)
                     .buildSnapshotIndex(buildSnapshotIndex)
                     .snapshotLookbackMonths(jiraIssuesLookbackMonths)
+                    .snapshotIndexName(snapshotIndexName)
+                    .snapshotReadRetries(snapshotReadRetries)
+                    .snapshotWriteRetries(snapshotWriteRetries)
                     .deliveryLeadTimeStatuses(new HashSet<>(Arrays.asList(deliveryLeadTimeStatuses)))
                     .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))
                     .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))

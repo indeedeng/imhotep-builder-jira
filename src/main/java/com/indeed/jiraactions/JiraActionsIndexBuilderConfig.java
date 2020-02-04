@@ -27,6 +27,8 @@ public interface JiraActionsIndexBuilderConfig {
     boolean buildSnapshotIndex();
     @Nonnegative int getSnapshotLookbackMonths();
     @Nullable String getSnapshotIndexName();
+    @Nonnegative int getSnapshotReadRetries();
+    @Nonnegative int getSnapshotWriteRetries();
     Set<String> getDeliveryLeadTimeStatuses();
     Set<String> getDeliveryLeadTimeResolutions();
     Set<String> getDeliveryLeadTimeTypes();
