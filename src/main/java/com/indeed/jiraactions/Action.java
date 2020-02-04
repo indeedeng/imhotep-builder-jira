@@ -39,15 +39,63 @@ public interface Action {
     String getDueDate();
     String getComponents();
     String getLabels();
+
+    /**
+     * @return Date issue was created, in yyyy-MM-dd format
+     */
     String getCreatedDate();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was created, as represented in yyyyMMdd format.
+     */
+    long getCreatedDateLong();
+
+    /**
+     * Returns an integer value that can be used for date-time arithmetic.
+     *
+     * @return Long integer representing the date the issue was created, as represented in yyyyMMddhhmmss format.
+     */
+    long getCreatedDateTimeLong();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was created, in Unix epoch time format
+     */
+    long getCreatedDateTimestamp();
+
+    /**
+     * @return Date issue was created, in yyyy-MM-dd format
+     */
+    String getResolutionDate();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was resolved, as represented in yyyyMMdd format.
+     */
+    long getResolutionDateLong();
+
+    /**
+     * Returns an integer value that can be used for date-time arithmetic.
+     *
+     * @return Long integer representing the date the issue was resolved, as represented in yyyyMMddhhmmss format.
+     */
+    long getResolutionDateTimeLong();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was resolved, in Unix epoch time format
+     */
+    long getResolutionDateTimestamp();
+
     String getPriority();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
-
-    // Jiraissues Fields - Building these fields alongside the jiraactions fields does not affect the jiraactions TSV unless they are added into its headers through TsvFileWriter
-    long getCreatedDateLong();
     long getClosedDate();
-    long getResolutionDate();
     long getLastUpdated();
     long getDeliveryLeadTime();
     long getComments();

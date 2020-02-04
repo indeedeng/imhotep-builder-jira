@@ -65,9 +65,14 @@ public class ActionFactory {
                 .labels(issue.initialValue("labels"))
                 .createdDate(issue.fields.created.toString("yyyy-MM-dd"))
                 .createdDateLong(Long.parseLong(issue.fields.created.toString("yyyyMMdd")))
+                .createdDateTimeLong(Long.parseLong(issue.fields.created.toString("yyyyMMddHHmmss")))
+                .createdDateTimestamp(issue.fields.created.getMillis() / 1000)
                 .lastUpdated(0)
                 .closedDate(0)
-                .resolutionDate(getDateResolved(issue.initialValue("resolutiondate")))
+                .resolutionDate(JiraActionsUtil.parseDateTime(issue.initialValue("resolutiondate")).toString("yyyy-MM-dd"))
+                .resolutionDateLong(parseDate(issue.initialValue("resolutiondate")))
+                .resolutionDateTimeLong(parseDateTime(issue.initialValue("resolutiondate")))
+                .resolutionDateTimestamp(parseTimestamp(issue.initialValue("resolutiondate")) / 1000)
                 .comments(0)
                 .deliveryLeadTime(0)
                 .statusTimes(statusTimeFactory.firstStatusTime(issue.initialValue("status")))
@@ -115,8 +120,13 @@ public class ActionFactory {
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate())
                 .createdDateLong(prevAction.getCreatedDateLong())
+                .createdDateTimeLong(prevAction.getCreatedDateTimeLong())
+                .createdDateTimestamp(prevAction.getCreatedDateTimestamp())
                 .closedDate(getDateClosed(prevAction, history))
-                .resolutionDate(history.itemExist("resolutiondate") ? getDateResolved(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDate())
+                .resolutionDate(history.itemExist("resolutiondate") ? history.getItemLastValue("resolutiondate") : prevAction.getResolutionDate())
+                .resolutionDateLong(history.itemExist("resolutiondate") ? parseDate(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateLong())
+                .resolutionDateTimeLong(history.itemExist("resolutiondate") ? parseDateTime(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimeLong())
+                .resolutionDateTimestamp(history.itemExist("resolutiondate") ? parseTimestamp(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimestamp())
                 .lastUpdated(0) // This field is used internally to filter issues longer than 6 months. It's only used by jiraissues so it will always go through the toCurrent() method where it takes the date of the previous action.
                 .comments(prevAction.getComments())
                 .deliveryLeadTime(0)
@@ -173,15 +183,27 @@ public class ActionFactory {
         return getTimeDiff(prevAction.getTimestamp(), changeTimestamp) + prevAction.getTimeinstate();
     }
 
-    private long getDateResolved(final String resolutionDate) {
-        if (StringUtils.isEmpty(resolutionDate)) {
+    private long parseDate(final String isoDateString) {
+        if (StringUtils.isEmpty(isoDateString)) {
             return 0;
         } else {
-            if (resolutionDate.contains("T")) {
-                return Long.parseLong(DateTime.parse(resolutionDate).toString("yyyyMMdd"));     // The initial value of resolution date contains the 'T' while the resolution date in the changelog does not
-            } else {
-                return Long.parseLong(resolutionDate.substring(0, 10).replaceAll("-", ""));
-            }
+            return Long.parseLong(JiraActionsUtil.parseDateTime(isoDateString).toString("yyyyMMdd"));
+        }
+    }
+
+    private long parseDateTime(final String isoDateString) {
+        if (StringUtils.isEmpty(isoDateString)) {
+            return 0;
+        } else {
+            return Long.parseLong(JiraActionsUtil.parseDateTime(isoDateString).toString("yyyyMMddHHmmss"));
+        }
+    }
+
+    private long parseTimestamp(final String isoDateString) {
+        if (StringUtils.isEmpty(isoDateString)) {
+            return 0;
+        } else {
+            return JiraActionsUtil.parseDateTime(isoDateString).getMillis();
         }
     }
 
