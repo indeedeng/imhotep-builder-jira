@@ -23,6 +23,7 @@
     "customfield_10270": null,
     "timespent": null,
     "customfield_10590": "12240",
+    "customfield_99999": "2010-03-22T14:07:43.000-0500",
     "project": {
       "self": "https://bugs.indeed.com/rest/api/2/project/10004",
       "id": "10004",

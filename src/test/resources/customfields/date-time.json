@@ -1,0 +1,8 @@
+[
+  {
+    "name": "Custom DateTime",
+    "customfieldid": "customfield_99999",
+    "imhotepfieldname": "custom",
+    "multiValueFieldConfiguration": "DATETIME"
+  }
+]
