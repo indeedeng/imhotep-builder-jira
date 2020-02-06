@@ -1,10 +1,10 @@
 package com.indeed.jiraactions.api.response.issue;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.indeed.jiraactions.Issues;
 import com.indeed.jiraactions.api.response.issue.changelog.ChangeLog;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
@@ -68,7 +68,7 @@ public class Issue {
                 }
             }
 
-            return Joiner.on("|").join(values);
+            return Issues.join(values);
 
         } else {
             // Single- and multi-valued primitive fields' initial state can be determined by examining

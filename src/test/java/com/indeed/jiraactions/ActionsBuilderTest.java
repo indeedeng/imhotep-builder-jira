@@ -150,7 +150,8 @@ public class ActionsBuilderTest {
                 action = actionFactory.update(action, history);
             }
 
-            Assert.assertThat(action.getComponents(), equalTo(ImmutableList.of()));
+            List<String> actual = action.getComponents();
+            Assert.assertThat(actual, equalTo(ImmutableList.of()));
         }
     }
 

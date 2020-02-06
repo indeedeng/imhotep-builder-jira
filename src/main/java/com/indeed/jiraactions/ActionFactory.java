@@ -1,7 +1,6 @@
 package com.indeed.jiraactions;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
@@ -10,7 +9,6 @@ import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
-import com.indeed.jiraactions.api.response.issue.fields.Component;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.jiraactions.api.statustimes.StatusTime;
 import com.indeed.jiraactions.api.statustimes.StatusTimeFactory;
@@ -23,9 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 
 public class ActionFactory {
     private final UserLookupService userLookupService;
@@ -47,7 +42,6 @@ public class ActionFactory {
         final User assignee = userLookupService.getUser(issue.initialValueKey("assignee", "assigneekey"));
         final User reporter = userLookupService.getUser(issue.initialValueKey("reporter", "reporterkey"));
         final User creator = issue.fields.creator == null ? User.INVALID_USER : userLookupService.getUser(issue.fields.creator.getKey());
-        final List<Component> components = null == issue.fields.components ? emptyList() : ImmutableList.copyOf(issue.fields.components);
 
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
@@ -71,9 +65,7 @@ public class ActionFactory {
                 .category(issue.initialValue("category"))
                 .fixversions(issue.initialValue("fixversions"))
                 .dueDate(issue.initialValue("duedate"))
-                .components(components.stream()
-                        .map(component -> component.name)
-                        .collect(toList()))
+                .components(Issues.split(issue.initialValue("component")))
                 .labels(issue.initialValue("labels"))
                 .createdDate(issue.fields.created.toString("yyyy-MM-dd"))
                 .createdDateLong(Long.parseLong(issue.fields.created.toString("yyyyMMdd")))
@@ -106,7 +98,6 @@ public class ActionFactory {
                 ? userLookupService.getUser(history.getItemLastValueKey("reporter"))
                 : prevAction.getReporter();
         final User actor = history.author == null ? User.INVALID_USER : userLookupService.getUser(history.author.getKey());
-        final List<String> components = extractComponents(prevAction, history);
 
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("update")
@@ -130,7 +121,7 @@ public class ActionFactory {
                 .category(history.itemExist("category") ? history.getItemLastValue("category") : prevAction.getCategory())
                 .fixversions(history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.getFixversions())
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate").replace(" 00:00:00.0", "") : prevAction.getDueDate())
-                .components(components)
+                .components(extractComponents(prevAction, history))
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate())
                 .createdDateLong(prevAction.getCreatedDateLong())

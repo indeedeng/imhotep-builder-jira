@@ -1,7 +1,6 @@
 package com.indeed.jiraactions;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
@@ -12,9 +11,9 @@ import org.immutables.value.Value;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 
 @Value.Immutable
 public interface Action {
@@ -120,6 +119,6 @@ public interface Action {
 
     @Value.Derived
     default String getComponentsJoined() {
-        return Joiner.on('|').join(getComponents());
+        return Issues.join(getComponents());
     }
 }
