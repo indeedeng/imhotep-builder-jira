@@ -52,15 +52,15 @@ public class CustomFieldOutputterTest {
 
             final String expectedFieldName = "custom";
             Assert.assertThat(headers, is(equalTo(ImmutableList.of(
-                    expectedFieldName + "date",
-                    expectedFieldName + "datetime",
-                    expectedFieldName + "timestamp"))));
+                    "int " + expectedFieldName + "date",
+                    "string " + expectedFieldName + "datetime",
+                    "int " + expectedFieldName + "timestamp"))));
 
             final DateTime expectedTime = DateTime.parse("2010-03-22T14:07:43.000-0500")
                     .withZone(DateTimeZone.forOffsetHours(-6));
             Assert.assertThat(values, is(equalTo(ImmutableList.of(
                     expectedTime.toString("yyyyMMdd"),
-                    expectedTime.toString("yyyyMMddHHmmss"),
+                    expectedTime.toString("yyyy-MM-dd HH:mm:ss"),
                     String.valueOf(expectedTime.getMillis())))));
         }
     }

@@ -114,6 +114,7 @@ public class JiraActionsIndexBuilderCommandLine {
             final String[] deliveryLeadTimeTypes = config.getStringArray("snapshot.deliveryleadtime.types");
             final OptionalInt maxStringTermLength = Optional.ofNullable(config.getInteger("index.maxStringTermLength", null))
                     .map(OptionalInt::of).orElse(OptionalInt.empty());
+            final boolean retainTsv = config.getBoolean("retain.tsv", false);
 
             final JiraActionsIndexBuilderConfig indexBuilderConfig = ImmutableJiraActionsIndexBuilderConfig.builder()
                     .jiraUsername(jiraUsername)
@@ -140,6 +141,7 @@ public class JiraActionsIndexBuilderCommandLine {
                     .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))
                     .customFields(customFieldDefinitions)
                     .maxStringTermLength(maxStringTermLength)
+                    .retainTSV(retainTsv)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);
 

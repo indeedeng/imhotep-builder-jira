@@ -34,6 +34,7 @@ public interface JiraActionsIndexBuilderConfig {
     Set<String> getDeliveryLeadTimeTypes();
     CustomFieldDefinition[] getCustomFields();
     OptionalInt getMaxStringTermLength();
+    boolean getRetainTSV();
 
     @Value.Check
     default void check() {

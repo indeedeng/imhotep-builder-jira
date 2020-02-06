@@ -101,9 +101,9 @@ public interface CustomFieldDefinition {
                 return ImmutableList.of(getImhotepFieldName(), getImhotepFieldName() + "username");
             case DATETIME:
                 return ImmutableList.of(
-                        getImhotepFieldName() + "date",
-                        getImhotepFieldName() + "datetime",
-                        getImhotepFieldName() + "timestamp");
+                        "int "+ getImhotepFieldName() + "date",
+                        "string "+ getImhotepFieldName() + "datetime",
+                        "int "+ getImhotepFieldName() + "timestamp");
             case EXPANDED:
             default:
                 return ImmutableList.of(getImhotepFieldName());

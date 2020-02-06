@@ -1,6 +1,7 @@
 package com.indeed.jiraactions;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.links.Link;
@@ -37,7 +38,7 @@ public interface Action {
     String getCategory();
     String getFixversions();
     String getDueDate();
-    String getComponents();
+    List<String> getComponents();
     String getLabels();
 
     /**
@@ -115,5 +116,10 @@ public interface Action {
     @Value.Derived
     default boolean isInRange(final DateTime start, final DateTime end) {
         return start.compareTo(getTimestamp()) <= 0 && end.compareTo(getTimestamp()) > 0;
+    }
+
+    @Value.Derived
+    default String getComponentsJoined() {
+        return Joiner.on('|').join(getComponents());
     }
 }

@@ -1,6 +1,7 @@
 package com.indeed.jiraactions;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
@@ -47,12 +48,17 @@ public class CustomFieldOutputter {
                 break;
 
             case DATETIME:
-                final DateTime dateTime = JiraActionsUtil.parseDateTime(value);
-                final long date = Long.parseLong(dateTime.toString("yyyyMMdd"));
-                final long datetime = Long.parseLong(dateTime.toString("yyyyMMddHHmmss"));
-                final long timestamp = dateTime.getMillis();
+                if (Strings.isNullOrEmpty(value)) {
+                    values = ImmutableList.of("", "", "");
 
-                values = ImmutableList.of(String.valueOf(date), String.valueOf(datetime), String.valueOf(timestamp));
+                } else {
+                    final DateTime dateTime = JiraActionsUtil.parseDateTime(value);
+                    final long date = Long.parseLong(dateTime.toString("yyyyMMdd"));
+                    final String datetime = dateTime.toString("yyyy-MM-dd HH:mm:ss");
+                    final long timestamp = dateTime.getMillis();
+
+                    values = ImmutableList.of(String.valueOf(date), datetime, String.valueOf(timestamp));
+                }
 
                 break;
 

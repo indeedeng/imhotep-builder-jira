@@ -133,7 +133,7 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
         // With the Action class mocked, this unit test is a little meaningless.
         final CustomFieldValue value = newCustomFieldValue(ImmutableList.of(
                 dateTime.toString("yyyyMMdd"),
-                dateTime.toString("yyyyMMddHHmmss"),
+                dateTime.toString("yyyy-MM-dd HH:mm:ss"),
                 String.valueOf(dateTime.getMillis())));
 
         EasyMock.expect(
@@ -143,10 +143,10 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
                         .anyTimes();
 
         verifyHeadersAndValues(
-                ImmutableList.of("customdate", "customdatetime", "customtimestamp"),
+                ImmutableList.of("int customdate", "string customdatetime", "int customtimestamp"),
                 ImmutableList.of(
                         dateTime.toString("yyyyMMdd"),
-                        dateTime.toString("yyyyMMddHHmmss"),
+                        dateTime.toString("yyyy-MM-dd HH:mm:ss"),
                         String.valueOf(dateTime.getMillis()))
         );
     }

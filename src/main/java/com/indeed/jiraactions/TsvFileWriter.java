@@ -93,7 +93,7 @@ public class TsvFileWriter {
                 .addUserColumns("actor", Action::getActor)
                 .addUserColumns("assignee", Action::getAssignee)
                 .addColumn("category", Action::getCategory)
-                .addColumn("components*|", Action::getComponents)
+                .addColumn("components*|", Action::getComponentsJoined)
                 .addColumn("createdate", Action::getCreatedDate)
                 .addLongColumn("createdatetime", Action::getCreatedDateTimeLong)
                 .addLongColumn("createtimestamp", Action::getCreatedDateTimestamp)
@@ -132,7 +132,7 @@ public class TsvFileWriter {
                 .addUserColumns("actor", Action::getActor)
                 .addUserColumns("assignee", Action::getAssignee)
                 .addColumn("category", Action::getCategory)
-                .addColumn("components*|", Action::getComponents)
+                .addColumn("components*|", Action::getComponentsJoined)
                 .addLongColumn("createdate", Action::getCreatedDateLong)
                 .addLongColumn("createdatetime", Action::getCreatedDateTimeLong)
                 .addLongColumn("createtimestamp", Action::getCreatedDateTimestamp)
@@ -169,10 +169,10 @@ public class TsvFileWriter {
     private void createFileAndWriteHeaders(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getIndexName(), reformatDate(day));
         final File file = new File(filename);
-        if (StringUtils.isNotEmpty(config.getIuploadURL())) {
+        if (!config.getRetainTSV() && StringUtils.isNotEmpty(config.getIuploadURL())) {
             file.deleteOnExit();
         } else {
-            log.info("Not deleting tsv file because upload url is unset.");
+            log.info("Not deleting tsv file because retain.tsv is set or iuploadurl is unset");
         }
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -192,7 +192,9 @@ public class TsvFileWriter {
     private void createFileAndWriteHeadersJiraIssues(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getSnapshotIndexName(), reformatDate(day));
         final File file = new File(filename);
-        file.deleteOnExit();
+        if (!config.getRetainTSV()) {
+            file.deleteOnExit();
+        }
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
