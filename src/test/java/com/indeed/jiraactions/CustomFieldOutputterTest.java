@@ -10,7 +10,6 @@ import com.indeed.jiraactions.api.customfields.CustomFieldDefinitionParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import com.indeed.jiraactions.api.response.issue.Issue;
 import org.easymock.EasyMock;
-import org.hamcrest.CoreMatchers;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
@@ -36,17 +35,17 @@ public class CustomFieldOutputterTest {
                 final InputStream fieldStream = getClass().getResourceAsStream("/customfields/date-time.json")
         ) {
             final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(fieldStream);
-            Assert.assertEquals(1, definitions.length);
+            Assert.assertEquals(2, definitions.length);
 
             final JsonNode node = new ObjectMapper().readTree(issueStream);
             final Issue issue = IssueAPIParser.getObject(node);
             final Action action = newActionFactory(definitions).create(issue);
 
-            final CustomFieldDefinition definition = definitions[0];
-            final CustomFieldValue value = action.getCustomFieldValues().get(definition);
+            final CustomFieldDefinition definitionWithValue = definitions[0];
+            final CustomFieldValue valueAppearingInHistory = action.getCustomFieldValues().get(definitionWithValue);
 
-            final List<String> headers = definition.getHeaders();
-            final List<String> values = outputter.getValues(value);
+            final List<String> headers = definitionWithValue.getHeaders();
+            final List<String> values = outputter.getValues(valueAppearingInHistory);
 
             Assert.assertEquals("Headers and values must have same dimension", headers.size(), values.size());
 
@@ -62,6 +61,27 @@ public class CustomFieldOutputterTest {
                     expectedTime.toString("yyyyMMdd"),
                     expectedTime.toString("yyyy-MM-dd HH:mm:ss"),
                     String.valueOf(expectedTime.getMillis())))));
+
+
+            final CustomFieldDefinition definitionNotAppearingInHistory = definitions[1];
+            Assert.assertEquals("Custom DateTime with no value in ENGPLANS-10", definitionNotAppearingInHistory.getName());
+            final CustomFieldValue valueNotAppearingInHistory = action.getCustomFieldValues().get(definitionNotAppearingInHistory);
+
+            final List<String> headersForDefinitionNotInHistory = definitionNotAppearingInHistory.getHeaders();
+            final List<String> valuesForDefinitionNotInHistory = outputter.getValues(valueNotAppearingInHistory);
+
+            Assert.assertEquals("Headers and values must have same dimension",
+                    headersForDefinitionNotInHistory.size(),
+                    valuesForDefinitionNotInHistory.size());
+
+            Assert.assertThat(headersForDefinitionNotInHistory, is(equalTo(ImmutableList.of(
+                    "int " + expectedFieldName + "date",
+                    "string " + expectedFieldName + "datetime",
+                    "int " + expectedFieldName + "timestamp"))));
+
+            Assert.assertThat(
+                    "Custom fields that do not appear in history should result in blank values",
+                    valuesForDefinitionNotInHistory, is(equalTo(ImmutableList.of("","",""))));
         }
     }
 
