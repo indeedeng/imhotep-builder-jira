@@ -10,6 +10,7 @@ import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.User;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.Item;
+import com.indeed.jiraactions.api.response.issue.fields.Component;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import com.indeed.jiraactions.api.statustimes.StatusTime;
 import com.indeed.jiraactions.api.statustimes.StatusTimeFactory;
@@ -22,6 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 public class ActionFactory {
     private final UserLookupService userLookupService;
@@ -43,6 +47,8 @@ public class ActionFactory {
         final User assignee = userLookupService.getUser(issue.initialValueKey("assignee", "assigneekey"));
         final User reporter = userLookupService.getUser(issue.initialValueKey("reporter", "reporterkey"));
         final User creator = issue.fields.creator == null ? User.INVALID_USER : userLookupService.getUser(issue.fields.creator.getKey());
+        final List<Component> components = null == issue.fields.components ? emptyList() : ImmutableList.copyOf(issue.fields.components);
+
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
                 .actor(creator)
@@ -65,7 +71,9 @@ public class ActionFactory {
                 .category(issue.initialValue("category"))
                 .fixversions(issue.initialValue("fixversions"))
                 .dueDate(issue.initialValue("duedate"))
-                .components(ImmutableList.of())
+                .components(components.stream()
+                        .map(component -> component.name)
+                        .collect(toList()))
                 .labels(issue.initialValue("labels"))
                 .createdDate(issue.fields.created.toString("yyyy-MM-dd"))
                 .createdDateLong(Long.parseLong(issue.fields.created.toString("yyyyMMdd")))

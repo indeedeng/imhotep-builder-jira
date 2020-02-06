@@ -165,7 +165,12 @@
         "name": "Done"
       }
     },
-    "components": [],
+    "components": [{
+      "self": "https://bugs.indeed.com/rest/api/2/component/26183",
+      "id": "26183",
+      "name": "Eng",
+      "description": "General Eng Processes"
+    }],
     "customfield_12590": null,
     "customfield_14098": "2|hmhf0v:",
     "customfield_10291": null,
