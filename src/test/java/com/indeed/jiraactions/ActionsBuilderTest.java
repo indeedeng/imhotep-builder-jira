@@ -1,5 +1,9 @@
 package com.indeed.jiraactions;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.indeed.jiraactions.api.IssueAPIParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.response.issue.ImmutableUser;
@@ -18,10 +22,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 
 public class ActionsBuilderTest {
     private Issue issue;
@@ -111,6 +119,46 @@ public class ActionsBuilderTest {
             }
         }
         Assert.assertTrue(containsComment);
+    }
+
+    @Test
+    public void testBuildActions_addingComponents() throws IOException {
+        // Custom JSON issue includes the addition and removal of components in various combinations,
+        //  resulting in a final list of two.
+        try (final InputStream stream = getClass().getResourceAsStream("/ENGPLANS-10.testBuildActions_addingComponents.json")) {
+            Issue issue = parseIssue(stream);
+
+            Action action = actionFactory.create(issue);
+            for (final History history: issue.changelog.histories) {
+                action = actionFactory.update(action, history);
+            }
+
+            Assert.assertThat(action.getComponents(), equalTo(ImmutableList.of("D", "R")));
+            Assert.assertThat(action.getComponentsJoined(), equalTo("D|R"));
+        }
+    }
+
+    @Test
+    public void testBuildActions_removingComponents() throws IOException {
+        // Custom JSON issue includes the addition and removal of components in various combinations,
+        //  resulting in an empty final list.
+        try (final InputStream stream = getClass().getResourceAsStream("/ENGPLANS-10.testBuildActions_removingComponents.json")) {
+            Issue issue = parseIssue(stream);
+
+            Action action = actionFactory.create(issue);
+            for (final History history: issue.changelog.histories) {
+                action = actionFactory.update(action, history);
+            }
+
+            List<String> actual = action.getComponents();
+            Assert.assertThat(actual, equalTo(ImmutableList.of()));
+        }
+    }
+
+    private Issue parseIssue(final InputStream stream) throws IOException {
+        Assert.assertNotNull(stream);
+        final JsonNode node = new ObjectMapper().readTree(stream);
+        return IssueAPIParser.getObject(node);
     }
 
     private void createHistory(final DateTime created) {

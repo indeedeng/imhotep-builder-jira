@@ -1,11 +1,13 @@
 package com.indeed.jiraactions;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.indeed.jiraactions.api.customfields.CustomFieldDefinition;
 import com.indeed.jiraactions.api.customfields.CustomFieldValue;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,22 @@ public class CustomFieldOutputter {
                     values = ImmutableList.of("");
                 }
                 break;
+
+            case DATETIME:
+                if (Strings.isNullOrEmpty(value)) {
+                    values = ImmutableList.of("", "", "");
+
+                } else {
+                    final DateTime dateTime = JiraActionsUtil.parseDateTime(value);
+                    final long date = Long.parseLong(dateTime.toString("yyyyMMdd"));
+                    final String datetime = dateTime.toString("yyyy-MM-dd HH:mm:ss");
+                    final long timestamp = dateTime.getMillis();
+
+                    values = ImmutableList.of(String.valueOf(date), datetime, String.valueOf(timestamp));
+                }
+
+                break;
+
             default:
                 log.error("Unknown multi-field definition {} trying to process field {}",
                         definition.getMultiValueFieldConfiguration(), definition.getName());

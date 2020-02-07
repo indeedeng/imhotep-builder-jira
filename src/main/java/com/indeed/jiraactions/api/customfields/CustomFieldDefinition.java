@@ -18,9 +18,13 @@ public interface CustomFieldDefinition {
      * https://stackoverflow.com/a/44217670/1515497
      */
     enum MultiValueFieldConfiguration {
+        /** Split result into two fields (suffixed 1 and 2) */
         SEPARATE,
         EXPANDED,
+        /** Expand username values to name and username */
         USERNAME, // This is kind of a kludge because it doesn't fit the other types of multi-values, but it keeps the model clean
+        /** Expand string values in ISO date-time format into three fields for yyyyMMdd, yyyyMMddHHmmss, and timestamp */
+        DATETIME, // Equally kludgy to USERNAME. Consider refactoring.
         NONE;
 
         @JsonCreator
@@ -95,6 +99,11 @@ public interface CustomFieldDefinition {
                 return ImmutableList.of(getImhotepFieldName() + "1", getImhotepFieldName() + "2");
             case USERNAME:
                 return ImmutableList.of(getImhotepFieldName(), getImhotepFieldName() + "username");
+            case DATETIME:
+                return ImmutableList.of(
+                        "int "+ getImhotepFieldName() + "date",
+                        "string "+ getImhotepFieldName() + "datetime",
+                        "int "+ getImhotepFieldName() + "timestamp");
             case EXPANDED:
             default:
                 return ImmutableList.of(getImhotepFieldName());

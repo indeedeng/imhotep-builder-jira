@@ -11,6 +11,7 @@ import com.indeed.jiraactions.api.response.issue.User;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +19,9 @@ import org.junit.Test;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 
 public class TSVSpecBuilderTest extends EasyMockSupport {
     Action action;
@@ -115,6 +119,39 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
     }
 
     @Test
+    public void testDateTimeCustomField() {
+        final CustomFieldDefinition fieldDefinition = ImmutableCustomFieldDefinition.builder()
+                .imhotepFieldName("custom")
+                .name("my custom field")
+                .customFieldId("1234")
+                .multiValueFieldConfiguration(MultiValueFieldConfiguration.DATETIME)
+                .build();
+        builder.addCustomFieldColumns(fieldDefinition);
+        final String isoDateTime = "2010-03-22T14:07:43.000-0500";
+        final DateTime dateTime = DateTime.parse(isoDateTime).withZone(DateTimeZone.forOffsetHours(-6));
+
+        // With the Action class mocked, this unit test is a little meaningless.
+        final CustomFieldValue value = newCustomFieldValue(ImmutableList.of(
+                dateTime.toString("yyyyMMdd"),
+                dateTime.toString("yyyy-MM-dd HH:mm:ss"),
+                String.valueOf(dateTime.getMillis())));
+
+        EasyMock.expect(
+                action.getCustomFieldValues())
+                        .andReturn(
+                                ImmutableMap.of(fieldDefinition, value))
+                        .anyTimes();
+
+        verifyHeadersAndValues(
+                ImmutableList.of("int customdate", "string customdatetime", "int customtimestamp"),
+                ImmutableList.of(
+                        dateTime.toString("yyyyMMdd"),
+                        dateTime.toString("yyyy-MM-dd HH:mm:ss"),
+                        String.valueOf(dateTime.getMillis()))
+        );
+    }
+
+    @Test
     public void testUserCustomField() {
         final CustomFieldDefinition fieldDefinition = ImmutableCustomFieldDefinition.builder()
                 .imhotepFieldName("custom")
@@ -137,12 +174,15 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
         return value;
     }
 
-    private void verifyHeadersAndValues(final List<String> expectedHeaders, final List<String> expectedValues) {
+    private void verifyHeadersAndValues(
+            final List<String> expectedHeaders,
+            final List<String> expectedValues
+    ) {
         final List<TSVColumnSpec> specs = builder.build();
         final List<String> actualHeaders = specs.stream()
                 .map(TSVColumnSpec::getHeader)
                 .collect(Collectors.toList());
-        Assert.assertEquals(expectedHeaders, actualHeaders);
+        Assert.assertThat(actualHeaders, is(equalTo(expectedHeaders)));
         replayAll();
         for (int i = 0; i < specs.size(); i++) {
             final TSVColumnSpec spec = specs.get(i);

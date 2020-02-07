@@ -107,11 +107,14 @@ public class JiraActionsIndexBuilderCommandLine {
             final boolean buildSnapshotIndex = config.getBoolean("snapshot.build");
             final int jiraIssuesLookbackMonths = config.getInt("snapshot.lookbackmonths");
             final String snapshotIndexName = config.getString("snapshot.indexname");
+            final int snapshotReadRetries = config.getInt("snapshot.read.retries", 5);
+            final int snapshotWriteRetries = config.getInt("snapshot.write.retries", 5);
             final String[] deliveryLeadTimeStatuses = config.getStringArray("snapshot.deliveryleadtime..statuses");
             final String[] deliveryLeadTimeResolutions = config.getStringArray("snapshot.deliveryleadtime..resolutions");
             final String[] deliveryLeadTimeTypes = config.getStringArray("snapshot.deliveryleadtime.types");
             final OptionalInt maxStringTermLength = Optional.ofNullable(config.getInteger("index.maxStringTermLength", null))
                     .map(OptionalInt::of).orElse(OptionalInt.empty());
+            final boolean retainTsv = config.getBoolean("retain.tsv", false);
 
             final JiraActionsIndexBuilderConfig indexBuilderConfig = ImmutableJiraActionsIndexBuilderConfig.builder()
                     .jiraUsername(jiraUsername)
@@ -130,11 +133,15 @@ public class JiraActionsIndexBuilderCommandLine {
                     .indexName(indexName)
                     .buildSnapshotIndex(buildSnapshotIndex)
                     .snapshotLookbackMonths(jiraIssuesLookbackMonths)
+                    .snapshotIndexName(snapshotIndexName)
+                    .snapshotReadRetries(snapshotReadRetries)
+                    .snapshotWriteRetries(snapshotWriteRetries)
                     .deliveryLeadTimeStatuses(new HashSet<>(Arrays.asList(deliveryLeadTimeStatuses)))
                     .deliveryLeadTimeResolutions(new HashSet<>(Arrays.asList(deliveryLeadTimeResolutions)))
                     .deliveryLeadTimeTypes(new HashSet<>(Arrays.asList(deliveryLeadTimeTypes)))
                     .customFields(customFieldDefinitions)
                     .maxStringTermLength(maxStringTermLength)
+                    .retainTSV(retainTsv)
                     .build();
             indexBuilder = new JiraActionsIndexBuilder(indexBuilderConfig);
 

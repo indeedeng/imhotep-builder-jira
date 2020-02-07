@@ -93,12 +93,14 @@ public class TsvFileWriter {
                 .addUserColumns("actor", Action::getActor)
                 .addUserColumns("assignee", Action::getAssignee)
                 .addColumn("category", Action::getCategory)
-                .addColumn("components*|", Action::getComponents)
+                .addColumn("components*|", Action::getComponentsJoined)
                 .addColumn("createdate", Action::getCreatedDate)
+                .addColumn("createdatetime", Action::getCreatedDateTime)
+                .addLongColumn("createtimestamp", Action::getCreatedDateTimestamp)
                 .addColumn("duedate", Action::getDueDate)
                 .addTimeColumn("int duedate_time", Action::getDueDateTime)
                 .addColumn("fieldschanged*", Action::getFieldschanged)
-                .addColumn("fixversion*|", Action::getFixversions)
+                .addColumn("fixversion*|", Action::getFixVersionsJoined)
                 .addLongColumn("issueage", Action::getIssueage)
                 .addColumn("issuetype", Action::getIssuetype)
                 .addColumn("labels*", Action::getLabels)
@@ -108,6 +110,9 @@ public class TsvFileWriter {
                 .addColumn("prevstatus", Action::getPrevstatus)
                 .addUserColumns("reporter", Action::getReporter)
                 .addColumn("resolution", Action::getResolution)
+                .addColumn("resolutiondate", Action::getResolutionDate)
+                .addColumn("resolutiondatetime", Action::getResolutionDateTime)
+                .addLongColumn("resolutiontimestamp", Action::getResolutionDateTimestamp)
                 .addColumn("status", Action::getStatus)
                 .addColumn("summary", Action::getSummary)
                 .addLongColumn("timeinstate", Action::getTimeinstate)
@@ -127,11 +132,13 @@ public class TsvFileWriter {
                 .addUserColumns("actor", Action::getActor)
                 .addUserColumns("assignee", Action::getAssignee)
                 .addColumn("category", Action::getCategory)
-                .addColumn("components*|", Action::getComponents)
+                .addColumn("components*|", Action::getComponentsJoined)
                 .addLongColumn("createdate", Action::getCreatedDateLong)
+                .addColumn("createdatetime", Action::getCreatedDateTime)
+                .addLongColumn("createtimestamp", Action::getCreatedDateTimestamp)
                 .addColumn("duedate", Action::getDueDate)
                 .addTimeColumn("int duedate_time", Action::getDueDateTime)
-                .addColumn("fixversion*|", Action::getFixversions)
+                .addColumn("fixversion*|", Action::getFixVersionsJoined)
                 .addLongColumn("issueage", Action::getIssueage)
                 .addColumn("issuetype", Action::getIssuetype)
                 .addColumn("labels*", Action::getLabels)
@@ -145,7 +152,9 @@ public class TsvFileWriter {
                 .addTimeColumn("time", Action::getTimestamp)
                 .addLongColumn("comments", Action::getComments)
                 .addLongColumn("closedate", Action::getClosedDate)
-                .addLongColumn("resolutiondate", Action::getResolutionDate)
+                .addLongColumn("resolutiondate", Action::getResolutionDateLong)
+                .addColumn("resolutiondatetime", Action::getResolutionDateTime)
+                .addLongColumn("resolutiontimestamp", Action::getResolutionDateTimestamp)
                 .addLongColumn("lastupdated", Action::getLastUpdated)
                 .addLongColumn("deliveryleadtime", Action::getDeliveryLeadTime)
                 .addStatusTimeColumns(statusTypes)
@@ -160,10 +169,10 @@ public class TsvFileWriter {
     private void createFileAndWriteHeaders(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getIndexName(), reformatDate(day));
         final File file = new File(filename);
-        if (StringUtils.isNotEmpty(config.getIuploadURL())) {
+        if (!config.getRetainTSV() && StringUtils.isNotEmpty(config.getIuploadURL())) {
             file.deleteOnExit();
         } else {
-            log.info("Not deleting tsv file because upload url is unset.");
+            log.info("Not deleting tsv file because retain.tsv is set or iuploadurl is unset");
         }
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -183,7 +192,9 @@ public class TsvFileWriter {
     private void createFileAndWriteHeadersJiraIssues(final DateTime day) throws IOException {
         final String filename = String.format("%s_%s.tsv", config.getSnapshotIndexName(), reformatDate(day));
         final File file = new File(filename);
-        file.deleteOnExit();
+        if (!config.getRetainTSV()) {
+            file.deleteOnExit();
+        }
 
         final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 

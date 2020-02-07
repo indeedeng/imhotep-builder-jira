@@ -9,11 +9,12 @@ import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 
 @Value.Immutable
 public interface Action {
@@ -35,19 +36,67 @@ public interface Action {
     long getTimesinceaction();
     DateTime getTimestamp();
     String getCategory();
-    String getFixversions();
+    List<String> getFixVersions();
     String getDueDate();
-    String getComponents();
+    List<String> getComponents();
     String getLabels();
+
+    /**
+     * @return Date issue was created, in yyyy-MM-dd format
+     */
     String getCreatedDate();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was created, as represented in yyyyMMdd format.
+     */
+    long getCreatedDateLong();
+
+    /**
+     * Returns an integer value that can be used for date-time arithmetic.
+     *
+     * @return Long integer representing the date the issue was created, as represented in yyyyMMddhhmmss format.
+     */
+    long getCreatedDateTimeLong();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was created, in Unix epoch time format
+     */
+    long getCreatedDateTimestamp();
+
+    /**
+     * @return Date issue was created, in yyyy-MM-dd format
+     */
+    String getResolutionDate();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was resolved, as represented in yyyyMMdd format.
+     */
+    long getResolutionDateLong();
+
+    /**
+     * Returns an integer value that can be used for date-time arithmetic.
+     *
+     * @return Long integer representing the date the issue was resolved, as represented in yyyyMMddhhmmss format.
+     */
+    long getResolutionDateTimeLong();
+
+    /**
+     * Returns an integer value that can be used for date arithmetic.
+     *
+     * @return Long integer representing the date the issue was resolved, in Unix epoch time format
+     */
+    long getResolutionDateTimestamp();
+
     String getPriority();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();
-
-    // Jiraissues Fields - Building these fields alongside the jiraactions fields does not affect the jiraactions TSV unless they are added into its headers through TsvFileWriter
-    long getCreatedDateLong();
     long getClosedDate();
-    long getResolutionDate();
     long getLastUpdated();
     long getDeliveryLeadTime();
     long getComments();
@@ -67,5 +116,25 @@ public interface Action {
     @Value.Derived
     default boolean isInRange(final DateTime start, final DateTime end) {
         return start.compareTo(getTimestamp()) <= 0 && end.compareTo(getTimestamp()) > 0;
+    }
+
+    @Value.Derived
+    default String getCreatedDateTime() {
+        return new DateTime(getCreatedDateLong()).withZone(DateTimeZone.forOffsetHours(-6)).toString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    @Value.Derived
+    default String getResolutionDateTime() {
+        return new DateTime(getResolutionDateTimeLong()).withZone(DateTimeZone.forOffsetHours(-6)).toString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    @Value.Derived
+    default String getFixVersionsJoined() {
+        return Issues.join(getFixVersions());
+    }
+
+    @Value.Derived
+    default String getComponentsJoined() {
+        return Issues.join(getComponents());
     }
 }

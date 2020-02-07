@@ -30,8 +30,6 @@ import java.util.zip.GZIPOutputStream;
 
 public class JiraIssuesFileWriter {
     private static final Logger log = LoggerFactory.getLogger(JiraIssuesFileWriter.class);
-    private static final int NUM_RETRIES = 5;
-
     private final JiraActionsIndexBuilderConfig config;
 
     private WriterData writerData;
@@ -57,7 +55,7 @@ public class JiraIssuesFileWriter {
                 config.getIuploadURL(), config.getSnapshotIndexName(), config.getSnapshotIndexName(), formattedDate));
         log.info("Attempting to download previous TSV at {}", url.toString());
 
-        for (int tries = 1; tries <= NUM_RETRIES; tries++) {
+        for (int tries = 1; tries <= config.getSnapshotReadRetries(); tries++) {
             backoff = Math.max(backoff / 2, 10000);
             final HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization", basicAuth);
@@ -77,7 +75,7 @@ public class JiraIssuesFileWriter {
                 in.close();
                 return file;
             } catch (final IOException e) {
-                log.error("Failed to download yesterday's TSV on try {}/5.", tries);
+                log.error("Failed to download yesterday's TSV on try {}/{}.", tries, config.getSnapshotReadRetries());
                 if (tries == 5) {
                     log.error("Failed on final try, aborting.", e);
                 }
@@ -111,7 +109,7 @@ public class JiraIssuesFileWriter {
                     .addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName())
                     .build());
 
-            for (int i = 0; i < NUM_RETRIES; i++) {
+            for (int i = 0; i < config.getSnapshotWriteRetries(); i++) {
                 try {
                     final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
                     log.info("Http response: " + response.getStatusLine().toString() + ": " + file.getName() + ".");

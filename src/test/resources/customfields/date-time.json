@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Custom DateTime with value in ENGPLANS-10",
+    "customfieldid": "customfield_99999",
+    "imhotepfieldname": "custom",
+    "multiValueFieldConfiguration": "DATETIME"
+  },
+  {
+    "name": "Custom DateTime with no value in ENGPLANS-10",
+    "customfieldid": "customfield_88888",
+    "imhotepfieldname": "custom",
+    "multiValueFieldConfiguration": "DATETIME"
+  }
+]
