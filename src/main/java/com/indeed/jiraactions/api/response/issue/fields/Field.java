@@ -81,7 +81,7 @@ public class Field {
                         ? ""
                         : category.name;
             }
-            case "fixversions": return fixVersions == null ? "" : Joiner.on("|").join(fixVersions);
+            case "fixversions": return fixVersions == null ? "" : Issues.join(fixVersions);
             case "duedate": return duedate == null ? "" : duedate;
             case "resolutiondate": return resolutiondate == null ? "" : resolutiondate;
             case "component": return components == null ? "" : Issues.join(components);

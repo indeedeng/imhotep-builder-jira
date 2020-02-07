@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class ActionFactory {
     private final UserLookupService userLookupService;
@@ -63,7 +64,7 @@ public class ActionFactory {
                 .timesinceaction(0)
                 .timestamp(issue.fields.created)
                 .category(issue.initialValue("category"))
-                .fixversions(issue.initialValue("fixversions"))
+                .fixVersions(Issues.split(issue.initialValue("fixversions")))
                 .dueDate(issue.initialValue("duedate"))
                 .components(Issues.split(issue.initialValue("component")))
                 .labels(issue.initialValue("labels"))
@@ -119,9 +120,9 @@ public class ActionFactory {
                 .timesinceaction(getTimeDiff(prevAction.getTimestamp(), history.created))
                 .timestamp(history.created)
                 .category(history.itemExist("category") ? history.getItemLastValue("category") : prevAction.getCategory())
-                .fixversions(history.itemExist("fixversions") ? history.getItemLastValue("fixversions") : prevAction.getFixversions())
+                .fixVersions(extractMultivaluedRichField("fixversions", Action::getFixVersions, prevAction, history))
                 .dueDate(history.itemExist("duedate") ? history.getItemLastValue("duedate").replace(" 00:00:00.0", "") : prevAction.getDueDate())
-                .components(extractComponents(prevAction, history))
+                .components(extractMultivaluedRichField("component", Action::getComponents, prevAction, history))
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate())
                 .createdDateLong(prevAction.getCreatedDateLong())
@@ -146,27 +147,33 @@ public class ActionFactory {
     }
 
     /**
-     * Jira's changelog behaves a little counterintuitively for components. A single history entry can
-     *  include multiple items with the "Component" field, and the from/to values of the item are specific
-     *  to the individual Component value (in the multivalued list). This means that to construct the current
-     *  state of the components list, we must collect the individual updates over history, rather than simply
+     * Jira's changelog behaves a little counterintuitively for multivalued rich objects. A single history entry can
+     *  include multiple items with the field, and the from/to values of the item are specific
+     *  to the individual value (in the multivalued list). This means that to construct the current
+     *  state of the list, we must collect the individual updates over history, rather than simply
      *  relying on the most recent "To:" value in the list.
      */
-    private List<String> extractComponents(final Action prevAction, final History history) {
-        final List<String> components;
-        if (history.itemExist("component")) {
-            components = Lists.newArrayList(prevAction.getComponents());
-            for (Item item: history.getAllItems("component")) {
+    private List<String> extractMultivaluedRichField(
+            final String field,
+            Function<Action, List<String>> getter,
+            final Action prevAction,
+            final History history
+    ) {
+        final List<String> values;
+        if (history.itemExist(field)) {
+            values = Lists.newArrayList(getter.apply(prevAction));
+            for (Item item: history.getAllItems(field)) {
                 if (Strings.isNullOrEmpty(item.toString)) {
-                    components.remove(item.fromString);
+                    values.remove(item.fromString);
                 } else {
-                    components.add(item.toString);
+                    values.add(item.toString);
                 }
             }
         } else {
-            components = prevAction.getComponents();
+            values = getter.apply(prevAction);
         }
-        return components;
+
+        return values;
     }
 
     public Action comment(final Action prevAction, final Comment comment) {

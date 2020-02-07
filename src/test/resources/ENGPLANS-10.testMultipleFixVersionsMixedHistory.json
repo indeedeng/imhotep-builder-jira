@@ -1,0 +1,410 @@
+{
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+  "id": "16142",
+  "self": "https://bugs.indeed.com/rest/api/latest/issue/16142",
+  "key": "ENGPLANS-10",
+  "fields": {
+    "issuetype": {
+      "self": "https://bugs.indeed.com/rest/api/2/issuetype/4",
+      "id": "4",
+      "description": "An improvement or enhancement to an existing feature or task.",
+      "iconUrl": "https://bugs.indeed.com/secure/viewavatar?size=xsmall&avatarId=15970&avatarType=issuetype",
+      "name": "Improvement",
+      "subtask": false,
+      "avatarId": 15970
+    },
+    "customfield_12090": null,
+    "customfield_12290": null,
+    "customfield_16292": null,
+    "customfield_16490": "2010-03-22T14:07:43.000-0500",
+    "customfield_12491": null,
+    "customfield_12490": null,
+    "customfield_10072": "10000_*:*_1_*:*_4085000_*|*_10008_*:*_1_*:*_0_*|*_10002_*:*_1_*:*_18000",
+    "customfield_10270": null,
+    "timespent": null,
+    "customfield_10590": "12240",
+    "customfield_99999": "2010-03-22T14:07:43.000-0500",
+    "project": {
+      "self": "https://bugs.indeed.com/rest/api/2/project/10004",
+      "id": "10004",
+      "key": "ENGPLANS",
+      "name": "Engineering Processes",
+      "avatarUrls": {
+        "48x48": "https://bugs.indeed.com/secure/projectavatar?pid=10004&avatarId=10011",
+        "24x24": "https://bugs.indeed.com/secure/projectavatar?size=small&pid=10004&avatarId=10011",
+        "16x16": "https://bugs.indeed.com/secure/projectavatar?size=xsmall&pid=10004&avatarId=10011",
+        "32x32": "https://bugs.indeed.com/secure/projectavatar?size=medium&pid=10004&avatarId=10011"
+      },
+      "projectCategory": {
+        "self": "https://bugs.indeed.com/rest/api/2/projectCategory/10260",
+        "id": "10260",
+        "description": "",
+        "name": "Engineering Process"
+      }
+    },
+    "customfield_10395": null,
+    "customfield_22094": null,
+    "fixVersions": [{
+        "self": "https://bugs.indeed.com/rest/api/2/version/12287",
+        "id": "12287",
+        "description": "tentative dark launch",
+        "name": "Private launch",
+        "released": true,
+        "releaseDate": "2001-01-01"
+      }, {
+        "self": "https://bugs.indeed.com/rest/api/2/version/12288",
+        "id": "12288",
+        "description": "final public launch",
+        "name": "Public launch",
+        "released": true,
+        "releaseDate": "2001-01-01"
+      }
+    ],
+    "customfield_10990": null,
+    "aggregatetimespent": null,
+    "resolution": {
+      "self": "https://bugs.indeed.com/rest/api/2/resolution/1",
+      "id": "1",
+      "description": "A fix for this issue is checked into the tree and tested.",
+      "name": "Fixed"
+    },
+    "customfield_12498": null,
+    "customfield_23591": null,
+    "resolutiondate": "2009-02-12T18:48:50.000-0600",
+    "customfield_23394": null,
+    "workratio": -1,
+    "customfield_20500": null,
+    "customfield_17890": null,
+    "lastViewed": "2020-02-04T00:33:13.627-0600",
+    "watches": {
+      "self": "https://bugs.indeed.com/rest/api/2/issue/ENGPLANS-10/watchers",
+      "watchCount": 0,
+      "isWatching": false
+    },
+    "customfield_11190": null,
+    "created": "2009-02-12T17:40:27.000-0600",
+    "customfield_10020": null,
+    "priority": {
+      "self": "https://bugs.indeed.com/rest/api/2/priority/4",
+      "iconUrl": "https://bugs.indeed.com/images/icons/priorities/minor.svg",
+      "name": "Minor",
+      "id": "4"
+    },
+    "customfield_21190": null,
+    "labels": [],
+    "customfield_23090": null,
+    "customfield_24090": null,
+    "customfield_24091": null,
+    "customfield_24092": null,
+    "customfield_24490": null,
+    "aggregatetimeoriginalestimate": null,
+    "timeestimate": null,
+    "issuelinks": [
+      {
+        "id": "18464",
+        "self": "https://bugs.indeed.com/rest/api/2/issueLink/18464",
+        "type": {
+          "id": "10001",
+          "name": "Reference",
+          "inward": "is referenced by",
+          "outward": "references",
+          "self": "https://bugs.indeed.com/rest/api/2/issueLinkType/10001"
+        },
+        "inwardIssue": {
+          "id": "41378",
+          "key": "ENGPLANS-63",
+          "self": "https://bugs.indeed.com/rest/api/2/issue/41378",
+          "fields": {
+            "summary": "Ivy 2.1.0",
+            "status": {
+              "self": "https://bugs.indeed.com/rest/api/2/status/6",
+              "description": "The issue is considered finished, the resolution is correct. Issues which are closed can not be reopened.",
+              "iconUrl": "https://bugs.indeed.com/images/icons/statuses/trash.png",
+              "name": "Closed",
+              "id": "6",
+              "statusCategory": {
+                "self": "https://bugs.indeed.com/rest/api/2/statuscategory/3",
+                "id": 3,
+                "key": "done",
+                "colorName": "green",
+                "name": "Done"
+              }
+            },
+            "priority": {
+              "self": "https://bugs.indeed.com/rest/api/2/priority/4",
+              "iconUrl": "https://bugs.indeed.com/images/icons/priorities/minor.svg",
+              "name": "Minor",
+              "id": "4"
+            },
+            "issuetype": {
+              "self": "https://bugs.indeed.com/rest/api/2/issuetype/4",
+              "id": "4",
+              "description": "An improvement or enhancement to an existing feature or task.",
+              "iconUrl": "https://bugs.indeed.com/secure/viewavatar?size=xsmall&avatarId=15970&avatarType=issuetype",
+              "name": "Improvement",
+              "subtask": false,
+              "avatarId": 15970
+            }
+          }
+        }
+      }
+    ],
+    "assignee": {
+      "self": "https://bugs.indeed.com/rest/api/2/user?username=c",
+      "name": "c",
+      "key": "c",
+      "emailAddress": "devnull@indeed.com",
+      "avatarUrls": {
+        "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+        "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+        "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+        "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+      },
+      "displayName": "C",
+      "active": false,
+      "timeZone": "America/Chicago"
+    },
+    "updated": "2010-03-22T14:13:33.000-0500",
+    "customfield_13090": null,
+    "status": {
+      "self": "https://bugs.indeed.com/rest/api/2/status/6",
+      "description": "The issue is considered finished, the resolution is correct. Issues which are closed can not be reopened.",
+      "iconUrl": "https://bugs.indeed.com/images/icons/statuses/trash.png",
+      "name": "Closed",
+      "id": "6",
+      "statusCategory": {
+        "self": "https://bugs.indeed.com/rest/api/2/statuscategory/3",
+        "id": 3,
+        "key": "done",
+        "colorName": "green",
+        "name": "Done"
+      }
+    },
+    "components": [{
+      "self": "https://bugs.indeed.com/rest/api/2/component/26183",
+      "id": "26183",
+      "name": "Eng",
+      "description": "General Eng Processes"
+    }, {
+      "self": "https://bugs.indeed.com/rest/api/2/component/26184",
+      "id": "26184",
+      "name": "Specialized",
+      "description": "Specialized Eng Processes"
+    }],
+    "customfield_12590": null,
+    "customfield_14098": "2|hmhf0v:",
+    "customfield_10291": null,
+    "timeoriginalestimate": null,
+    "customfield_10690": "9774",
+    "customfield_10130": [],
+    "description": "We're still on 2.0.0-beta2. 2.0.0 was released.",
+    "customfield_10891": "r(r)",
+    "customfield_22190": null,
+    "customfield_13403": null,
+    "timetracking": {},
+    "customfield_12503": "0.0",
+    "attachment": [],
+    "aggregatetimeestimate": null,
+    "customfield_23890": null,
+    "customfield_23891": null,
+    "customfield_23892": null,
+    "customfield_23893": null,
+    "customfield_23894": null,
+    "customfield_23895": null,
+    "customfield_20202": null,
+    "customfield_23896": null,
+    "customfield_20203": null,
+    "customfield_23897": null,
+    "summary": "Upgrade Ivy from 2.0.0-beta2 to 2.0.0",
+    "customfield_11090": null,
+    "creator": {
+      "self": "https://bugs.indeed.com/rest/api/2/user?username=j",
+      "name": "j",
+      "key": "j",
+      "emailAddress": "devnull@indeed.com",
+      "avatarUrls": {
+        "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+        "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+        "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+        "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+      },
+      "displayName": "J",
+      "active": true,
+      "timeZone": "America/Chicago"
+    },
+    "customfield_11490": null,
+    "customfield_21692": null,
+    "subtasks": [],
+    "customfield_21691": null,
+    "reporter": {
+      "self": "https://bugs.indeed.com/rest/api/2/user?username=j",
+      "name": "j",
+      "key": "j",
+      "emailAddress": "devnull@indeed.com",
+      "avatarUrls": {
+        "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+        "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+        "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+        "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+      },
+      "displayName": "J",
+      "active": true,
+      "timeZone": "America/Chicago"
+    },
+    "customfield_10044": null,
+    "aggregateprogress": {
+      "progress": 0,
+      "total": 0
+    },
+    "customfield_10002": null,
+    "customfield_10003": {
+      "self": "https://bugs.indeed.com/rest/api/2/user?username=c",
+      "name": "c",
+      "key": "c",
+      "emailAddress": "devnull@indeed.com",
+      "avatarUrls": {
+        "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+        "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+        "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+        "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+      },
+      "displayName": "C",
+      "active": false,
+      "timeZone": "America/Chicago"
+    },
+    "customfield_24190": null,
+    "duedate": null,
+    "progress": {
+      "progress": 0,
+      "total": 0
+    },
+    "comment": {
+      "comments": [
+        {
+          "self": "https://bugs.indeed.com/rest/api/2/issue/16142/comment/133346",
+          "id": "133346",
+          "author": {
+            "self": "https://bugs.indeed.com/rest/api/2/user?username=c",
+            "name": "c",
+            "key": "c",
+            "emailAddress": "devnull@indeed.com",
+            "avatarUrls": {
+              "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+              "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+              "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+              "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+            },
+            "displayName": "C",
+            "active": false,
+            "timeZone": "America/Chicago"
+          },
+          "body": "We're using ivy 2.0.0 release in ant/lib.  2.1.0 is released now.",
+          "updateAuthor": {
+            "self": "https://bugs.indeed.com/rest/api/2/user?username=c",
+            "name": "c",
+            "key": "c",
+            "emailAddress": "devnull@indeed.com",
+            "avatarUrls": {
+              "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+              "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+              "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+              "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+            },
+            "displayName": "C",
+            "active": false,
+            "timeZone": "America/Chicago"
+          },
+          "created": "2010-03-22T14:07:43.000-0500",
+          "updated": "2010-03-22T14:07:43.000-0500"
+        },
+        {
+          "self": "https://bugs.indeed.com/rest/api/2/issue/16142/comment/133349",
+          "id": "133349",
+          "author": {
+            "self": "https://bugs.indeed.com/rest/api/2/user?username=j",
+            "name": "j",
+            "key": "j",
+            "emailAddress": "devnull@indeed.com",
+            "avatarUrls": {
+              "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+              "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+              "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+              "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+            },
+            "displayName": "J",
+            "active": true,
+            "timeZone": "America/Chicago"
+          },
+          "body": "We upgraded on Feb 12/2009.",
+          "updateAuthor": {
+            "self": "https://bugs.indeed.com/rest/api/2/user?username=j",
+            "name": "j",
+            "key": "j",
+            "emailAddress": "devnull@indeed.com",
+            "avatarUrls": {
+              "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+              "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+              "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+              "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+            },
+            "displayName": "J",
+            "active": true,
+            "timeZone": "America/Chicago"
+          },
+          "created": "2010-03-22T14:13:33.000-0500",
+          "updated": "2010-03-22T14:13:33.000-0500"
+        }
+      ],
+      "maxResults": 2,
+      "total": 2,
+      "startAt": 0
+    },
+    "votes": {
+      "self": "https://bugs.indeed.com/rest/api/2/issue/ENGPLANS-10/votes",
+      "votes": 0,
+      "hasVoted": false
+    },
+    "worklog": {
+      "startAt": 0,
+      "maxResults": 20,
+      "total": 0,
+      "worklogs": []
+    }
+  },
+  "changelog": {
+    "startAt": 0,
+    "maxResults": 7,
+    "total": 7,
+    "histories": [
+      {
+        "id": "45130",
+        "author": {
+          "self": "https://bugs.indeed.com/rest/api/2/user?username=j",
+          "name": "j",
+          "key": "j",
+          "emailAddress": "devnull@indeed.com",
+          "avatarUrls": {
+            "48x48": "https://bugs.indeed.com/secure/useravatar?avatarId=10182",
+            "24x24": "https://bugs.indeed.com/secure/useravatar?size=small&avatarId=10182",
+            "16x16": "https://bugs.indeed.com/secure/useravatar?size=xsmall&avatarId=10182",
+            "32x32": "https://bugs.indeed.com/secure/useravatar?size=medium&avatarId=10182"
+          },
+          "displayName": "J",
+          "active": true,
+          "timeZone": "America/Chicago"
+        },
+        "created": "2009-02-12T18:48:32.000-0600",
+        "items": [
+          {
+            "field": "Fix Version",
+            "fieldtype": "jira",
+            "from": null,
+            "fromString": "",
+            "to": "12288",
+            "toString": "Public launch"
+          }
+        ]
+      }
+    ]
+  }
+}

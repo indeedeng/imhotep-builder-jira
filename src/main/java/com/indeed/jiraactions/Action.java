@@ -35,7 +35,7 @@ public interface Action {
     long getTimesinceaction();
     DateTime getTimestamp();
     String getCategory();
-    String getFixversions();
+    List<String> getFixVersions();
     String getDueDate();
     List<String> getComponents();
     String getLabels();
@@ -115,6 +115,11 @@ public interface Action {
     @Value.Derived
     default boolean isInRange(final DateTime start, final DateTime end) {
         return start.compareTo(getTimestamp()) <= 0 && end.compareTo(getTimestamp()) > 0;
+    }
+
+    @Value.Derived
+    default String getFixVersionsJoined() {
+        return Issues.join(getFixVersions());
     }
 
     @Value.Derived

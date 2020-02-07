@@ -1,7 +1,7 @@
 package com.indeed.jiraactions.api.response.issue;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.indeed.jiraactions.Issues;
@@ -14,8 +14,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author soono
@@ -31,7 +29,8 @@ public class Issue {
     // Multivalued rich object fields are treated different in Jira changelog histories than
     //  multivalued primitive fields.
     private static Set<String> MULTIVALUED_RICH_FIELDS = ImmutableSet.of(
-            "component"
+            "component",
+            "fixversions"
     );
 
     public String initialValue(final String field) throws IOException {
@@ -46,16 +45,14 @@ public class Issue {
             // Multivalued rich fields' initial state must be determined by inference from
             //  taking the current state and walking the history to reverse the actions.
             List<String> values =
-                    null == this.fields.components ?
+                    Strings.isNullOrEmpty(this.fields.getStringValue(field)) ?
                             Lists.newArrayList() :
-                            ImmutableList.copyOf(this.fields.components).stream()
-                                    .map(component -> component.name)
-                                    .collect(toList());
+                            Lists.newArrayList(Issues.split(this.fields.getStringValue(field)));
 
             if (null != this.changelog && null != this.changelog.histories) {
                 for (int i = this.changelog.histories.length - 1; i >= 0; i--) {
                     final History history = this.changelog.histories[i];
-                    for (final Item item: history.getAllItems("component")) {
+                    for (final Item item: history.getAllItems(field)) {
                         // Reverse the action.
                         if (null == item.to) {
                             // Reverse the removal
