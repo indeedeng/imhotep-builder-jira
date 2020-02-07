@@ -9,6 +9,7 @@ import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -115,6 +116,16 @@ public interface Action {
     @Value.Derived
     default boolean isInRange(final DateTime start, final DateTime end) {
         return start.compareTo(getTimestamp()) <= 0 && end.compareTo(getTimestamp()) > 0;
+    }
+
+    @Value.Derived
+    default String getCreatedDateTime() {
+        return new DateTime(getCreatedDateLong()).withZone(DateTimeZone.forOffsetHours(-6)).toString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    @Value.Derived
+    default String getResolutionDateTime() {
+        return new DateTime(getResolutionDateTimeLong()).withZone(DateTimeZone.forOffsetHours(-6)).toString("yyyy-MM-dd HH:mm:ss");
     }
 
     @Value.Derived
