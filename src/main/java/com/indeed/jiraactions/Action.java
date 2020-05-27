@@ -93,6 +93,10 @@ public interface Action {
      */
     long getResolutionDateTimestamp();
 
+    long getTimeOriginalEstimate();
+    long getTimeEstimate();
+    long getTimeSpent();
+
     String getPriority();
     Map<CustomFieldDefinition, CustomFieldValue> getCustomFieldValues();
     Set<Link> getLinks();

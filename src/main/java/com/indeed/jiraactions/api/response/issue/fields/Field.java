@@ -37,6 +37,10 @@ public class Field {
     public Priority priority;
     public Map<String, JsonNode> otherProperties = new HashMap<>();
 
+    public Long timeoriginalestimate;
+    public Long timeestimate;
+    public Long timespent;
+
     @JsonProperty("created")
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);

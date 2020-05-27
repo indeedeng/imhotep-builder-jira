@@ -74,6 +74,9 @@ public class ActionFactory {
                 .createdDateTimestamp(issue.fields.created.getMillis() / 1000)
                 .lastUpdated(0)
                 .closedDate(0)
+                .timeOriginalEstimate(issue.fields.timeoriginalestimate == null ? 0 : issue.fields.timeoriginalestimate)
+                .timeEstimate(issue.fields.timeestimate == null ? 0 : issue.fields.timeestimate)
+                .timeSpent(issue.fields.timespent == null ? 0 : issue.fields.timespent)
                 .resolutionDate(JiraActionsUtil.parseDateTime(issue.initialValue("resolutiondate")).toString("yyyy-MM-dd"))
                 .resolutionDateLong(parseDate(issue.initialValue("resolutiondate")))
                 .resolutionDateTimeLong(parseDateTime(issue.initialValue("resolutiondate")))
@@ -84,9 +87,9 @@ public class ActionFactory {
                 .statusHistory(createStatusHistory(issue.initialValue("status")))
                 .links(Collections.emptySet());
 
-            for (final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
-                builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseInitialValue(customFieldDefinition, issue));
-            }
+        for (final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
+            builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseInitialValue(customFieldDefinition, issue));
+        }
 
         return builder.build();
     }
@@ -134,6 +137,9 @@ public class ActionFactory {
                 .resolutionDateTimeLong(history.itemExist("resolutiondate") ? parseDateTime(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimeLong())
                 .resolutionDateTimestamp(history.itemExist("resolutiondate") ? parseTimestamp(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimestamp())
                 .lastUpdated(0) // This field is used internally to filter issues longer than 6 months. It's only used by jiraissues so it will always go through the toCurrent() method where it takes the date of the previous action.
+                .timeOriginalEstimate((history.itemExist("timeoriginalestimate") && history.getItemLastValue("timeoriginalestimate") != null) ? Long.parseLong(history.getItemLastValue("timeoriginalestimate")) : prevAction.getTimeOriginalEstimate())
+                .timeEstimate((history.itemExist("timeestimate") && history.getItemLastValue("timeestimate") != null) ? Long.parseLong(history.getItemLastValue("timeestimate")) : prevAction.getTimeEstimate())
+                .timeSpent((history.itemExist("timespent") && history.getItemLastValue("timespent") != null) ? Long.parseLong(history.getItemLastValue("timespent")) : prevAction.getTimeSpent())
                 .comments(prevAction.getComments())
                 .deliveryLeadTime(0)
                 .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")))
