@@ -37,6 +37,10 @@ public class Field {
     public Priority priority;
     public Map<String, JsonNode> otherProperties = new HashMap<>();
 
+    public String timeoriginalestimate;
+    public String timeestimate;
+    public String timespent;
+
     @JsonProperty("created")
     public void setCreate(final String created) {
         this.created = JiraActionsUtil.parseDateTime(created);
@@ -87,6 +91,9 @@ public class Field {
             case "component": return components == null ? "" : Issues.join(components);
             case "labels": return labels == null ? "" : Joiner.on(" ").join(labels);
             case "priority": return priority == null ? "" : priority.name;
+            case "timeoriginalestimate": return timeoriginalestimate == null || timeoriginalestimate.isEmpty() ? "0" : timeoriginalestimate;
+            case "timeestimate": return timeestimate == null || timeestimate.isEmpty() ? "0" : timeestimate;
+            case "timespent": return timespent == null || timespent.isEmpty() ? "0" : timespent;
         }
         throw new IOException("Wrong input name " + attribute);
     }

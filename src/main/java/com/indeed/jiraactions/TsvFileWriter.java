@@ -118,6 +118,9 @@ public class TsvFileWriter {
                 .addLongColumn("timeinstate", Action::getTimeinstate)
                 .addLongColumn("timesinceaction", Action::getTimesinceaction)
                 .addTimeColumn("time", Action::getTimestamp)
+                .addLongColumn("originalestimate", Action::getTimeOriginalEstimate)
+                .addLongColumn("remainingestimate", Action::getTimeEstimate)
+                .addLongColumn("timespent", Action::getTimeSpent)
                 .addLinkColumns(linkTypes);
 
         for (final CustomFieldDefinition customField : config.getCustomFields()) {
@@ -152,6 +155,9 @@ public class TsvFileWriter {
                 .addTimeColumn("time", Action::getTimestamp)
                 .addLongColumn("comments", Action::getComments)
                 .addLongColumn("closedate", Action::getClosedDate)
+                .addLongColumn("originalestimate", Action::getTimeOriginalEstimate)
+                .addLongColumn("remainingestimate", Action::getTimeEstimate)
+                .addLongColumn("timespent", Action::getTimeSpent)
                 .addLongColumn("resolutiondate", Action::getResolutionDateLong)
                 .addColumn("resolutiondatetime", Action::getResolutionDateTime)
                 .addLongColumn("resolutiontimestamp", Action::getResolutionDateTimestamp)
