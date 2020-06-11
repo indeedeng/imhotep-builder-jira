@@ -137,9 +137,9 @@ public class ActionFactory {
                 .resolutionDateTimeLong(history.itemExist("resolutiondate") ? parseDateTime(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimeLong())
                 .resolutionDateTimestamp(history.itemExist("resolutiondate") ? parseTimestamp(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimestamp())
                 .lastUpdated(0) // This field is used internally to filter issues longer than 6 months. It's only used by jiraissues so it will always go through the toCurrent() method where it takes the date of the previous action.
-                .timeOriginalEstimate((history.itemExist("timeoriginalestimate") && history.getItemLastValue("timeoriginalestimate") != null) ? Long.parseLong(history.getItemLastValue("timeoriginalestimate")) : prevAction.getTimeOriginalEstimate())
-                .timeEstimate((history.itemExist("timeestimate") && history.getItemLastValue("timeestimate") != null) ? Long.parseLong(history.getItemLastValue("timeestimate")) : prevAction.getTimeEstimate())
-                .timeSpent((history.itemExist("timespent") && history.getItemLastValue("timespent") != null) ? Long.parseLong(history.getItemLastValue("timespent")) : prevAction.getTimeSpent())
+                .timeOriginalEstimate((history.itemExist("timeoriginalestimate") && !StringUtils.isEmpty(history.getItemLastValue("timeoriginalestimate"))) ? Long.parseLong(history.getItemLastValue("timeoriginalestimate")) : prevAction.getTimeOriginalEstimate())
+                .timeEstimate((history.itemExist("timeestimate") && !StringUtils.isEmpty(history.getItemLastValue("timeestimate"))) ? Long.parseLong(history.getItemLastValue("timeestimate")) : prevAction.getTimeEstimate())
+                .timeSpent((history.itemExist("timespent") && !StringUtils.isEmpty(history.getItemLastValue("timespent"))) ? Long.parseLong(history.getItemLastValue("timespent")) : prevAction.getTimeSpent())
                 .comments(prevAction.getComments())
                 .deliveryLeadTime(0)
                 .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")))
