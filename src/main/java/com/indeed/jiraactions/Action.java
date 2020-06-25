@@ -9,11 +9,11 @@ import com.indeed.jiraactions.api.statustimes.StatusTime;
 import org.apache.commons.lang.StringUtils;
 import org.immutables.value.Value;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Value.Immutable
@@ -42,56 +42,14 @@ public interface Action {
     String getLabels();
 
     /**
-     * @return Date issue was created, in yyyy-MM-dd format
+     * @return Date issue was created. We will later use this to represent the data in multiple formats.
      */
-    String getCreatedDate();
+    DateTime getCreatedDate();
 
     /**
-     * Returns an integer value that can be used for date arithmetic.
-     *
-     * @return Long integer representing the date the issue was created, as represented in yyyyMMdd format.
+     * @return Date issue was resolved. We will later use this to represent the data in multiple formats.
      */
-    long getCreatedDateLong();
-
-    /**
-     * Returns an integer value that can be used for date-time arithmetic.
-     *
-     * @return Long integer representing the date the issue was created, as represented in yyyyMMddhhmmss format.
-     */
-    long getCreatedDateTimeLong();
-
-    /**
-     * Returns an integer value that can be used for date arithmetic.
-     *
-     * @return Long integer representing the date the issue was created, in Unix epoch time format
-     */
-    long getCreatedDateTimestamp();
-
-    /**
-     * @return Date issue was created, in yyyy-MM-dd format
-     */
-    String getResolutionDate();
-
-    /**
-     * Returns an integer value that can be used for date arithmetic.
-     *
-     * @return Long integer representing the date the issue was resolved, as represented in yyyyMMdd format.
-     */
-    long getResolutionDateLong();
-
-    /**
-     * Returns an integer value that can be used for date-time arithmetic.
-     *
-     * @return Long integer representing the date the issue was resolved, as represented in yyyyMMddhhmmss format.
-     */
-    long getResolutionDateTimeLong();
-
-    /**
-     * Returns an integer value that can be used for date arithmetic.
-     *
-     * @return Long integer representing the date the issue was resolved, in Unix epoch time format
-     */
-    long getResolutionDateTimestamp();
+    Optional<DateTime> getResolutionDate();
 
     long getTimeOriginalEstimate();
     long getTimeEstimate();
@@ -120,16 +78,6 @@ public interface Action {
     @Value.Derived
     default boolean isInRange(final DateTime start, final DateTime end) {
         return start.compareTo(getTimestamp()) <= 0 && end.compareTo(getTimestamp()) > 0;
-    }
-
-    @Value.Derived
-    default String getCreatedDateTime() {
-        return new DateTime(getCreatedDateLong()).withZone(DateTimeZone.forOffsetHours(-6)).toString("yyyy-MM-dd HH:mm:ss");
-    }
-
-    @Value.Derived
-    default String getResolutionDateTime() {
-        return new DateTime(getResolutionDateTimeLong()).withZone(DateTimeZone.forOffsetHours(-6)).toString("yyyy-MM-dd HH:mm:ss");
     }
 
     @Value.Derived
