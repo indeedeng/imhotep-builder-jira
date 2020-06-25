@@ -10,6 +10,7 @@ import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,14 +33,14 @@ public class ActionFactoryTest {
             final Issue issue = IssueAPIParser.getObject(node);
             final Action action = factory.create(issue);
 
-            Assert.assertEquals(new DateTime(2009, 2, 12, 17, 40, 27).toString(), action.getCreatedDate().toString());
+            Assert.assertEquals(new DateTime(2009, 2, 12, 17, 40, 27).withZone(DateTimeZone.forOffsetHours(-6)).toString(), action.getCreatedDate().toString());
             //Assert.assertEquals(20090212, action.getCreatedDateLong());
             //Assert.assertEquals(20090212174027L, action.getCreatedDateTimeLong());
             //Assert.assertEquals(1234482027, action.getCreatedDateTimestamp());
             //org.joda.time.DateTime<2009-02-12T17:40:27.000-06:00>
             //org.joda.time.DateTime<2009-02-12T17:40:27.000-06:00>
 
-            Assert.assertEquals(new DateTime(2009, 2, 12, 18, 48, 50).toString(), action.getResolutionDate().get().toString());
+            Assert.assertEquals(new DateTime(2009, 2, 12, 18, 48, 50).withZone(DateTimeZone.forOffsetHours(-6)).toString(), action.getResolutionDate().get().toString());
             //Assert.assertEquals(20090212, action.getResolutionDateLong());
             //Assert.assertEquals(20090212184850L, action.getResolutionDateTimeLong());
             //Assert.assertEquals(1234486130, action.getResolutionDateTimestamp());
