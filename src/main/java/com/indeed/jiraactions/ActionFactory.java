@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ActionFactory {
@@ -68,19 +69,13 @@ public class ActionFactory {
                 .dueDate(issue.initialValue("duedate"))
                 .components(Issues.split(issue.initialValue("component")))
                 .labels(issue.initialValue("labels"))
-                .createdDate(issue.fields.created.toString("yyyy-MM-dd"))
-                .createdDateLong(Long.parseLong(issue.fields.created.toString("yyyyMMdd")))
-                .createdDateTimeLong(Long.parseLong(issue.fields.created.toString("yyyyMMddHHmmss")))
-                .createdDateTimestamp(issue.fields.created.getMillis() / 1000)
+                .createdDate(issue.fields.created)
                 .lastUpdated(0)
                 .closedDate(0)
                 .timeOriginalEstimate(issue.initialValue("timeoriginalestimate").isEmpty() ? 0 : Long.parseLong(issue.initialValue("timeoriginalestimate")))
                 .timeEstimate(issue.initialValue("timeestimate").isEmpty() ? 0 : Long.parseLong(issue.initialValue("timeestimate")))
                 .timeSpent(issue.initialValue("timespent").isEmpty() ? 0 : Long.parseLong(issue.initialValue("timespent")))
-                .resolutionDate(JiraActionsUtil.parseDateTime(issue.initialValue("resolutiondate")).toString("yyyy-MM-dd"))
-                .resolutionDateLong(parseDate(issue.initialValue("resolutiondate")))
-                .resolutionDateTimeLong(parseDateTime(issue.initialValue("resolutiondate")))
-                .resolutionDateTimestamp(parseTimestamp(issue.initialValue("resolutiondate")) / 1000)
+                .resolutionDate(parseDate(issue.initialValue("resolutiondate")))
                 .comments(0)
                 .deliveryLeadTime(0)
                 .statusTimes(statusTimeFactory.firstStatusTime(issue.initialValue("status")))
@@ -128,14 +123,8 @@ public class ActionFactory {
                 .components(extractMultivaluedRichField("component", Action::getComponents, prevAction, history))
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate())
-                .createdDateLong(prevAction.getCreatedDateLong())
-                .createdDateTimeLong(prevAction.getCreatedDateTimeLong())
-                .createdDateTimestamp(prevAction.getCreatedDateTimestamp())
                 .closedDate(getDateClosed(prevAction, history))
-                .resolutionDate(history.itemExist("resolutiondate") ? history.getItemLastValue("resolutiondate") : prevAction.getResolutionDate())
-                .resolutionDateLong(history.itemExist("resolutiondate") ? parseDate(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateLong())
-                .resolutionDateTimeLong(history.itemExist("resolutiondate") ? parseDateTime(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimeLong())
-                .resolutionDateTimestamp(history.itemExist("resolutiondate") ? parseTimestamp(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDateTimestamp())
+                .resolutionDate(history.itemExist("resolutiondate") ? parseDate(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDate())
                 .lastUpdated(0) // This field is used internally to filter issues longer than 6 months. It's only used by jiraissues so it will always go through the toCurrent() method where it takes the date of the previous action.
                 .timeOriginalEstimate((history.itemExist("timeoriginalestimate") && !StringUtils.isEmpty(history.getItemLastValue("timeoriginalestimate"))) ? Long.parseLong(history.getItemLastValue("timeoriginalestimate")) : prevAction.getTimeOriginalEstimate())
                 .timeEstimate((history.itemExist("timeestimate") && !StringUtils.isEmpty(history.getItemLastValue("timeestimate"))) ? Long.parseLong(history.getItemLastValue("timeestimate")) : prevAction.getTimeEstimate())
@@ -225,27 +214,11 @@ public class ActionFactory {
         return getTimeDiff(prevAction.getTimestamp(), changeTimestamp) + prevAction.getTimeinstate();
     }
 
-    private long parseDate(final String isoDateString) {
+    private Optional<DateTime> parseDate(final String isoDateString) {
         if (StringUtils.isEmpty(isoDateString)) {
-            return 0;
+            return Optional.empty();
         } else {
-            return Long.parseLong(JiraActionsUtil.parseDateTime(isoDateString).toString("yyyyMMdd"));
-        }
-    }
-
-    private long parseDateTime(final String isoDateString) {
-        if (StringUtils.isEmpty(isoDateString)) {
-            return 0;
-        } else {
-            return Long.parseLong(JiraActionsUtil.parseDateTime(isoDateString).toString("yyyyMMddHHmmss"));
-        }
-    }
-
-    private long parseTimestamp(final String isoDateString) {
-        if (StringUtils.isEmpty(isoDateString)) {
-            return 0;
-        } else {
-            return JiraActionsUtil.parseDateTime(isoDateString).getMillis();
+            return Optional.of(JiraActionsUtil.parseDateTime(isoDateString));
         }
     }
 
