@@ -10,14 +10,11 @@ import com.indeed.jiraactions.api.response.issue.Issue;
 import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -35,14 +32,14 @@ public class ActionFactoryTest {
             final Issue issue = IssueAPIParser.getObject(node);
             final Action action = factory.create(issue);
 
-            Assert.assertEquals(new DateTime(2009, 2, 12, 17, 40, 27).withChronology(ISOChronology.getInstance(DateTimeZone.forOffsetHours(-6))), action.getCreatedDate());
+            Assert.assertEquals(new DateTime(2009, 2, 12, 17, 40, 27).toString(), action.getCreatedDate().toString());
             //Assert.assertEquals(20090212, action.getCreatedDateLong());
             //Assert.assertEquals(20090212174027L, action.getCreatedDateTimeLong());
             //Assert.assertEquals(1234482027, action.getCreatedDateTimestamp());
             //org.joda.time.DateTime<2009-02-12T17:40:27.000-06:00>
             //org.joda.time.DateTime<2009-02-12T17:40:27.000-06:00>
 
-            Assert.assertEquals(Optional.of(new DateTime(2009, 2, 12, 18, 48, 50).withChronology(ISOChronology.getInstance(DateTimeZone.forOffsetHours(-6)))), action.getResolutionDate());
+            Assert.assertEquals(new DateTime(2009, 2, 12, 18, 48, 50).toString(), action.getResolutionDate().get().toString());
             //Assert.assertEquals(20090212, action.getResolutionDateLong());
             //Assert.assertEquals(20090212184850L, action.getResolutionDateTimeLong());
             //Assert.assertEquals(1234486130, action.getResolutionDateTimestamp());
