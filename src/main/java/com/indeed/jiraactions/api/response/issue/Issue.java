@@ -28,7 +28,7 @@ public class Issue {
 
     // Multivalued rich object fields are treated different in Jira changelog histories than
     //  multivalued primitive fields.
-    private static Set<String> MULTIVALUED_RICH_FIELDS = ImmutableSet.of(
+    private static final Set<String> MULTIVALUED_RICH_FIELDS = ImmutableSet.of(
             "component",
             "fixversions"
     );
@@ -44,7 +44,7 @@ public class Issue {
         if (MULTIVALUED_RICH_FIELDS.contains(field)) {
             // Multivalued rich fields' initial state must be determined by inference from
             //  taking the current state and walking the history to reverse the actions.
-            List<String> values =
+            final List<String> values =
                     Strings.isNullOrEmpty(this.fields.getStringValue(field)) ?
                             Lists.newArrayList() :
                             Lists.newArrayList(Issues.split(this.fields.getStringValue(field)));

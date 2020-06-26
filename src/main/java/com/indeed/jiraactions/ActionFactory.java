@@ -51,14 +51,13 @@ public class ActionFactory {
                 .assignee(assignee)
                 .fieldschanged("created")
                 .issueage(0)
-                .issuekey(issue.initialValue("key").equals("") ? issue.key : issue.initialValue("key"))
+                .issuekey(issue.initialValue("key").isEmpty() ? issue.key : issue.initialValue("key"))
                 .issuetype(issue.initialValue("issuetype"))
                 .priority(issue.initialValue("priority"))
                 .project(issue.initialValue("project"))
                 .projectkey(issue.initialValue("projectkey"))
                 .prevstatus("")
                 .reporter(reporter)
-                .resolution(issue.initialValue("resolution"))
                 .status(issue.initialValue("status"))
                 .summary(issue.initialValue("summary"))
                 .timeinstate(0)
@@ -75,12 +74,18 @@ public class ActionFactory {
                 .timeOriginalEstimate(issue.initialValue("timeoriginalestimate").isEmpty() ? 0 : Long.parseLong(issue.initialValue("timeoriginalestimate")))
                 .timeEstimate(issue.initialValue("timeestimate").isEmpty() ? 0 : Long.parseLong(issue.initialValue("timeestimate")))
                 .timeSpent(issue.initialValue("timespent").isEmpty() ? 0 : Long.parseLong(issue.initialValue("timespent")))
-                .resolutionDate(parseDate(issue.initialValue("resolutiondate")))
                 .comments(0)
                 .deliveryLeadTime(0)
                 .statusTimes(statusTimeFactory.firstStatusTime(issue.initialValue("status")))
                 .statusHistory(createStatusHistory(issue.initialValue("status")))
                 .links(Collections.emptySet());
+
+        // resolutiondate isn't a field, it's a shortcut for a field
+        final String resolution = issue.initialValue("resolution");
+        builder.resolution(resolution);
+        if (StringUtils.isNotEmpty(resolution)) {
+            builder.resolutionDate(issue.fields.created);
+        }
 
         for (final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseInitialValue(customFieldDefinition, issue));
@@ -111,7 +116,6 @@ public class ActionFactory {
                 .projectkey(history.itemExist("projectkey") ? history.getItemLastValue("projectkey") : prevAction.getProjectkey())
                 .prevstatus(prevAction.getStatus())
                 .reporter(reporter)
-                .resolution(history.itemExist("resolution") ? history.getItemLastValue("resolution") : prevAction.getResolution())
                 .status(history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus())
                 .summary(history.itemExist("summary") ? history.getItemLastValue("summary") : prevAction.getSummary())
                 .timeinstate(timeInState(prevAction, history))
@@ -124,7 +128,6 @@ public class ActionFactory {
                 .labels(history.itemExist("labels") ? history.getItemLastValue("labels") : prevAction.getLabels())
                 .createdDate(prevAction.getCreatedDate())
                 .closedDate(getDateClosed(prevAction, history))
-                .resolutionDate(history.itemExist("resolutiondate") ? parseDate(history.getItemLastValue("resolutiondate")) : prevAction.getResolutionDate())
                 .lastUpdated(0) // This field is used internally to filter issues longer than 6 months. It's only used by jiraissues so it will always go through the toCurrent() method where it takes the date of the previous action.
                 .timeOriginalEstimate((history.itemExist("timeoriginalestimate") && !StringUtils.isEmpty(history.getItemLastValue("timeoriginalestimate"))) ? Long.parseLong(history.getItemLastValue("timeoriginalestimate")) : prevAction.getTimeOriginalEstimate())
                 .timeEstimate((history.itemExist("timeestimate") && !StringUtils.isEmpty(history.getItemLastValue("timeestimate"))) ? Long.parseLong(history.getItemLastValue("timeestimate")) : prevAction.getTimeEstimate())
@@ -134,6 +137,19 @@ public class ActionFactory {
                 .links(linkFactory.mergeLinks(prevAction.getLinks(), history.getAllItems("link")))
                 .statusTimes(statusTimeFactory.getStatusTimeUpdate(prevAction.getStatusTimes(), history, prevAction))
                 .statusHistory(addStatusHistory(prevAction.getStatusHistory(), prevAction, history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus()));
+
+        // resolutiondate isn't a field, it's a shortcut for a field
+        if (history.itemExist("resolution")) {
+            final String resolution = history.getItemLastValue("resolution");
+            builder.resolution(resolution);
+
+            final Optional<DateTime> resolutionDate = StringUtils.isEmpty(resolution) ? Optional.empty() : Optional.of(history.created);
+            builder.resolutionDate(resolutionDate);
+        } else {
+            builder.resolution(prevAction.getResolution());
+            builder.resolutionDate(prevAction.getResolutionDate());
+        }
+
         for (final CustomFieldDefinition customFieldDefinition : config.getCustomFields()) {
             builder.putCustomFieldValues(customFieldDefinition, customFieldParser.parseNonInitialValue(customFieldDefinition, prevAction, history));
         }
@@ -150,14 +166,14 @@ public class ActionFactory {
      */
     private List<String> extractMultivaluedRichField(
             final String field,
-            Function<Action, List<String>> getter,
+            final Function<Action, List<String>> getter,
             final Action prevAction,
             final History history
     ) {
         final List<String> values;
         if (history.itemExist(field)) {
             values = Lists.newArrayList(getter.apply(prevAction));
-            for (Item item: history.getAllItems(field)) {
+            for (final Item item: history.getAllItems(field)) {
                 if (Strings.isNullOrEmpty(item.toString)) {
                     values.remove(item.fromString);
                 } else {
@@ -212,14 +228,6 @@ public class ActionFactory {
         }
 
         return getTimeDiff(prevAction.getTimestamp(), changeTimestamp) + prevAction.getTimeinstate();
-    }
-
-    private Optional<DateTime> parseDate(final String isoDateString) {
-        if (StringUtils.isEmpty(isoDateString)) {
-            return Optional.empty();
-        } else {
-            return Optional.of(JiraActionsUtil.parseDateTime(isoDateString));
-        }
     }
 
     private long getDateClosed(final Action prevAction, final History history) {

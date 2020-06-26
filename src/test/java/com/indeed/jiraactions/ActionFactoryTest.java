@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -33,8 +34,7 @@ public class ActionFactoryTest {
             final Issue issue = IssueAPIParser.getObject(node);
             final Action action = factory.create(issue);
             Assert.assertEquals(new DateTime(2009, 2, 12, 17, 40, 27, DateTimeZone.forOffsetHours(-6)), action.getCreatedDate());
-
-            Assert.assertEquals(new DateTime(2009, 2, 12, 18, 48, 50, DateTimeZone.forOffsetHours(-6)), action.getResolutionDate().get());
+            Assert.assertEquals(Optional.empty(), action.getResolutionDate());
         }
     }
 
