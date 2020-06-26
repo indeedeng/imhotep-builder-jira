@@ -10,6 +10,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -79,6 +80,8 @@ public class ImmutableProxy<T> implements InvocationHandler {
             return Collections.emptySet();
         } else if(returnType.equals(User.class)) {
             return User.INVALID_USER;
+        } else if(returnType.equals(Optional.class)) {
+            return Optional.empty();
         }
         //noinspection ConstantConditions
         return null;

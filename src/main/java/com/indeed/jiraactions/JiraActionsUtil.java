@@ -8,6 +8,7 @@ import org.joda.time.Period;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public abstract class JiraActionsUtil {
     private JiraActionsUtil() { /* No */ }
@@ -16,7 +17,6 @@ public abstract class JiraActionsUtil {
 
     // copied from imhotep-builders
     @SuppressWarnings("Duplicates")
-    @Nonnull
     public static DateTime parseDateTime(final String arg) {
         try {
             return new DateTime(arg.trim().replace(" ", "T"), RAMSES_TIME);
@@ -54,13 +54,36 @@ public abstract class JiraActionsUtil {
         throw new IllegalArgumentException("could not parse date: " + arg);
     }
 
-    @Nonnull
     public static String getUnixTimestamp(@Nullable final DateTime date) {
         if(date == null) {
             return "";
         }
         final long unixTime = date.getMillis()/1000;
         return String.valueOf(unixTime);
+    }
+
+    public static long formatDateTimeAsDate(final Optional<DateTime> date) {
+        return date.map(JiraActionsUtil::formatDateTimeAsDate).orElse(0L);
+    }
+
+    public static long formatDateTimeAsDate(final DateTime date) {
+        return Long.parseLong(date.withZone(RAMSES_TIME).toString("yyyyMMdd"));
+    }
+
+    public static long formatDateTimeAsTimestamp(final Optional<DateTime> date) {
+        return date.map(JiraActionsUtil::formatDateTimeAsTimestamp).orElse(0L);
+    }
+
+    public static long formatDateTimeAsTimestamp(final DateTime date) {
+        return date.withZone(RAMSES_TIME).getMillis();
+    }
+
+    public static String formatDateTimeAsDateTime(final Optional<DateTime> date) {
+        return date.map(JiraActionsUtil::formatDateTimeAsDateTime).orElse("");
+    }
+
+    public static String formatDateTimeAsDateTime(final DateTime date) {
+        return date.withZone(RAMSES_TIME).toString("yyyy-MM-dd HH:mm:ss");
     }
 
     @Nonnull
