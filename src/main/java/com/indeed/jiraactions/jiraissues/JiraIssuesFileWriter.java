@@ -112,15 +112,15 @@ public class JiraIssuesFileWriter {
             for (int i = 0; i < config.getSnapshotWriteRetries(); i++) {
                 try {
                     final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
-                    log.info("Http response: " + response.getStatusLine().toString() + ": " + file.getName() + ".");
+                    log.info("Http response: {}: {}.", response.getStatusLine().toString(), file.getName());
                     if (response.getStatusLine().getStatusCode() == 200) {
                         return;
                     }
                 } catch (final IOException e) {
-                    log.warn("Failed to upload file: " + file.getName() + ".", e);
+                    log.warn("Failed to upload file: {}.", file.getName(), e);
                 }
             }
-            log.error("Retries expired, unable to upload file: " + file.getName() + ".");
+            log.error("Retries expired, unable to upload file: {}.", file.getName());
         }
     }
 

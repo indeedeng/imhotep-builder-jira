@@ -72,7 +72,7 @@ public class ApiUserLookupService implements UserLookupService {
             final JsonNode json = apiCaller.getJsonNode(url);
             return parseUser(json);
         } catch(final IOException e) {
-            log.error("Could not find user " + key + ". Using fallback.", e);
+            log.error("Could not find user {}. Using fallback.", key, e);
             return User.getFallbackUser(key);
         } finally {
             final long end = System.currentTimeMillis();

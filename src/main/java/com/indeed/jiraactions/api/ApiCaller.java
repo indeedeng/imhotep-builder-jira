@@ -135,7 +135,7 @@ public class ApiCaller {
 
             sb.append("}");
             sb.append("}");
-            log.error("Encountered connection error: " + sb);
+            log.error("Encountered connection error: {}", sb);
             throw e;
         } finally {
             if (br != null) {

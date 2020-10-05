@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 public class CustomFieldApiParser {
     private static final Logger log = LoggerFactory.getLogger(CustomFieldApiParser.class);
     private static final Pattern MULTIVALUE_PATTERN = Pattern.compile("Parent values: (.*?)\\(\\d+\\)(Level 1 values: (.*?)\\(\\d+\\))?");
+    public static final String[] EMPTY = new String[0];
 
     private final UserLookupService userLookupService;
     private final Set<CustomFieldDefinition> failedCustomFields;
@@ -271,7 +272,7 @@ public class CustomFieldApiParser {
             return ImmutableList.<String>builder()
                     .add(label)
                     .addAll(Arrays.stream(definition.getAlternateNames()).map(CustomFieldApiParser::getItemLabel)::iterator)
-                    .build().toArray(new String[0]);
+                    .build().toArray(EMPTY);
         }
     }
 }

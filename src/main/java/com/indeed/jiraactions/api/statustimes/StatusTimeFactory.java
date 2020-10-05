@@ -5,9 +5,9 @@ import com.indeed.jiraactions.api.response.issue.changelog.histories.History;
 import com.indeed.jiraactions.api.response.issue.fields.comment.Comment;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 public class StatusTimeFactory {
 
@@ -22,7 +22,7 @@ public class StatusTimeFactory {
         return statusTimeMap;
     }
 
-    private StatusTime addStatus(@Nonnull final long timetofirst, final long timetolast) {
+    private StatusTime addStatus(final long timetofirst, final long timetolast) {
         return ImmutableStatusTime.builder()
                 .timeinstatus(0)
                 .timetofirst(timetofirst)
