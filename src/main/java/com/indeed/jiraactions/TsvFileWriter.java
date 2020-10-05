@@ -311,7 +311,7 @@ public class TsvFileWriter {
             try {
                 wd.getBufferedWriter().close();
             } catch (final IOException e) {
-                log.error("Failed to close " + wd.file.getName() + ".", e);
+                log.error("Failed to close {}.", wd.file.getName(), e);
             }
 
             if (!wd.isWritten()) {
@@ -344,15 +344,15 @@ public class TsvFileWriter {
             for (int i = 0; i < NUM_RETRIES; i++) {
                 try {
                     final HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
-                    log.info("Http response: " + response.getStatusLine().toString() + ": " + wd.file.getName() + ".");
+                    log.info("Http response: {}: {}.", response.getStatusLine().toString(), wd.file.getName());
                     if (response.getStatusLine().getStatusCode() == 200) {
                         return;
                     }
                 } catch (final IOException e) {
-                    log.warn("Failed to upload file: " + wd.file.getName() + ".", e);
+                    log.warn("Failed to upload file: {}.", wd.file.getName(), e);
                 }
             }
-            log.error("Retries expired, unable to upload file: " + wd.file.getName() + ".");
+            log.error("Retries expired, unable to upload file: {}.", wd.file.getName());
         });
     }
 

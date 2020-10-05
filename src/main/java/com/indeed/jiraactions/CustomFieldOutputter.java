@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CustomFieldOutputter {
-    private static final Logger log = LoggerFactory.getLogger(CustomFieldValue.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomFieldOutputter.class);
     private static final Splitter NUMBER_SPLITTER = Splitter.onPattern("\\D+").omitEmptyStrings();
 
     private final OutputFormatter outputFormatter;

@@ -103,7 +103,7 @@ public class ApiPageProvider implements PageProvider {
         processTime += stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
         if (issue == null) {
-            log.error("null issue after parsing: " + issueNode.toString());
+            log.error("null issue after parsing: {}", issueNode.toString());
         }
 
         return issue;

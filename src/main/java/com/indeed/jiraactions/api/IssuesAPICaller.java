@@ -70,8 +70,7 @@ public class IssuesAPICaller {
                 }
 
                 batchSize = Math.max(batchSize - (int)(batchSize*(float)0.9), 1);
-                log.warn("Caught exception when trying to get issues, backing off for " + backoff + " milliseconds" +
-                        " and trying again with batchSize = " + batchSize, e);
+                log.warn("Caught exception when trying to get issues, backing off for {} milliseconds and trying again with batchSize = {}", backoff, batchSize, e);
                 Thread.sleep(backoff);
                 backoff *= 2;
             }

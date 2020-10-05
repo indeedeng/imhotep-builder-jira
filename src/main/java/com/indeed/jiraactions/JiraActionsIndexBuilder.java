@@ -104,7 +104,7 @@ public class JiraActionsIndexBuilder {
                     .map(CustomFieldDefinition::getName)
                     .collect(Collectors.toList());
 
-            log.debug("No values seen for these custom fields: " + missedFields);
+            log.debug("No values seen for these custom fields: {}", missedFields);
 
             final Stopwatch fileUploadStopwatch = Stopwatch.createStarted();
             writer.uploadTsvFile(false);
