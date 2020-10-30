@@ -247,10 +247,22 @@ public class CustomFieldApiParser {
                         return text;
                     }
                     final int start = index + "name=".length();
-                    final int end = text.indexOf(",", start);
+                    final int end = text.indexOf(',', start);
                     return text.substring(start, end >= start ? end : text.length());
                 } else if (definition.getSplit() != SplitRule.NONE && StringUtils.isNotEmpty(definition.getSeparator())) {
-                    return text.replaceAll(definition.getSplit().getSplitPattern(), definition.getSeparator());
+                    final String replaced = text.replaceAll(definition.getSplit().getSplitPattern(), definition.getSeparator());
+                    if (definition.getSplitConfig().removeEmptyStrings() && StringUtils.isNotEmpty(definition.getSeparator())) {
+                        final String quotedSeparator = Pattern.quote(definition.getSeparator());
+                        return replaced
+                                // Replace leading and trailing separators with the empty string
+                                .replaceAll(String.format("(?:^%1$s)|(?:%1$s$)", quotedSeparator), "")
+                                // Replace any number of repeated separators with a single one
+                                .replaceAll(String.format("%1$s%1$s+", quotedSeparator), definition.getSeparator())
+                                ;
+
+                    } else {
+                        return replaced;
+                    }
                 } else {
                     return text;
                 }

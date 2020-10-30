@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.List;
 
 public class TestCustomFieldDefinitionParser {
@@ -69,6 +68,17 @@ public class TestCustomFieldDefinitionParser {
             "    \"imhotepfieldname\": \"allfeedids*|\",\n" +
             "    \"separator\": \"|\",\n" +
             "    \"split\": \"non_number\"\n" +
+            "  }";
+
+    private static final String SOURCE_ID = "  {\n" +
+            "    \"name\": \"SourceID\",\n" +
+            "    \"customfieldid\": \"customfield_10490\",\n" +
+            "    \"imhotepfieldname\": \"int sourceid*|\",\n" +
+            "    \"separator\": \"|\",\n" +
+            "    \"split\": \"non_number\",\n" +
+            "    \"splitconfig\": {\n" +
+            "      \"removeEmptyStrings\": true\n" +
+            "    }\n" +
             "  }";
 
     @Test
@@ -180,16 +190,33 @@ public class TestCustomFieldDefinitionParser {
         assertComparison(definition, "verifier\tverifierusername", VERIFIER);
     }
 
+    @Test
+    public void testDefaultSplitConfig() throws IOException {
+        final CustomFieldDefinition actual = parseCustomFieldDefinition(FEED_ID);
+        Assert.assertEquals(CustomFieldDefinition.EMPTY_SPLIT_CONFIG, actual.getSplitConfig());
+    }
+
+    @Test
+    public void testSettingSplitConfig() throws IOException {
+        final CustomFieldDefinition.SplitConfig splitConfig = ImmutableSplitConfig.builder().removeEmptyStrings(true).build();
+        final CustomFieldDefinition actual = parseCustomFieldDefinition(SOURCE_ID);
+        Assert.assertEquals(splitConfig, actual.getSplitConfig());
+    }
+
+    private CustomFieldDefinition parseCustomFieldDefinition(final String input) throws IOException {
+        try(final InputStream in = createInputStreamFromDefinitions(input)) {
+            final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(in);
+
+            Assert.assertNotNull(definitions);
+            Assert.assertEquals(1, definitions.length);
+
+            final CustomFieldDefinition actual = definitions[0];
+            return actual;
+        }
+    }
+
     private void assertComparison(final CustomFieldDefinition expected, final String expectedHeader, final String input) throws IOException {
-        final InputStream in = createInputStreamFromDefinitions(input);
-        final CustomFieldDefinition[] definitions = CustomFieldDefinitionParser.parseCustomFields(in);
-        final StringWriter writer = new StringWriter();
-
-        Assert.assertNotNull(definitions);
-        Assert.assertEquals(1, definitions.length);
-
-        final CustomFieldDefinition actual = definitions[0];
-
+       final CustomFieldDefinition actual = parseCustomFieldDefinition(input);
         Assert.assertEquals(expected, actual);
 
         final List<String> headers = actual.getHeaders();
