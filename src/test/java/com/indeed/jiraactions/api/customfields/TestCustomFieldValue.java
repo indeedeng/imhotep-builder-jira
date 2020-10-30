@@ -280,14 +280,14 @@ public class TestCustomFieldValue {
 
     @Test
     public void testLeavesInEmptySpaces() {
-        final String value = apiParser.customFieldFromInitialFields(feedid, new TextNode("A BUNCH OF NON-NUMERIC TEXT18176487SOME MORE NON-NUMERIC TEXT")).getValue();
-        Assert.assertEquals("|18176487|", value);
+        Assert.assertEquals("|18176487|", apiParser.customFieldFromInitialFields(feedid, new TextNode("A BUNCH OF NON-NUMERIC TEXT18176487SOME MORE NON-NUMERIC TEXT")).getValue());
+        Assert.assertEquals("|18176487|", apiParser.customFieldValueFromChangelog(feedid,"", " 18176487 ").getValue());
     }
 
     @Test
     public void testRemovingEmptySpaces() {
-        final String value = apiParser.customFieldFromInitialFields(separatorRemovesEmptySpace, new TextNode("A BUNCH OF NON-NUMERIC TEXT18176487SOME MORE NON-NUMERIC TEXT")).getValue();
-        Assert.assertEquals("18176487", value);
+        Assert.assertEquals("18176487", apiParser.customFieldFromInitialFields(separatorRemovesEmptySpace, new TextNode("A BUNCH OF NON-NUMERIC TEXT18176487SOME MORE NON-NUMERIC TEXT")).getValue());
+        Assert.assertEquals("18176487", apiParser.customFieldValueFromChangelog(separatorRemovesEmptySpace,"", " 18176487 ").getValue());
     }
 
     private void testFromInitial(final CustomFieldDefinition definition, final String input, final String expected) throws IOException {
