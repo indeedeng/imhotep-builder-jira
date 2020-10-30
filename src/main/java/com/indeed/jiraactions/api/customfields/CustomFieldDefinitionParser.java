@@ -16,6 +16,7 @@ public abstract class CustomFieldDefinitionParser {
 
     private final static ObjectMapper mapper = new ObjectMapper()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+            .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 
     public static CustomFieldDefinition[] parseCustomFields(final InputStream in) throws IOException {

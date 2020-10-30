@@ -2,6 +2,7 @@ package com.indeed.jiraactions.api.customfields;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.indeed.jiraactions.CustomFieldOutputter;
 import com.indeed.jiraactions.FriendlyUserLookupService;
 import com.indeed.jiraactions.OutputFormatter;
@@ -69,6 +70,15 @@ public class TestCustomFieldValue {
             .imhotepFieldName("allfeedids*|")
             .separator("|")
             .split(CustomFieldDefinition.SplitRule.NON_NUMBER)
+            .build();
+
+    private static final CustomFieldDefinition separatorRemovesEmptySpace = ImmutableCustomFieldDefinition.builder()
+            .name("Separator Removing Empty Space")
+            .customFieldId("customfield_10042")
+            .imhotepFieldName("fieldName*|")
+            .separator("|")
+            .split(CustomFieldDefinition.SplitRule.NON_NUMBER)
+            .splitConfig(ImmutableSplitConfig.builder().removeEmptyStrings(true).build())
             .build();
 
     @Test
@@ -266,6 +276,18 @@ public class TestCustomFieldValue {
 
         Assert.assertEquals("5000", CustomFieldOutputter.numericStringToMilliNumericString("5"));
         Assert.assertEquals("230", CustomFieldOutputter.numericStringToMilliNumericString(".23"));
+    }
+
+    @Test
+    public void testLeavesInEmptySpaces() {
+        final String value = apiParser.customFieldFromInitialFields(feedid, new TextNode("A BUNCH OF NON-NUMERIC TEXT18176487SOME MORE NON-NUMERIC TEXT")).getValue();
+        Assert.assertEquals("|18176487|", value);
+    }
+
+    @Test
+    public void testRemovingEmptySpaces() {
+        final String value = apiParser.customFieldFromInitialFields(separatorRemovesEmptySpace, new TextNode("A BUNCH OF NON-NUMERIC TEXT18176487SOME MORE NON-NUMERIC TEXT")).getValue();
+        Assert.assertEquals("18176487", value);
     }
 
     private void testFromInitial(final CustomFieldDefinition definition, final String input, final String expected) throws IOException {
