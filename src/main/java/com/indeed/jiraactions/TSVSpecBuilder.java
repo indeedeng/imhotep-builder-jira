@@ -69,7 +69,7 @@ public class TSVSpecBuilder {
             addLongColumn(String.format("timetofirst_%s", formattedType), timeToFirst);
             addLongColumn(String.format("timetolast_%s", formattedType), timeToLast);
         }
-        final Function<Action, String> valueExtractor = TSVSpecBuilder::getAllStatuses;
+        final Function<Action, String> valueExtractor = this::getAllStatuses;
         addColumn("statushistory*|", valueExtractor);
 
         return this;
@@ -152,7 +152,7 @@ public class TSVSpecBuilder {
         return 0;
     }
 
-    private static String getAllStatuses(final Action action) {
-        return String.join("|", action.getStatusHistory());
+    private String getAllStatuses(final Action action) {
+        return outputFormatter.truncate(String.join("|", action.getStatusHistory()), "|");
     }
 }
