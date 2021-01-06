@@ -16,6 +16,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -168,6 +170,29 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
         );
     }
 
+    @Test
+    public void testVeryLongHistoryGetsTruncated() {
+        final List<String> statusHistory = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            statusHistory.add("Closed");
+            statusHistory.add("Reopened");
+        }
+
+        EasyMock.expect(action.getStatusHistory()).andReturn(statusHistory).once();
+
+        final int maxLength = 35;
+        final OutputFormatter outputFormatter = new OutputFormatter(OptionalInt.of(maxLength));
+        final TSVSpecBuilder builder = new TSVSpecBuilder(outputFormatter, customFieldOutputter);
+        builder.addStatusTimeColumns(Collections.emptyList());
+        Assert.assertTrue(String.join("|", statusHistory).length() > maxLength);
+
+        verifyHeadersAndValues(
+                Collections.singletonList("statushistory*|"),
+                Collections.singletonList("Closed|Reopened|Closed|<TRUNCATED>"),
+                builder
+        );
+    }
+
     private CustomFieldValue newCustomFieldValue(final List<String> values) {
         final CustomFieldValue value = createNiceMock(CustomFieldValue.class);
         EasyMock.expect(customFieldOutputter.getValues(value)).andReturn(values).anyTimes();
@@ -177,6 +202,14 @@ public class TSVSpecBuilderTest extends EasyMockSupport {
     private void verifyHeadersAndValues(
             final List<String> expectedHeaders,
             final List<String> expectedValues
+    ) {
+        verifyHeadersAndValues(expectedHeaders, expectedValues, builder);
+    }
+
+    private void verifyHeadersAndValues(
+            final List<String> expectedHeaders,
+            final List<String> expectedValues,
+            final TSVSpecBuilder builder
     ) {
         final List<TSVColumnSpec> specs = builder.build();
         final List<String> actualHeaders = specs.stream()
