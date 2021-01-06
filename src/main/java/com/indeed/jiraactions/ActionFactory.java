@@ -62,7 +62,7 @@ public class ActionFactory {
                 .project(project)
                 .originalProject(project)
                 .projectkey(projectKey)
-                .originalProjectKey(projectKey)
+                .originalProjectkey(projectKey)
                 .prevstatus("")
                 .reporter(reporter)
                 .status(issue.initialValue("status"))
