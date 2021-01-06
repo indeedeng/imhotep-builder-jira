@@ -57,12 +57,15 @@ public class ActionFactory {
                 .issueage(0)
                 .issuekey(issuekey)
                 .originalIssuekey(issuekey)
+                .allIssueKeys(Collections.singleton(issuekey))
                 .issuetype(issue.initialValue("issuetype"))
                 .priority(issue.initialValue("priority"))
                 .project(project)
                 .originalProject(project)
+                .allProjects(Collections.singleton(project))
                 .projectkey(projectKey)
                 .originalProjectkey(projectKey)
+                .allProjectKeys(Collections.singleton(projectKey))
                 .prevstatus("")
                 .reporter(reporter)
                 .status(issue.initialValue("status"))
@@ -109,6 +112,9 @@ public class ActionFactory {
                 ? userLookupService.getUser(history.getItemLastValueKey("reporter"))
                 : prevAction.getReporter();
         final User actor = history.author == null ? User.INVALID_USER : userLookupService.getUser(history.author.getKey());
+        final String issuekey = history.itemExist("key") ? history.getItemLastValue("key") : prevAction.getIssuekey();
+        final String project = history.itemExist("project") ? history.getItemLastValue("project") : prevAction.getProject();
+        final String projectkey = history.itemExist("projectkey") ? history.getItemLastValue("projectkey") : prevAction.getProjectkey();
 
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("update")
@@ -116,14 +122,17 @@ public class ActionFactory {
                 .assignee(assignee)
                 .fieldschanged(history.getChangedFields())
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created))
-                .issuekey(history.itemExist("key") ? history.getItemLastValue("key") : prevAction.getIssuekey())
+                .issuekey(issuekey)
                 .issuetype(history.itemExist("issuetype") ? history.getItemLastValue("issuetype") : prevAction.getIssuetype())
                 .originalIssuekey(prevAction.getOriginalIssuekey())
+                .allIssueKeys(prevAction.getAllIssueKeys()).addAllIssueKeys(issuekey)
                 .priority(history.itemExist("priority") ? history.getItemLastValue("priority") : prevAction.getPriority())
-                .project(history.itemExist("project") ? history.getItemLastValue("project") : prevAction.getProject())
+                .project(project)
                 .originalProject(prevAction.getOriginalProject())
-                .projectkey(history.itemExist("projectkey") ? history.getItemLastValue("projectkey") : prevAction.getProjectkey())
+                .allProjects(prevAction.getAllProjects()).addAllProjects(project)
+                .projectkey(projectkey)
                 .originalProjectkey(prevAction.getOriginalProjectkey())
+                .allProjectKeys(prevAction.getAllProjectKeys()).addAllProjectKeys(projectkey)
                 .prevstatus(prevAction.getStatus())
                 .reporter(reporter)
                 .status(history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus())

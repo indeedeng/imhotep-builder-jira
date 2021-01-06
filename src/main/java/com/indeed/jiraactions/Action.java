@@ -25,11 +25,14 @@ public interface Action {
     long getIssueage();
     String getIssuekey();
     String getOriginalIssuekey();
+    Set<String> getAllIssueKeys();
     String getIssuetype();
     String getProject();
     String getOriginalProject();
+    Set<String> getAllProjects();
     String getProjectkey();
     String getOriginalProjectkey();
+    Set<String> getAllProjectKeys();
     String getPrevstatus();
     User getReporter();
     String getResolution();
