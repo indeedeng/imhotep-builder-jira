@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.OptionalInt;
 
 public class OutputFormatter {
@@ -54,5 +55,22 @@ public class OutputFormatter {
 
         sb.append(delimeter).append(TRUNCATED_INDICATOR);
         return sb.toString();
+    }
+
+    /**
+     * Similar to {@link #truncate(String, String)}, will take a String field and cut it off at a maximum length.
+     * This will take a {@link Collection} and do the join as well. Mostly exists for convience.
+     * @param source The list of strings containing the data.
+     * @param delimeter The String used both to join the elements in the list together and to use as a token to use to
+     *                  truncate at element boundaries.
+     * @return The string containing as many of the elements as fits, as well as an element containing the truncator
+     * element.
+     */
+    public String truncate(final Collection<String> source, @Nullable final String delimeter) {
+        if (delimeter == null) {
+            return truncate(String.join("", source), null);
+        } else {
+            return truncate(String.join(delimeter, source), delimeter);
+        }
     }
 }
