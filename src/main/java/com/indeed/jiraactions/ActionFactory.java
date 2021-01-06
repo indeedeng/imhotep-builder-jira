@@ -45,17 +45,24 @@ public class ActionFactory {
         final User reporter = userLookupService.getUser(issue.initialValueKey("reporter", "reporterkey"));
         final User creator = issue.fields.creator == null ? User.INVALID_USER : userLookupService.getUser(issue.fields.creator.getKey());
 
+        final String issuekey = issue.initialValue("key").isEmpty() ? issue.key : issue.initialValue("key");
+        final String project = issue.initialValue("project");
+        final String projectKey = issue.initialValue("projectkey");
+
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
                 .actor(creator)
                 .assignee(assignee)
                 .fieldschanged("created")
                 .issueage(0)
-                .issuekey(issue.initialValue("key").isEmpty() ? issue.key : issue.initialValue("key"))
+                .issuekey(issuekey)
+                .originalIssuekey(issuekey)
                 .issuetype(issue.initialValue("issuetype"))
                 .priority(issue.initialValue("priority"))
-                .project(issue.initialValue("project"))
-                .projectkey(issue.initialValue("projectkey"))
+                .project(project)
+                .originalProject(project)
+                .projectkey(projectKey)
+                .originalProjectKey(projectKey)
                 .prevstatus("")
                 .reporter(reporter)
                 .status(issue.initialValue("status"))
@@ -111,9 +118,12 @@ public class ActionFactory {
                 .issueage(prevAction.getIssueage() + getTimeDiff(prevAction.getTimestamp(), history.created))
                 .issuekey(history.itemExist("key") ? history.getItemLastValue("key") : prevAction.getIssuekey())
                 .issuetype(history.itemExist("issuetype") ? history.getItemLastValue("issuetype") : prevAction.getIssuetype())
+                .originalIssuekey(prevAction.getOriginalIssuekey())
                 .priority(history.itemExist("priority") ? history.getItemLastValue("priority") : prevAction.getPriority())
                 .project(history.itemExist("project") ? history.getItemLastValue("project") : prevAction.getProject())
+                .originalProject(prevAction.getOriginalProject())
                 .projectkey(history.itemExist("projectkey") ? history.getItemLastValue("projectkey") : prevAction.getProjectkey())
+                .originalProjectkey(prevAction.getOriginalProjectkey())
                 .prevstatus(prevAction.getStatus())
                 .reporter(reporter)
                 .status(history.itemExist("status") ? history.getItemLastValue("status") : prevAction.getStatus())

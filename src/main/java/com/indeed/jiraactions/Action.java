@@ -24,9 +24,12 @@ public interface Action {
     String getFieldschanged();
     long getIssueage();
     String getIssuekey();
+    String getOriginalIssuekey();
     String getIssuetype();
     String getProject();
+    String getOriginalProject();
     String getProjectkey();
+    String getOriginalProjectkey();
     String getPrevstatus();
     User getReporter();
     String getResolution();
