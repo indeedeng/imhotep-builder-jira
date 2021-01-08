@@ -39,17 +39,17 @@ public class ActionFactoryTest {
     }
 
     @Test
-    /**
+    /*
      * Components that are added to an issue when the issue is first created will never appear in
      *  the changelog. Make sure that we are adding this to the issue.
      */
     public void testComponentsCreatedWithIssue() throws IOException {
-        ActionFactory factory = newActionFactory();
+        final ActionFactory factory = newActionFactory();
 
         try (final InputStream stream = getClass().getResourceAsStream("/ENGPLANS-10.json")) {
             Assert.assertNotNull(stream);
             final JsonNode node = new ObjectMapper().readTree(stream);
-            Issue issue = IssueAPIParser.getObject(node);
+            final Issue issue = IssueAPIParser.getObject(node);
             final Action action = factory.create(issue);
 
             Assert.assertThat(action.getComponents(), is(equalTo(ImmutableList.of("Eng"))));
@@ -62,12 +62,12 @@ public class ActionFactoryTest {
      */
     @Test
     public void testFixVersionsCreatedWithIssueAndAddedLater() throws IOException {
-        ActionFactory factory = newActionFactory();
+        final ActionFactory factory = newActionFactory();
 
         try (final InputStream stream = getClass().getResourceAsStream("/ENGPLANS-10.testMultipleFixVersionsMixedHistory.json")) {
             Assert.assertNotNull(stream);
             final JsonNode node = new ObjectMapper().readTree(stream);
-            Issue issue = IssueAPIParser.getObject(node);
+            final Issue issue = IssueAPIParser.getObject(node);
             Action action = factory.create(issue);
 
             Assert.assertThat(
@@ -87,6 +87,30 @@ public class ActionFactoryTest {
                     action.getFixVersionsJoined(), is(equalTo("Private launch|Public launch")));
 
         }
+    }
+
+    @Test
+    public void testExtractValidProjectKeyFromIssueKey() {
+        final ActionFactory factory = newActionFactory();
+        Assert.assertEquals("ABC", factory.getProjectkeyFromIssuekey("ABC-123"));
+    }
+
+    @Test
+    public void testExtractShortestProjectKeyFromIssueKey() {
+        final ActionFactory factory = newActionFactory();
+        Assert.assertEquals("A", factory.getProjectkeyFromIssuekey("A-189"));
+    }
+
+    @Test
+    public void testExtractMissingProjectKeyFromIssueKey() {
+        final ActionFactory factory = newActionFactory();
+        Assert.assertThrows(IllegalArgumentException.class, () -> factory.getProjectkeyFromIssuekey("-123"));
+    }
+
+    @Test
+    public void testExtractProjectKeyFromMalformedIssueyKey() {
+        final ActionFactory factory = newActionFactory();
+        Assert.assertThrows(IllegalArgumentException.class, () -> factory.getProjectkeyFromIssuekey("123"));
     }
 
     private ActionFactory newActionFactory() {

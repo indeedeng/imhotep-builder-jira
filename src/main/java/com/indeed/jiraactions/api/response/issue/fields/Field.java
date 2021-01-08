@@ -70,7 +70,6 @@ public class Field {
             case "creator": return creator == null ? "" : creator.getDisplayName();
             case "issuetype": return issuetype == null ? "" : issuetype.name;
             case "project": return project == null ? "" : project.name;
-            case "projectkey": return project == null ? "" : project.key;
             case "reporter": return reporter == null ? "" : reporter.getDisplayName();
             case "reporterusername": return reporter == null ? "" : reporter.getName();
             case "reporterkey": return reporter == null ? "" : reporter.getKey();

@@ -59,6 +59,7 @@ public class ActionTest {
         prevAction = ImmutableAction.builder()
                 .from(defaultAction)
                 .action("create")
+                .issuekey("ABC-123")
                 .timestamp(prevActionTimestamp)
                 .prevstatus("")
                 .status("Pending Triage")
