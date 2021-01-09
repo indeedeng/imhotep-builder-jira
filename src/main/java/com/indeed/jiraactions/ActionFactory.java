@@ -1,5 +1,6 @@
 package com.indeed.jiraactions;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.indeed.jiraactions.api.customfields.CustomFieldApiParser;
@@ -47,7 +48,7 @@ public class ActionFactory {
 
         final String issuekey = issue.initialValue("key").isEmpty() ? issue.key : issue.initialValue("key");
         final String project = issue.initialValue("project");
-        final String projectKey = issue.initialValue("projectkey");
+        final String projectkey = getProjectkeyFromIssuekey(issuekey);
 
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("create")
@@ -63,9 +64,9 @@ public class ActionFactory {
                 .project(project)
                 .originalProject(project)
                 .allProjects(Collections.singleton(project))
-                .projectkey(projectKey)
-                .originalProjectkey(projectKey)
-                .allProjectKeys(Collections.singleton(projectKey))
+                .projectkey(projectkey)
+                .originalProjectkey(projectkey)
+                .allProjectKeys(Collections.singleton(projectkey))
                 .prevstatus("")
                 .reporter(reporter)
                 .status(issue.initialValue("status"))
@@ -114,7 +115,7 @@ public class ActionFactory {
         final User actor = history.author == null ? User.INVALID_USER : userLookupService.getUser(history.author.getKey());
         final String issuekey = history.itemExist("key") ? history.getItemLastValue("key") : prevAction.getIssuekey();
         final String project = history.itemExist("project") ? history.getItemLastValue("project") : prevAction.getProject();
-        final String projectkey = history.itemExist("projectkey") ? history.getItemLastValue("projectkey") : prevAction.getProjectkey();
+        final String projectkey = getProjectkeyFromIssuekey(issuekey);
 
         final ImmutableAction.Builder builder = ImmutableAction.builder()
                 .action("update")
@@ -287,5 +288,25 @@ public class ActionFactory {
                 .filter(entry -> config.getDeliveryLeadTimeStatuses().contains(entry.getKey()))
                 .mapToLong(entry -> entry.getValue().getTimeinstatus())
                 .sum();
+    }
+
+    /*
+     * The API response will return a project blob that contains a number of fields, including the key of the project.
+     * This always represents the current project. When the issue changes projects, it will show one changelog Item
+     * to change the "Key" and another to change the "project", but not the project key.
+     *
+     * Luckily, Jira has sufficient guarantees that you can easily decode the project key from the issue key.
+     * (I suspect because they need to do exactly this.)
+     * The project key cannot contain a dash, and the issue key pattern is always "project_key-issue_number".
+     * https://confluence.atlassian.com/adminjiraserver/changing-the-project-key-format-938847081.html
+     */
+    @VisibleForTesting
+    String getProjectkeyFromIssuekey(final String issuekey) {
+        final int index = issuekey.indexOf('-');
+        if (index < 1) { // The project key has to start with a letter
+            throw new IllegalArgumentException("Somehow have an invalid issuekey: " + issuekey);
+        }
+
+        return issuekey.substring(0, index);
     }
 }
