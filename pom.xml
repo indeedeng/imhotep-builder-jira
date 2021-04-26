@@ -160,7 +160,7 @@
 
         <indeed-util.version>1.0.25</indeed-util.version>
 
-        <commons.io.version>1.4</commons.io.version>
+        <commons.io.version>2.7</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
         <commons.cli.version>1.4</commons.cli.version>
         <commons.configuration.version>1.10</commons.configuration.version>
