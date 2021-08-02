@@ -1,4 +1,7 @@
-# Jira Actions Imhotep Builder
+Jira Actions Imhotep Builder
+
+## NOTE: Indeed has discontinued supporting this project. Archiving will take place on 8/16/21.
+## If you are interested in taking over as the Maintainer, please contact Indeed at opensource@indeed.com
 
 The Jira Actions Imhotep Builder is a command line tool designed to create an Imhotep index from actions taken in an instance of JIRA.
 Each document in an index is a single action (create, update, or comment) taken on an issue. It does this by asking the API for each issue
